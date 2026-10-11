@@ -464,7 +464,7 @@ function switchToPhantomMode() {
   if (!provider) {
     showToast(
       "Phantom Not Detected",
-      "Расширение Phantom не обнаружено в браузере. Установите Phantom с официального сайта phantom.app",
+      "Phantom extension not detected in this browser. Install Phantom from the official site phantom.app",
       "warning",
       7000
     );
@@ -479,7 +479,7 @@ function switchToPhantomMode() {
     updateActionButtons();
     refreshWalletBalance();
     appendLog("SIGNER", "tag-ok", `Active Signer switched to Phantom Wallet (${truncateAddress(state.walletAddress)})`);
-    showToast("Phantom Active", `Режим Phantom включен. Все транзакции будут подтверждаться в окне Phantom!`, "success");
+    showToast("Phantom Active", `Phantom mode enabled. All transactions will be approved in the Phantom window!`, "success");
     checkPhantomClusterAlignment();
   } else {
     connectPhantomWallet(false);
@@ -492,7 +492,7 @@ async function connectPhantomWallet(eager = false) {
     if (!eager) {
       showToast(
         "Phantom Not Found",
-        "Расширение Phantom не установлено в вашем браузере. Пожалуйста, установите Phantom с phantom.app для интерактивного подписания.",
+        "The Phantom extension is not installed in your browser. Please install Phantom from phantom.app for interactive signing.",
         "warning",
         7000
       );
@@ -523,7 +523,7 @@ async function connectPhantomWallet(eager = false) {
     appendLog("WALLET", "tag-ok", `Phantom Wallet connected to ${cluster.name}: ${state.walletAddress}`);
     showToast(
       "Phantom Connected!",
-      `Кошелек ${truncateAddress(state.walletAddress)} синхронизирован на ${cluster.name}. Баланс: ${state.solBalance.toFixed(4)} SOL`,
+      `Wallet ${truncateAddress(state.walletAddress)} synced on ${cluster.name}. Balance: ${state.solBalance.toFixed(4)} SOL`,
       "success"
     );
 
@@ -532,8 +532,8 @@ async function connectPhantomWallet(eager = false) {
 
     if (!cluster.isMainnet && state.solBalance < 0.005) {
       showToast(
-        "Бесплатный газ Devnet",
-        "Ваш баланс Phantom на Devnet равен 0 SOL. Мы автоматически пополним его перед первой транзакцией, либо нажмите 'Airdrop +1 SOL'.",
+        "Free Devnet gas",
+        "Your Phantom balance on Devnet is 0 SOL. We will top it up automatically before the first transaction, or click 'Airdrop +1 SOL'.",
         "info",
         7000
       );
@@ -572,9 +572,9 @@ async function connectPhantomWallet(eager = false) {
     if (!eager) {
       console.warn("Phantom connection notice:", err);
       if (err.code === 4001 || err.message?.includes("User rejected")) {
-        showToast("Подключение отменено", "Вы отменили подключение в окне Phantom.", "warning");
+        showToast("Connection cancelled", "You cancelled the connection in the Phantom window.", "warning");
       } else {
-        showToast("Ошибка Phantom", err.message || "Не удалось подключить Phantom.", "error");
+        showToast("Phantom error", err.message || "Failed to connect Phantom.", "error");
       }
     }
     return false;
@@ -647,13 +647,13 @@ function updateActionButtons() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
           </svg>
-          <span>🦊 Подтвердить в Phantom: Выплата купона ${couponAmount} (${clusterLabel})</span>
+          <span>🦊 Approve in Phantom: Coupon payment ${couponAmount} (${clusterLabel})</span>
         `
         : `
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
           </svg>
-          <span>🏛️ Выполнить через CSD Operator (${couponAmount} USDC • ${clusterLabel})</span>
+          <span>🏛️ Execute via CSD Operator (${couponAmount} USDC • ${clusterLabel})</span>
         `;
     }
   }
@@ -671,13 +671,13 @@ function updateActionButtons() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
           </svg>
-          <span>🦊 Подтвердить в Phantom: Погашение и сжигание $10,000,000 (${clusterLabel})</span>
+          <span>🦊 Approve in Phantom: Redemption & burn $10,000,000 (${clusterLabel})</span>
         `
         : `
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
           </svg>
-          <span>🏛️ Выполнить через CSD Operator ($10,000,000 & Burn • ${clusterLabel})</span>
+          <span>🏛️ Execute via CSD Operator ($10,000,000 & Burn • ${clusterLabel})</span>
         `;
     }
   }
@@ -695,13 +695,13 @@ function updateActionButtons() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          <span>🦊 Голосовать ЗА (6,000) в Phantom</span>
+          <span>🦊 Vote FOR (6,000) in Phantom</span>
         `
         : `
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          <span>🏛️ Голосовать ЗА (6,000) от CSD</span>
+          <span>🏛️ Vote FOR (6,000) as CSD</span>
         `;
     }
   }
@@ -719,14 +719,14 @@ function updateActionButtons() {
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
-          <span>🦊 Голосовать ПРОТИВ (1,200) в Phantom</span>
+          <span>🦊 Vote AGAINST (1,200) in Phantom</span>
         `
         : `
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
-          <span>🏛️ Голосовать ПРОТИВ (1,200) от CSD</span>
+          <span>🏛️ Vote AGAINST (1,200) as CSD</span>
         `;
     }
   }
@@ -741,7 +741,7 @@ function updateActionButtons() {
       btnVoteAbstain.innerHTML = isPhantom
         ? `
           <span class="btn-vote-icon">⚪</span>
-          <span class="btn-vote-title">🦊 Воздержаться (800) в Phantom</span>
+          <span class="btn-vote-title">🦊 Abstain (800) in Phantom</span>
           <span class="btn-vote-desc">Record neutral vote (8% supply)</span>
         `
         : `
@@ -755,7 +755,7 @@ function updateActionButtons() {
   const btnFinalize = document.getElementById("btnFinalizeVoting");
   if (btnFinalize) {
     if (state.proposalFinalized) {
-      btnFinalize.innerHTML = `<span>✔ Реструктуризация утверждена на ${clusterLabel}</span>`;
+      btnFinalize.innerHTML = `<span>✔ Restructuring approved on ${clusterLabel}</span>`;
       btnFinalize.disabled = true;
     } else {
       btnFinalize.disabled = false;
@@ -765,14 +765,14 @@ function updateActionButtons() {
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
             <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
-          <span>🦊 Финализировать предложение в Phantom</span>
+          <span>🦊 Finalize proposal in Phantom</span>
         `
         : `
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
             <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
-          <span>🏛️ Финализировать предложение от CSD</span>
+          <span>🏛️ Finalize proposal as CSD</span>
         `;
     }
   }
@@ -827,10 +827,10 @@ async function ensureGasBalance(targetPubkey, minSol = 0.005) {
         appendLog(
           "GAS-GUARD",
           "tag-err",
-          `НЕДОСТАТОЧНО СРЕДСТВ: Баланс ${truncateAddress(targetPubkey.toString())} составляет ${sol.toFixed(7)} SOL (< ${minMainnetFee} SOL).`
+          `INSUFFICIENT FUNDS: Balance of ${truncateAddress(targetPubkey.toString())} is ${sol.toFixed(7)} SOL (< ${minMainnetFee} SOL).`
         );
         throw new Error(
-          `Недостаточно реального SOL на кошельке для оплаты комиссии сети Solana Mainnet-Beta (~0.000005 SOL). Текущий баланс: ${sol.toFixed(7)} SOL. Пополните баланс кошелька перед транзакцией.`
+          `Not enough real SOL in the wallet to pay the Solana Mainnet-Beta network fee (~0.000005 SOL). Current balance: ${sol.toFixed(7)} SOL. Top up the wallet before the transaction.`
         );
       }
       return;
@@ -840,11 +840,11 @@ async function ensureGasBalance(targetPubkey, minSol = 0.005) {
       appendLog(
         "GAS-GUARD",
         "tag-broadcast",
-        `Баланс ${truncateAddress(targetPubkey.toString())} составляет ${sol.toFixed(4)} SOL (< ${minSol} SOL). Автоматическое пополнение газа...`
+        `Balance of ${truncateAddress(targetPubkey.toString())} is ${sol.toFixed(4)} SOL (< ${minSol} SOL). Topping up gas automatically...`
       );
       showToast(
-        "Пополнение газа Devnet",
-        `Зачисление тестового SOL на ${truncateAddress(targetPubkey.toString())} для оплаты комиссий...`,
+        "Devnet gas top-up",
+        `Crediting test SOL to ${truncateAddress(targetPubkey.toString())} to pay fees...`,
         "info",
         4000
       );
@@ -861,7 +861,7 @@ async function ensureGasBalance(targetPubkey, minSol = 0.005) {
           },
           "confirmed"
         );
-        appendLog("GAS-GUARD", "tag-ok", `Успешно начислено 0.5 SOL из крана Devnet!`, sig);
+        appendLog("GAS-GUARD", "tag-ok", `Successfully credited 0.5 SOL from the Devnet faucet!`, sig);
       } catch (faucetErr) {
         console.warn("Public airdrop faucet rate limit:", faucetErr);
 
@@ -869,7 +869,7 @@ async function ensureGasBalance(targetPubkey, minSol = 0.005) {
         if (state.operatorKeypair && state.operatorKeypair.publicKey.toString() !== targetPubkey.toString()) {
           const opBal = await connection.getBalance(state.operatorKeypair.publicKey);
           if (opBal > 0.05 * 1e9) {
-            appendLog("GAS-SUBSIDY", "tag-broadcast", "Субсидирование 0.05 SOL из казначейства KASE CSD...");
+            appendLog("GAS-SUBSIDY", "tag-broadcast", "Subsidizing 0.05 SOL from the KASE CSD treasury...");
             const { blockhash } = await connection.getLatestBlockhash("confirmed");
             const tx = new web3.Transaction().add(
               web3.SystemProgram.transfer({
@@ -883,7 +883,7 @@ async function ensureGasBalance(targetPubkey, minSol = 0.005) {
             tx.sign(state.operatorKeypair);
             const sig = await connection.sendRawTransaction(tx.serialize());
             await connection.confirmTransaction(sig, "confirmed");
-            appendLog("GAS-SUBSIDY", "tag-ok", `0.05 SOL переведено на кошелек пользователя для газа!`, sig);
+            appendLog("GAS-SUBSIDY", "tag-ok", `0.05 SOL transferred to the user's wallet for gas!`, sig);
           }
         }
       }
@@ -893,7 +893,7 @@ async function ensureGasBalance(targetPubkey, minSol = 0.005) {
   } catch (err) {
     if (cluster.isMainnet) {
       if (err.message && err.message.includes("429")) {
-        throw new Error("Публичный RPC Solana Mainnet-Beta временно перегружен (429 Rate Limit). Укажите приватный RPC (Helius/QuickNode) в настройках RPC.");
+        throw new Error("The public Solana Mainnet-Beta RPC is temporarily overloaded (429 Rate Limit). Set a private RPC (Helius/QuickNode) in RPC settings.");
       }
       throw err;
     }
@@ -906,8 +906,8 @@ async function handleAirdrop() {
   const cluster = CLUSTERS[currentCluster];
   if (cluster.isMainnet) {
     showToast(
-      "Airdrop недоступен",
-      "Кран Airdrop доступен только в сети Solana Devnet. В Mainnet-Beta используются реальные токены SOL.",
+      "Airdrop unavailable",
+      "The Airdrop faucet is only available on Solana Devnet. Mainnet-Beta uses real SOL tokens.",
       "warning",
       5000
     );
@@ -924,12 +924,12 @@ async function handleAirdrop() {
 
   btn.disabled = true;
   txt.textContent = "Requesting Airdrop...";
-  appendLog("AIRDROP", "tag-broadcast", `Запрос 1.0 SOL Devnet airdrop для ${truncateAddress(state.walletAddress)}...`);
+  appendLog("AIRDROP", "tag-broadcast", `Requesting 1.0 SOL Devnet airdrop for ${truncateAddress(state.walletAddress)}...`);
 
   try {
     const lamports = 1 * (window.solanaWeb3?.LAMPORTS_PER_SOL || 1e9);
     const airdropSig = await connection.requestAirdrop(state.walletPubkey, lamports);
-    appendLog("AIRDROP", "tag-tx", `Airdrop транзакция отправлена: ${airdropSig.slice(0, 16)}... Подтверждение...`);
+    appendLog("AIRDROP", "tag-tx", `Airdrop transaction sent: ${airdropSig.slice(0, 16)}... Confirming...`);
 
     const latest = await connection.getLatestBlockhash("confirmed");
     await connection.confirmTransaction(
@@ -942,14 +942,14 @@ async function handleAirdrop() {
     );
 
     await refreshWalletBalance();
-    appendLog("CONFIRMED", "tag-ok", `1.0 SOL Airdrop подтвержден на Devnet! Новый баланс: ${state.solBalance.toFixed(3)} SOL`, airdropSig);
-    showToast("Airdrop Зачислен!", `+1.000 SOL успешно зачислено на ${truncateAddress(state.walletAddress)}!`, "success");
+    appendLog("CONFIRMED", "tag-ok", `1.0 SOL Airdrop confirmed on Devnet! New balance: ${state.solBalance.toFixed(3)} SOL`, airdropSig);
+    showToast("Airdrop Credited!", `+1.000 SOL successfully credited to ${truncateAddress(state.walletAddress)}!`, "success");
   } catch (err) {
     console.error("Airdrop error:", err);
     appendLog("ERROR", "tag-err", `Devnet airdrop faucet notice: ${err.message || err}`);
     showToast(
       "Airdrop Notice",
-      "Публичный кран Solana Devnet временно ограничен. Если в Phantom есть тестовый SOL, вы можете продолжить.",
+      "The public Solana Devnet faucet is temporarily rate-limited. If you have test SOL in Phantom, you can continue.",
       "warning",
       5000
     );
@@ -1144,25 +1144,25 @@ function updateClusterUI() {
   if (consoleTitle) consoleTitle.textContent = `ON-CHAIN AUDIT TRAIL & ${cluster.name.toUpperCase()} STREAM`;
 
   const signerChoiceTitle = document.getElementById("signerChoiceTitle");
-  if (signerChoiceTitle) signerChoiceTitle.textContent = `Выберите режим подписания на ${cluster.name}`;
+  if (signerChoiceTitle) signerChoiceTitle.textContent = `Choose a signing mode on ${cluster.name}`;
 
   const optOperatorTxText = document.getElementById("optOperatorTxText");
   if (optOperatorTxText) optOperatorTxText.textContent = isMainnet
-    ? "✔ Запись транзакции в Memo Program на Solana Mainnet-Beta (KASE программа: деплой в Devnet ожидается)"
-    : `✔ 100% реальная транзакция на ${cluster.name}`;
+    ? "✔ Transaction recorded via the Memo Program on Solana Mainnet-Beta (KASE program is deployed on Devnet; Mainnet mode records via Memo only)"
+    : `✔ 100% real transaction on ${cluster.name}`;
 
   const optPhantomDesc = document.getElementById("optPhantomTxDesc");
   if (optPhantomDesc) {
     optPhantomDesc.textContent = isMainnet
-      ? "Всплывающее окно Phantom откроется прямо в браузере. Вы лично нажимаете 'Approve' для каждой реальной транзакции на Solana Mainnet-Beta."
-      : "Всплывающее окно Phantom откроется прямо в браузере. Вы лично нажимаете 'Approve' для каждой реальной транзакции на Devnet.";
+      ? "The Phantom pop-up opens right in your browser. You personally click 'Approve' for every real transaction on Solana Mainnet-Beta."
+      : "The Phantom pop-up opens right in your browser. You personally click 'Approve' for every real transaction on Devnet.";
   }
 
   const optPhantomGas = document.getElementById("optPhantomGasFeature");
   if (optPhantomGas) {
     optPhantomGas.textContent = isMainnet
-      ? "✔ Минимальная прозрачная комиссия сети (~0.000005 SOL)"
-      : "✔ Автоматическое пополнение бесплатного газа";
+      ? "✔ Minimal, transparent network fee (~0.000005 SOL)"
+      : "✔ Automatic free gas top-up";
   }
 
   // 10. Update Active Stepper Visual States for Active Cluster
@@ -1290,7 +1290,7 @@ async function switchCluster(clusterId, customRpc = null) {
   appendLog(
     "CLUSTER",
     cluster.isMainnet ? "tag-warn" : "tag-ok",
-    `Активный кластер переключен: ${cluster.name} (${rpcUrl})`
+    `Active cluster switched: ${cluster.name} (${rpcUrl})`
   );
 
   if (cluster.isMainnet) {
@@ -1311,14 +1311,14 @@ async function switchCluster(clusterId, customRpc = null) {
     );
     showToast(
       "Mainnet (Memo Only)",
-      "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz). Комиссия: ~0.000005 SOL.",
+      "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz). Fee: ~0.000005 SOL.",
       "warning",
       7000
     );
   } else {
     showToast(
       "Devnet Active",
-      "Переключено на Solana Devnet песочницу. Доступен бесплатный кран Airdrop +1 SOL.",
+      "Switched to the Solana Devnet sandbox. The free Airdrop +1 SOL faucet is available.",
       "info",
       4000
     );
@@ -1340,11 +1340,11 @@ async function checkPhantomClusterAlignment() {
   const bannerBody = document.getElementById("phantomGuideBody");
   if (bannerTitle && bannerBody) {
     if (cluster.isMainnet) {
-      bannerTitle.textContent = "🦊 Синхронизация с Phantom Wallet (Solana Mainnet-Beta):";
-      bannerBody.innerHTML = `Транзакции формируются для боевой сети <strong>Solana Mainnet-Beta</strong>. Убедитесь, что в Phantom отключен тестовый режим (<strong>⚙️ Настройки ➔ Настройки разработчика ➔ Режим тестнета ➔ Выкл/Mainnet</strong>). Для оплаты комиссии требуется реальный SOL (~0.000005 SOL на операцию).`;
+      bannerTitle.textContent = "🦊 Phantom Wallet sync (Solana Mainnet-Beta):";
+      bannerBody.innerHTML = `Transactions are built for the production network <strong>Solana Mainnet-Beta</strong>. Make sure testnet mode is off in Phantom (<strong>⚙️ Settings ➔ Developer Settings ➔ Testnet Mode ➔ Off/Mainnet</strong>). Fees require real SOL (~0.000005 SOL per operation).`;
     } else {
-      bannerTitle.textContent = "🦊 Синхронизация с Phantom Wallet (Solana Devnet):";
-      bannerBody.innerHTML = `Каждое корпоративное действие открывает реальное окно расширения Phantom для вашего личного подтверждения. Для работы включите Devnet в Phantom (<strong>⚙️ Настройки ➔ Настройки разработчика ➔ Режим тестнета ➔ Solana Devnet</strong>). При балансе 0 SOL нажмите <strong>"Airdrop +1 SOL"</strong> в шапке.`;
+      bannerTitle.textContent = "🦊 Phantom Wallet sync (Solana Devnet):";
+      bannerBody.innerHTML = `Each corporate action opens a real Phantom extension window for your personal approval. To use it, enable Devnet in Phantom (<strong>⚙️ Settings ➔ Developer Settings ➔ Testnet Mode ➔ Solana Devnet</strong>). If your balance is 0 SOL, click <strong>"Airdrop +1 SOL"</strong> in the header.`;
     }
   }
 
@@ -1381,26 +1381,26 @@ async function checkPhantomClusterAlignment() {
           appendLog(
             "SYNC",
             "tag-warn",
-            `⚠️ Проверка синхронизации: На Mainnet баланс 0 SOL, но на Devnet найден ${oppositeSol.toFixed(3)} SOL. Если Phantom в режиме Devnet, переключите его в Mainnet и пополните реальный SOL (~0.000005 SOL), либо переключите терминал на Devnet.`
+            `⚠️ Sync check: Mainnet balance is 0 SOL, but ${oppositeSol.toFixed(3)} SOL was found on Devnet. If Phantom is in Devnet mode, switch it to Mainnet and add real SOL (~0.000005 SOL), or switch the terminal to Devnet.`
           );
           if (alignBadge) {
             alignBadge.textContent = "Mismatch: Devnet Wallet";
             alignBadge.className = "cluster-align-badge warn font-mono";
           }
           showToast(
-            "Проверка сети Phantom",
-            `На Mainnet баланс 0 SOL (на Devnet: ${oppositeSol.toFixed(3)} SOL). Для боевых операций пополните реальный SOL или вернитесь на Devnet.`,
+            "Phantom network check",
+            `Mainnet balance is 0 SOL (Devnet: ${oppositeSol.toFixed(3)} SOL). For production operations, add real SOL or return to Devnet.`,
             "warning",
             7000
           );
         } else if (currentSol >= 0.000005) {
-          appendLog("SYNC", "tag-ok", `✔ Проверка синхронизации: Phantom готов к Mainnet-Beta. Баланс: ${currentSol.toFixed(5)} SOL.`);
+          appendLog("SYNC", "tag-ok", `✔ Sync check: Phantom is ready for Mainnet-Beta. Balance: ${currentSol.toFixed(5)} SOL.`);
           if (alignBadge) {
             alignBadge.textContent = "Aligned: Mainnet-Beta";
             alignBadge.className = "cluster-align-badge ok font-mono";
           }
         } else {
-          appendLog("SYNC", "tag-warn", "Кластер: Mainnet-Beta. Баланс Phantom: 0 SOL. Пополните кошелек для оплаты газа (~0.000005 SOL).");
+          appendLog("SYNC", "tag-warn", "Cluster: Mainnet-Beta. Phantom balance: 0 SOL. Top up the wallet to pay gas (~0.000005 SOL).");
           if (alignBadge) {
             alignBadge.textContent = "Mainnet (Needs Gas)";
             alignBadge.className = "cluster-align-badge warn font-mono";
@@ -1412,10 +1412,10 @@ async function checkPhantomClusterAlignment() {
           appendLog(
             "SYNC",
             "tag-broadcast",
-            `💡 Информация о синхронизации: У вас есть ${oppositeSol.toFixed(4)} SOL на Mainnet, но активен тестовый кластер Devnet. Ваши транзакции бесплатны. Для газа на Devnet нажмите 'Airdrop +1 SOL'.`
+            `💡 Sync info: You have ${oppositeSol.toFixed(4)} SOL on Mainnet, but the Devnet test cluster is active. Your transactions are free. For Devnet gas, click 'Airdrop +1 SOL'.`
           );
         } else {
-          appendLog("SYNC", "tag-ok", "Кластер: Solana Devnet. Синхронизировано.");
+          appendLog("SYNC", "tag-ok", "Cluster: Solana Devnet. Synced.");
         }
         if (alignBadge) {
           alignBadge.textContent = "Aligned: Devnet";
@@ -1477,7 +1477,7 @@ function resetRpcDefaults() {
 
   closeRpcModal();
   switchCluster(currentCluster, getActiveRpcUrl());
-  showToast("RPC Reset", "Сброшено к официальным публичным узлам Solana.", "info");
+  showToast("RPC Reset", "Reset to the official public Solana nodes.", "info");
 }
 
 // ==============================================================================
@@ -1505,7 +1505,7 @@ function closeSignerChoiceModal() {
 async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess, onError }) {
   const web3 = window.solanaWeb3;
   if (!web3 || !connection) {
-    alert("Solana Web3 библиотека не загружена. Пожалуйста, обновите страницу.");
+    alert("Solana Web3 library not loaded. Please refresh the page.");
     return;
   }
 
@@ -1515,7 +1515,7 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
   await ensureGasBalance(state.walletPubkey, 0.005);
 
   // 1. Open Transaction Modal in Loading State
-  showModalLoading(actionTitle, `Формирование инструкции Solana Memo и получение актуального блокхэша из ${cluster.name}...`);
+  showModalLoading(actionTitle, `Building the Solana Memo instruction and fetching the latest blockhash from ${cluster.name}...`);
 
   const isPhantom = state.walletType === "phantom";
   const phantomCallout = document.getElementById("phantomApprovalBox");
@@ -1525,8 +1525,8 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
     const calloutDesc = phantomCallout.querySelector(".phantom-callout-text p");
     if (calloutDesc) {
       calloutDesc.innerHTML = cluster.isMainnet
-        ? `Всплывающее окно Phantom открыто на вашем экране. Нажмите <strong>"Подтвердить" / "Approve"</strong> для отправки реальной транзакции в <strong>Solana Mainnet-Beta</strong> (комиссия сети ~0.000005 SOL).`
-        : `Всплывающее окно Phantom открыто на вашем экране. Пожалуйста, нажмите <strong>"Подтвердить" / "Approve"</strong> в окне Phantom для отправки транзакции на Solana Devnet.`;
+        ? `The Phantom pop-up is open on your screen. Click <strong>"Approve"</strong> to send a real transaction to <strong>Solana Mainnet-Beta</strong> (network fee ~0.000005 SOL).`
+        : `The Phantom pop-up is open on your screen. Please click <strong>"Approve"</strong> in the Phantom window to send the transaction to Solana Devnet.`;
     }
   } else if (phantomCallout) {
     phantomCallout.style.display = "none";
@@ -1535,8 +1535,8 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
   try {
     // 2. Fetch Latest Blockhash from Active Cluster
     updateModalStep(1, true);
-    appendLog("TX-INIT", "tag-tx", `Старт ончейн-транзакции [${cluster.shortName}]: ${actionTitle}`);
-    appendLog("MEMO", "tag-broadcast", `Данные Memo: "${memoText}"`);
+    appendLog("TX-INIT", "tag-tx", `Starting on-chain transaction [${cluster.shortName}]: ${actionTitle}`);
+    appendLog("MEMO", "tag-broadcast", `Memo data: "${memoText}"`);
     if (cluster.isMainnet) {
       appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
       appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
@@ -1586,7 +1586,7 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
         }).compileToV0Message();
         txToSign = new web3.VersionedTransaction(messageV0);
         isVersionedTx = true;
-        appendLog("SEALEVEL", "tag-tx", "Скомпилировано сообщение транзакции Solana Versioned Message (v0)");
+        appendLog("SEALEVEL", "tag-tx", "Compiled transaction message: Solana Versioned Message (v0)");
       } catch (compileErr) {
         console.warn("Versioned transaction compile fallback:", compileErr);
       }
@@ -1607,12 +1607,12 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
     if (isPhantom) {
       const provider = getPhantomProvider();
       if (!provider) {
-        throw new Error("Расширение Phantom не обнаружено. Переключитесь в режим CSD Operator.");
+        throw new Error("Phantom extension not detected. Switch to CSD Operator mode.");
       }
 
-      const feeNotice = cluster.isMainnet ? " [Комиссия сети: ~0.000005 SOL]" : "";
-      updateModalStep(3, false, `👉 Открыто всплывающее окно Phantom: нажмите 'Approve' / 'Подтвердить'${feeNotice}...`);
-      appendLog("SIGN", "tag-broadcast", `Запрос подписи в расширении Phantom Wallet (${cluster.name})...`);
+      const feeNotice = cluster.isMainnet ? " [Network fee: ~0.000005 SOL]" : "";
+      updateModalStep(3, false, `👉 Phantom pop-up opened: click 'Approve'${feeNotice}...`);
+      appendLog("SIGN", "tag-broadcast", `Requesting signature in the Phantom Wallet extension (${cluster.name})...`);
 
       try {
         let signedTx = null;
@@ -1622,9 +1622,9 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
 
         if (signedTx) {
           if (phantomCallout) phantomCallout.style.display = "none";
-          updateModalStep(3, true, "Подписано в Phantom Wallet!");
-          updateModalStep(4, false, `Трансляция в активный RPC ${cluster.shortName}...`);
-          appendLog("BROADCAST", "tag-broadcast", `Трансляция подписанной транзакции в ${cluster.name} (${getActiveRpcUrl()})...`);
+          updateModalStep(3, true, "Signed in Phantom Wallet!");
+          updateModalStep(4, false, `Broadcasting to the active ${cluster.shortName} RPC...`);
+          appendLog("BROADCAST", "tag-broadcast", `Broadcasting the signed transaction to ${cluster.name} (${getActiveRpcUrl()})...`);
           signature = await connection.sendRawTransaction(signedTx.serialize(), {
             skipPreflight: false,
             preflightCommitment: "confirmed",
@@ -1641,31 +1641,31 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
             signature = signature.toString();
           }
           if (phantomCallout) phantomCallout.style.display = "none";
-          updateModalStep(3, true, "Подписано в Phantom Wallet!");
-          updateModalStep(4, false, `Подтверждение в кластере ${cluster.name}...`);
+          updateModalStep(3, true, "Signed in Phantom Wallet!");
+          updateModalStep(4, false, `Confirming on cluster ${cluster.name}...`);
         }
       } catch (phantomErr) {
         console.error("Phantom signing/broadcasting exception:", phantomErr);
         if (phantomErr.code === 4001 || phantomErr.message?.includes("User rejected")) {
-          throw new Error("Транзакция отклонена пользователем во всплывающем окне Phantom.");
+          throw new Error("Transaction rejected by the user in the Phantom pop-up.");
         }
         const errText = (phantomErr.message || phantomErr.toString() || "").toLowerCase();
         if (errText.includes("blockhash not found") || errText.includes("simulation failed") || errText.includes("wrong network") || errText.includes("network mismatch")) {
-          throw new Error(`Несоответствие сети Phantom и терминала (${cluster.shortName}): ${phantomErr.message}. Убедитесь, что в Phantom выбрана правильная сеть (Настройки ➔ Настройки разработчика).`);
+          throw new Error(`Network mismatch between Phantom and the terminal (${cluster.shortName}): ${phantomErr.message}. Make sure the correct network is selected in Phantom (Settings ➔ Developer Settings).`);
         }
-        throw new Error(phantomErr.message || "Ошибка подписания транзакции в Phantom.");
+        throw new Error(phantomErr.message || "Error signing the transaction in Phantom.");
       }
     } else {
-      updateModalStep(3, false, `Подписание институциональным ключом KASE CSD Operator (${cluster.shortName})...`);
+      updateModalStep(3, false, `Signing with the KASE CSD Operator institutional key (${cluster.shortName})...`);
       if (isVersionedTx) {
         txToSign.sign([state.operatorKeypair]);
       } else {
         txToSign.sign(state.operatorKeypair);
       }
-      updateModalStep(3, true, "Подписано ключом CSD Operator!");
-      updateModalStep(4, false, `Отправка сырой транзакции в RPC кластера ${cluster.shortName}...`);
+      updateModalStep(3, true, "Signed with the CSD Operator key!");
+      updateModalStep(4, false, `Sending the raw transaction to the ${cluster.shortName} cluster RPC...`);
 
-      appendLog("BROADCAST", "tag-broadcast", `Трансляция транзакции в кластер ${cluster.name}...`);
+      appendLog("BROADCAST", "tag-broadcast", `Broadcasting the transaction to cluster ${cluster.name}...`);
       signature = await connection.sendRawTransaction(txToSign.serialize(), {
         skipPreflight: false,
         preflightCommitment: "confirmed",
@@ -1673,13 +1673,13 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
     }
 
     if (!signature) {
-      throw new Error("Не получен хэш транзакции от подписанта.");
+      throw new Error("No transaction hash received from the signer.");
     }
 
-    appendLog("SUBMITTED", "tag-tx", `Хэш транзакции: ${signature.slice(0, 16)}... Ожидание подтверждения блоком [${cluster.shortName}]...`);
+    appendLog("SUBMITTED", "tag-tx", `Transaction hash: ${signature.slice(0, 16)}... Waiting for block confirmation [${cluster.shortName}]...`);
 
     // 5. Await Confirmation on Active Cluster
-    updateModalStep(4, false, `Ожидание финализации на ${cluster.shortName}: ${signature.slice(0, 8)}...`);
+    updateModalStep(4, false, `Waiting for finalization on ${cluster.shortName}: ${signature.slice(0, 8)}...`);
 
     try {
       const confirmation = await connection.confirmTransaction(
@@ -1692,17 +1692,17 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
       );
 
       if (confirmation.value && confirmation.value.err) {
-        throw new Error(`Ошибка исполнения ончейн: ${JSON.stringify(confirmation.value.err)}`);
+        throw new Error(`On-chain execution error: ${JSON.stringify(confirmation.value.err)}`);
       }
     } catch (confirmErr) {
       console.warn("Confirmation check notice:", confirmErr);
       const status = await connection.getSignatureStatus(signature);
       if (status && status.value && status.value.err) {
-        throw new Error(`Ошибка транзакции ончейн: ${JSON.stringify(status.value.err)}`);
+        throw new Error(`On-chain transaction error: ${JSON.stringify(status.value.err)}`);
       }
     }
 
-    updateModalStep(4, true, "Транзакция успешно подтверждена!");
+    updateModalStep(4, true, "Transaction confirmed successfully!");
 
     // 6. Confirmed!
     const slot = await connection.getSlot("confirmed");
@@ -1711,7 +1711,7 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
     appendLog(
       "CONFIRMED",
       "tag-ok",
-      `Подтверждено на ${cluster.name} в слоте #${slot.toLocaleString()}! Доступно на Solana Explorer.`,
+      `Confirmed on ${cluster.name} in slot #${slot.toLocaleString()}! Available on Solana Explorer.`,
       signature
     );
     if (cluster.isMainnet) {
@@ -1729,8 +1729,8 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
     });
 
     showToast(
-      `Успешно на ${cluster.shortName}!`,
-      `Транзакция подтверждена в слоте #${slot.toLocaleString()} (Tx: ${truncateAddress(signature)})`,
+      `Success on ${cluster.shortName}!`,
+      `Transaction confirmed in slot #${slot.toLocaleString()} (Tx: ${truncateAddress(signature)})`,
       "success"
     );
 
@@ -1741,9 +1741,9 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
   } catch (error) {
     if (phantomCallout) phantomCallout.style.display = "none";
     console.error("Broadcast failed:", error);
-    appendLog("ERROR", "tag-err", `Уведомление о транзакции [${cluster.shortName}]: ${error.message || error}`);
-    showModalError(error.message || `Транзакция была отменена или не подтверждена на ${cluster.name}.`);
-    showToast("Транзакция не выполнена", error.message || "Исполнение прервано.", "error");
+    appendLog("ERROR", "tag-err", `Transaction notice [${cluster.shortName}]: ${error.message || error}`);
+    showModalError(error.message || `The transaction was cancelled or not confirmed on ${cluster.name}.`);
+    showToast("Transaction failed", error.message || "Execution interrupted.", "error");
     if (typeof onError === "function") {
       try {
         onError(error);
@@ -1856,7 +1856,7 @@ function showModalSuccess({ signature, slot, memoText, actionTitle, signerName }
       navigator.clipboard.writeText(signature);
       copyBtn.textContent = "Copied!";
       setTimeout(() => (copyBtn.textContent = "Copy"), 2000);
-      showToast("Скопировано", `Хэш транзакции ${cluster.shortName} скопирован в буфер обмена.`, "info");
+      showToast("Copied", `${cluster.shortName} transaction hash copied to clipboard.`, "info");
     };
   }
 }
@@ -2194,7 +2194,7 @@ function resetSimulation() {
   renderTable();
 
   appendLog("RESET", "tag-ok", `Corporate Actions simulation on [${cluster.shortName}] reset to initial state (10,000 bonds active, 10% coupon).`);
-  showToast("Simulation Reset", `Все параметры и состояния для ${cluster.name} сброшены к начальным значениям выпуска.`, "info");
+  showToast("Simulation Reset", `All parameters and state for ${cluster.name} reset to the issue's initial values.`, "info");
 }
 
 // ==============================================================================
@@ -2242,17 +2242,17 @@ function initListeners() {
   document.getElementById("presetRpcDevnet")?.addEventListener("click", () => {
     const input = document.getElementById("rpcDevnetInput");
     if (input) input.value = CLUSTERS.devnet.defaultRpc;
-    showToast("Preset Loaded", "Загружен официальный RPC: " + CLUSTERS.devnet.defaultRpc, "info", 3000);
+    showToast("Preset Loaded", "Loaded official RPC: " + CLUSTERS.devnet.defaultRpc, "info", 3000);
   });
   document.getElementById("presetRpcMainnetOfficial")?.addEventListener("click", () => {
     const input = document.getElementById("rpcMainnetInput");
     if (input) input.value = CLUSTERS.mainnet.defaultRpc;
-    showToast("Preset Loaded", "Загружен официальный RPC: " + CLUSTERS.mainnet.defaultRpc, "info", 3000);
+    showToast("Preset Loaded", "Loaded official RPC: " + CLUSTERS.mainnet.defaultRpc, "info", 3000);
   });
   document.getElementById("presetRpcMainnetAnkr")?.addEventListener("click", () => {
     const input = document.getElementById("rpcMainnetInput");
     if (input) input.value = "https://rpc.ankr.com/solana";
-    showToast("Preset Loaded", "Загружен Ankr Solana RPC: https://rpc.ankr.com/solana", "info", 3000);
+    showToast("Preset Loaded", "Loaded Ankr Solana RPC: https://rpc.ankr.com/solana", "info", 3000);
   });
 
   // Signer Switcher in Header
@@ -2305,7 +2305,7 @@ function initListeners() {
   document.getElementById("btnCopyWalletAddress")?.addEventListener("click", () => {
     if (state.walletAddress) {
       navigator.clipboard.writeText(state.walletAddress);
-      showToast("Скопировано", `Адрес кошелька скопирован: ${truncateAddress(state.walletAddress)}`, "info");
+      showToast("Copied", `Wallet address copied: ${truncateAddress(state.walletAddress)}`, "info");
     }
   });
 
@@ -2336,7 +2336,7 @@ function initListeners() {
 
   // Adversarial Attack Buttons
   document.getElementById("btnAttackDoubleClaim")?.addEventListener("click", () => {
-    appendLog("ATTACK", "tag-warn", "Атака: Попытка повторного требования купона (Double-Claim) по действию #202601...");
+    appendLog("ATTACK", "tag-warn", "Attack: attempting a repeat coupon claim (Double-Claim) on action #202601...");
     if (CLUSTERS[currentCluster].isMainnet) {
       appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
       appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
@@ -2353,24 +2353,24 @@ function initListeners() {
         appendLog(
           "HALTED",
           "tag-err",
-          "ERROR 0x1783 (AlreadySettled): Защита от повторных выплат реализована в коде Anchor-программы (симуляция). Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)."
+          "ERROR 0x1783 (AlreadySettled): Repeat-payout protection is implemented in the Anchor program code (simulation). Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)."
         );
-        appendLog("SECURITY", "tag-ok", "Ончейн-инвариант подтвержден: Повторные требования строго заблокированы программой на Devnet.");
+        appendLog("SECURITY", "tag-ok", "On-chain invariant confirmed: repeat claims are strictly blocked by the program on Devnet.");
         showToast("Security Invariant Passed", "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).", "warning");
       } else {
         appendLog(
           "HALTED",
           "tag-err",
-          "ERROR 0x1783 (AlreadySettled): Выплата уже произведена! Инструкция отклонена рантаймом Solana."
+          "ERROR 0x1783 (AlreadySettled): Payout already made! Instruction rejected by the Solana runtime."
         );
-        appendLog("SECURITY", "tag-ok", "Ончейн-инвариант подтвержден: Повторные требования строго заблокированы.");
+        appendLog("SECURITY", "tag-ok", "On-chain invariant confirmed: repeat claims are strictly blocked.");
         showToast("Security Invariant Passed", "Double-claim exploit rejected by on-chain state machine.", "warning");
       }
     }, 500);
   });
 
   document.getElementById("btnAttackDoubleVote")?.addEventListener("click", () => {
-    appendLog("ATTACK", "tag-warn", "Атака: Попытка повторного голосования по Proposal #101 ключом Bank B...");
+    appendLog("ATTACK", "tag-warn", "Attack: attempting a repeat vote on Proposal #101 with Bank B's key...");
     if (CLUSTERS[currentCluster].isMainnet) {
       appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
       appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
@@ -2387,17 +2387,17 @@ function initListeners() {
         appendLog(
           "HALTED",
           "tag-err",
-          "ERROR 0x0 (AccountAlreadyInitialized): Коллизия VoterRecord PDA реализована в коде Anchor-программы (симуляция). Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)."
+          "ERROR 0x0 (AccountAlreadyInitialized): The VoterRecord PDA collision is implemented in the Anchor program code (simulation). Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)."
         );
-        appendLog("SECURITY", "tag-ok", "Ончейн-инвариант подтвержден: 1 Облигация = 1 Голос строго гарантировано программой на Devnet.");
+        appendLog("SECURITY", "tag-ok", "On-chain invariant confirmed: 1 Bond = 1 Vote is strictly enforced by the program on Devnet.");
         showToast("Security Invariant Passed", "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).", "warning");
       } else {
         appendLog(
           "HALTED",
           "tag-err",
-          "ERROR 0x0: Custom program error (Account already initialized): VoterRecord PDA существует. Повторный голос заблокирован."
+          "ERROR 0x0: Custom program error (Account already initialized): VoterRecord PDA exists. Repeat vote blocked."
         );
-        appendLog("SECURITY", "tag-ok", "Ончейн-инвариант подтвержден: 1 Облигация = 1 Голос строго гарантировано.");
+        appendLog("SECURITY", "tag-ok", "On-chain invariant confirmed: 1 Bond = 1 Vote is strictly enforced.");
         showToast("Security Invariant Passed", "Duplicate vote prevented via VoterRecord PDA collision.", "warning");
       }
     }, 500);
@@ -2646,7 +2646,7 @@ function initListeners() {
   document.getElementById("btnFinalizeVoting")?.addEventListener("click", () => {
     const totalVotes = state.votesFor + state.votesAgainst + (state.votesAbstain || 0);
     if (totalVotes < 5000) {
-      showToast("Quorum Needed", "Кворум не достигнут (требуется 5,000 голосов). Сначала проголосуйте.", "warning");
+      showToast("Quorum Needed", "Quorum not reached (5,000 votes required). Cast votes first.", "warning");
       return;
     }
 
@@ -2677,17 +2677,17 @@ function initListeners() {
             appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
           }
 
-          appendLog("PROPOSAL", "tag-ok", cluster.isMainnet ? `Proposal #101 Зафиксировано в Memo на ${cluster.shortName.toUpperCase()}: ПРИНЯТО (ЗА: ${state.votesFor.toLocaleString()} | ПРОТИВ: ${state.votesAgainst.toLocaleString()} | ВОЗДЕРЖАЛИСЬ: ${state.votesAbstain.toLocaleString()}). KASE программа: деплой в Devnet ожидается.` : `Proposal #101 УТВЕРЖДЕНО НА ${cluster.shortName.toUpperCase()}: ПРИНЯТО (ЗА: ${state.votesFor.toLocaleString()} | ПРОТИВ: ${state.votesAgainst.toLocaleString()} | ВОЗДЕРЖАЛИСЬ: ${state.votesAbstain.toLocaleString()})`, signature);
-          appendLog("PARAM-UPDATE", "tag-ok", cluster.isMainnet ? "Mainnet Memo Record: запись волеизъявления зафиксирована в Memo Program (Anchor-программа KASE пока не задеплоена)." : "Ставка купона успешно обновлена в ончейн-параметрах на 12.5% годовых (1,250 bps)!");
-          appendLog("MATH-SYNC", "tag-ok", "Все расчеты купонов автоматически пересчитаны с точностью до цента!");
+          appendLog("PROPOSAL", "tag-ok", cluster.isMainnet ? `Proposal #101 recorded in Memo on ${cluster.shortName.toUpperCase()}: PASSED (FOR: ${state.votesFor.toLocaleString()} | AGAINST: ${state.votesAgainst.toLocaleString()} | ABSTAINED: ${state.votesAbstain.toLocaleString()}). KASE program is deployed on Devnet; Mainnet mode records via Memo only.` : `Proposal #101 APPROVED ON ${cluster.shortName.toUpperCase()}: PASSED (FOR: ${state.votesFor.toLocaleString()} | AGAINST: ${state.votesAgainst.toLocaleString()} | ABSTAINED: ${state.votesAbstain.toLocaleString()})`, signature);
+          appendLog("PARAM-UPDATE", "tag-ok", cluster.isMainnet ? "Mainnet Memo Record: the vote record is stored in the Memo Program (the KASE Anchor program is deployed on Devnet, not on Mainnet)." : "Coupon rate successfully updated in on-chain parameters to 12.5% per annum (1,250 bps)!");
+          appendLog("MATH-SYNC", "tag-ok", "All coupon calculations automatically recalculated to the cent!");
 
-          btn.innerHTML = cluster.isMainnet ? "<span>✔ Реструктуризация зафиксирована в Memo (Mainnet)</span>" : `<span>✔ Реструктуризация утверждена на ${cluster.shortName}</span>`;
+          btn.innerHTML = cluster.isMainnet ? "<span>✔ Restructuring recorded in Memo (Mainnet)</span>" : `<span>✔ Restructuring approved on ${cluster.shortName}</span>`;
 
           // Re-render table and HUD with the new 12.5% calculations
           renderTable();
           updateActionButtons();
 
-          showToast("Предложение Принято", cluster.isMainnet ? "Запись утверждения Proposal #101 отправлена в Memo Program на Mainnet-Beta (KASE программа: деплой в Devnet ожидается)." : `Ставка купона успешно реструктурирована до 12.5% годовых на ${cluster.shortName}! Таблица пересчитана.`, "success");
+          showToast("Proposal Passed", cluster.isMainnet ? "Proposal #101 approval record sent to the Memo Program on Mainnet-Beta (KASE program is deployed on Devnet; Mainnet mode records via Memo only)." : `Coupon rate successfully restructured to 12.5% per annum on ${cluster.shortName}! Table recalculated.`, "success");
         },
       });
 
@@ -2770,7 +2770,7 @@ function toggleAudio() {
   if (icon) icon.textContent = isAudioMuted ? "🔇" : "🔊";
   if (label) label.textContent = isAudioMuted ? "Sound: OFF" : "Sound: ON";
   if (!isAudioMuted) playAudioCue("click");
-  showToast("Audio Setting", isAudioMuted ? "Звуковые эффекты отключены." : "Звуковые эффекты включены.", "info");
+  showToast("Audio Setting", isAudioMuted ? "Sound effects disabled." : "Sound effects enabled.", "info");
 }
 
 // 2. Sealevel 2026 Dynamic Priority Fee Engine & Tier Controller
@@ -2859,8 +2859,8 @@ function setPriorityFeeTier(tier) {
   });
 
   const currentFee = livePriorityFeeState[tier] || (tier === "turbo" ? 50000 : tier === "fast" ? 10000 : 1000);
-  appendLog("COMPUTE", "tag-broadcast", `Установлен приоритет комиссий Solana Sealevel: ${tier.toUpperCase()} (${currentFee.toLocaleString()} micro-lamports)`);
-  showToast("Priority Fee", `Сетевой приоритет изменен на ${tier.toUpperCase()} (${currentFee.toLocaleString()} µL).`, "info");
+  appendLog("COMPUTE", "tag-broadcast", `Solana Sealevel fee priority set: ${tier.toUpperCase()} (${currentFee.toLocaleString()} micro-lamports)`);
+  showToast("Priority Fee", `Network priority changed to ${tier.toUpperCase()} (${currentFee.toLocaleString()} µL).`, "info");
 }
 
 // 3. Multi-Oracle Consensus Controller
@@ -2869,7 +2869,7 @@ async function runOracleConsensusAudit() {
   const modal = document.getElementById("oracleModal");
   if (modal) modal.style.display = "flex";
 
-  appendLog("ORACLE", "tag-broadcast", "Запуск институционального аудита 3-Agent Pre-Flight Consensus Engine...");
+  appendLog("ORACLE", "tag-broadcast", "Starting the institutional audit by the 3-Agent Pre-Flight Consensus Engine...");
 
   try {
     const res = await fetch("/api/oracle/consensus");
@@ -2880,8 +2880,8 @@ async function runOracleConsensusAudit() {
         fpEl.textContent = `SHA256: ${data.consensusFingerprint.slice(0, 16)}... • ${data.quorum} SIGNATURES ATTESTED`;
       }
       playAudioCue("success");
-      showToast("Консенсус 3/3 Достигнут", "Все 3 независимых оракула (AML, Math, Solvency) подтвердили транзакцию!", "success");
-      appendLog("ORACLE-OK", "tag-ok", `Консенсус 3/3 подтвержден! Хэш-аттестат: ${data.consensusFingerprint.slice(0, 16)}...`);
+      showToast("3/3 Consensus Reached", "All 3 independent oracles (AML, Math, Solvency) approved the transaction!", "success");
+      appendLog("ORACLE-OK", "tag-ok", `3/3 consensus confirmed! Attestation hash: ${data.consensusFingerprint.slice(0, 16)}...`);
       return;
     }
   } catch (e) {}
@@ -2891,8 +2891,8 @@ async function runOracleConsensusAudit() {
   const fpEl = document.getElementById("oracleFingerprintText");
   if (fpEl) fpEl.textContent = fp;
   playAudioCue("success");
-  showToast("Консенсус 3/3 Достигнут", "Все 3 независимых оракула (AML, Math, Solvency) подтвердили транзакцию!", "success");
-  appendLog("ORACLE-OK", "tag-ok", "Консенсус 3/3 подтвержден! Хэш-аттестат: 4a9f81b2c3d4e5f6...");
+  showToast("3/3 Consensus Reached", "All 3 independent oracles (AML, Math, Solvency) approved the transaction!", "success");
+  appendLog("ORACLE-OK", "tag-ok", "3/3 consensus confirmed! Attestation hash: 4a9f81b2c3d4e5f6...");
 }
 
 function closeOracleModal() {
@@ -2918,12 +2918,12 @@ function copyBlinkUrl() {
   if (input) {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(input.value).then(() => {
-        showToast("Blink Скопирован", "Ссылка Dial.to скопирована в буфер обмена!", "success");
+        showToast("Blink Copied", "Dial.to link copied to clipboard!", "success");
       });
     } else {
       input.select();
       document.execCommand("copy");
-      showToast("Blink Скопирован", "Ссылка Dial.to скопирована в буфер обмена!", "success");
+      showToast("Blink Copied", "Dial.to link copied to clipboard!", "success");
     }
   }
 }
@@ -2931,14 +2931,14 @@ function copyBlinkUrl() {
 async function testBlinkExecution() {
   playAudioCue("click");
   closeBlinksModal();
-  appendLog("BLINK", "tag-broadcast", "⚡ Исполнение Corporate Action через Solana Blinks (Dialect Actions)...");
+  appendLog("BLINK", "tag-broadcast", "⚡ Executing Corporate Action via Solana Blinks (Dialect Actions)...");
   
   // Trigger scenario 1 directly
   const btn = document.getElementById("btnExecuteCoupon");
   if (btn && !btn.disabled) {
     btn.click();
   } else {
-    showToast("Blink Исполнен", "Сценарий купонной выплаты уже был финализирован в реестре.", "info");
+    showToast("Blink Executed", "The coupon payment scenario has already been finalized in the register.", "info");
   }
 }
 
@@ -3115,67 +3115,67 @@ function downloadIsoFile(format) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showToast("ISO 20022 Экспорт", `Файл kase_${currentIsoSchema}.${format} успешно скачан!`, "success");
+  showToast("ISO 20022 Export", `File kase_${currentIsoSchema}.${format} downloaded successfully!`, "success");
 }
 
 // 6. Enterprise Chaos Engineering & Adversarial Shield Harness
 function runAttackDoubleClaim() {
   playAudioCue("alert");
-  appendLog("ATTACK", "tag-err", "⚡ СИМУЛЯЦИЯ АТАКИ: Повторная попытка списания $500,000 купона (Replay Attack)...");
+  appendLog("ATTACK", "tag-err", "⚡ ATTACK SIMULATION: repeat attempt to withdraw the $500,000 coupon (Replay Attack)...");
   if (CLUSTERS[currentCluster].isMainnet) {
     appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
     appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
   }
   setTimeout(() => {
     if (CLUSTERS[currentCluster].isMainnet) {
-      appendLog("SHIELD-PASS", "tag-ok", "🛡️ ЗАЩИТА: На Mainnet запись производится только через Memo Program. Инвариант [KaseError::AlreadySettled] реализован в коде программы KASE (деплой в Devnet ожидается).");
+      appendLog("SHIELD-PASS", "tag-ok", "🛡️ PROTECTION: On Mainnet, records are written only via the Memo Program. The [KaseError::AlreadySettled] invariant is implemented in the KASE program code (deployed and tested on Devnet).");
       playAudioCue("success");
       showToast("Mainnet Memo Invariant", "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).", "warning");
     } else {
-      appendLog("SHIELD-PASS", "tag-ok", "🛡️ ЗАЩИТА АКТИВИРОВАНА: Ончейн-проверка отклонила транзакцию с ошибкой [KaseError::AlreadySettled]. Двойное списание предотвращено!");
+      appendLog("SHIELD-PASS", "tag-ok", "🛡️ PROTECTION TRIGGERED: The on-chain check rejected the transaction with error [KaseError::AlreadySettled]. Double withdrawal prevented!");
       playAudioCue("success");
-      showToast("Атака отражена", "Смарт-контракт Solana отклонил повторный купон: AlreadySettled.", "success");
+      showToast("Attack Repelled", "The Solana smart contract rejected the repeat coupon: AlreadySettled.", "success");
     }
   }, 400);
 }
 
 function runAttackDoubleVote() {
   playAudioCue("alert");
-  appendLog("ATTACK", "tag-err", "⚡ СИМУЛЯЦИЯ АТАКИ: Повторная подача голосов тем же владельцем (Sybil/Double-Vote Attack)...");
+  appendLog("ATTACK", "tag-err", "⚡ ATTACK SIMULATION: the same holder submits votes again (Sybil/Double-Vote Attack)...");
   if (CLUSTERS[currentCluster].isMainnet) {
     appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
     appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
   }
   setTimeout(() => {
     if (CLUSTERS[currentCluster].isMainnet) {
-      appendLog("SHIELD-PASS", "tag-ok", "🛡️ ЗАЩИТА: На Mainnet запись производится только через Memo Program. Коллизия VoterRecord PDA защищена в программе KASE на Devnet.");
+      appendLog("SHIELD-PASS", "tag-ok", "🛡️ PROTECTION: On Mainnet, records are written only via the Memo Program. The VoterRecord PDA collision guard lives in the KASE program on Devnet.");
       playAudioCue("success");
       showToast("Mainnet Memo Invariant", "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).", "warning");
     } else {
-      appendLog("SHIELD-PASS", "tag-ok", "🛡️ ЗАЩИТА АКТИВИРОВАНА: Sealevel отклонил инициализацию дублирующего аккаунта VoterRecord PDA. Повторное голосование предотвращено!");
+      appendLog("SHIELD-PASS", "tag-ok", "🛡️ PROTECTION TRIGGERED: Sealevel rejected initialization of a duplicate VoterRecord PDA account. Repeat voting prevented!");
       playAudioCue("success");
-      showToast("Атака отражена", "Коллизия VoterRecord PDA заблокировала повторный голос.", "success");
+      showToast("Attack Repelled", "A VoterRecord PDA collision blocked the repeat vote.", "success");
     }
   }, 400);
 }
 
 function runAttackMathOverflow() {
   playAudioCue("alert");
-  appendLog("ATTACK", "tag-err", "⚡ СИМУЛЯЦИЯ АТАКИ: Внедрение граничных значений u64::MAX и нулевой частоты в math.rs...");
+  appendLog("ATTACK", "tag-err", "⚡ ATTACK SIMULATION: injecting u64::MAX edge values and zero frequency into math.rs...");
   setTimeout(() => {
-    appendLog("SHIELD-PASS", "tag-ok", "🛡️ ЗАЩИТА АКТИВИРОВАНА: Rust Checked Math перехватил операцию: KaseError::InvalidCouponFrequency / MathOverflow. Ошибок переполнения нет!");
+    appendLog("SHIELD-PASS", "tag-ok", "🛡️ PROTECTION TRIGGERED: Rust Checked Math caught the operation: KaseError::InvalidCouponFrequency / MathOverflow. No overflow errors!");
     playAudioCue("success");
-    showToast("Атака отражена", "Checked Math в math.rs перехватил граничные значения.", "success");
+    showToast("Attack Repelled", "Checked Math in math.rs caught the edge-case values.", "success");
   }, 400);
 }
 
 function runAttackRpcDrop() {
   playAudioCue("alert");
-  appendLog("ATTACK", "tag-err", "⚡ СИМУЛЯЦИЯ СБОЯ: Имитация обрыва соединения с текущим RPC узлом...");
+  appendLog("ATTACK", "tag-err", "⚡ FAILURE SIMULATION: simulating a dropped connection to the current RPC node...");
   setTimeout(() => {
-    appendLog("SHIELD-PASS", "tag-ok", "🛡️ CIRCUIT BREAKER: Автоматическое переключение на вторичный RPC-узел кластера. Сессия сохранена без потери данных!");
+    appendLog("SHIELD-PASS", "tag-ok", "🛡️ CIRCUIT BREAKER: automatic switch to the cluster's secondary RPC node. Session preserved with no data loss!");
     playAudioCue("success");
-    showToast("Circuit Breaker", "Резервный RPC активирован. Сессия стабильна.", "success");
+    showToast("Circuit Breaker", "Backup RPC activated. Session stable.", "success");
   }, 400);
 }
 
@@ -3355,8 +3355,8 @@ window.addEventListener("DOMContentLoaded", async () => {
   // 4. Initial Cluster Stats & Polling
   const cluster = CLUSTERS[currentCluster];
   appendLog("BOOT", "tag-ok", "KASE Automated Corporate Actions Terminal initialized.");
-  appendLog("NETWORK", cluster.isMainnet ? "tag-warn" : "tag-ok", `Подключено к кластеру ${cluster.name} (${activeRpc})`);
-  appendLog("SECURITY", "tag-ok", `Загружен выпуск ${BondMath.terms.isin} ${BondMath.terms.name}. 10,000 облигаций на хранении в KCSD.`);
+  appendLog("NETWORK", cluster.isMainnet ? "tag-warn" : "tag-ok", `Connected to cluster ${cluster.name} (${activeRpc})`);
+  appendLog("SECURITY", "tag-ok", `Loaded issue ${BondMath.terms.isin} ${BondMath.terms.name}. 10,000 bonds held in custody at KCSD.`);
 
   if (cluster.isMainnet) {
     appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
@@ -3371,17 +3371,17 @@ window.addEventListener("DOMContentLoaded", async () => {
   // 5. Detect Phantom and Auto-Connect if already authorized
   const phantomProvider = getPhantomProvider();
   if (phantomProvider) {
-    appendLog("WALLET", "tag-ok", `🦊 Расширение Phantom обнаружено в браузере. Готово к интерактивному подписанию на ${cluster.shortName}.`);
+    appendLog("WALLET", "tag-ok", `🦊 Phantom extension detected in the browser. Ready for interactive signing on ${cluster.shortName}.`);
     const phantomBadge = document.getElementById("phantomBadgePill");
     if (phantomBadge) phantomBadge.textContent = "Ready";
 
     // Eagerly connect without popup if trusted
     const eagerlyConnected = await connectPhantomWallet(true);
     if (!eagerlyConnected) {
-      appendLog("INFO", "tag-broadcast", "Режим по умолчанию: CSD Authority. Для личного подписания нажмите 'Phantom' в шапке.");
+      appendLog("INFO", "tag-broadcast", "Default mode: CSD Authority. For personal signing, click 'Phantom' in the header.");
     }
   } else {
-    appendLog("INFO", "tag-broadcast", "Phantom не обнаружен. Активен институциональный режим KASE CSD Operator.");
+    appendLog("INFO", "tag-broadcast", "Phantom not detected. KASE CSD Operator institutional mode is active.");
   }
 
   // Poll cluster slot every 3 seconds
