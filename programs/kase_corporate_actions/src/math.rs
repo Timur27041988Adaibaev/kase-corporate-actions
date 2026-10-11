@@ -1,15 +1,15 @@
 use crate::errors::KaseError;
 use anchor_lang::prelude::*;
 
-/// Вычисление купонного дохода по позиции держателя:
+/// Compute coupon income for a holder's position:
 /// Coupon = (BondsHeld * FaceValue * CouponRateBps) / (10,000 * Frequency)
 ///
-/// Пример:
+/// Example:
 /// - BondsHeld = 50
-/// - FaceValue = 1,000 USDC (1_000_000_000 микро-юнитов, 6 знаков)
-/// - CouponRateBps = 1000 (10.00% годовых)
-/// - Frequency = 2 (полугодовая выплата)
-/// -> Entitlement = 50 * 1,000,000,000 * 1000 / (10000 * 2) = 2,500,000,000 (2,500 USDC, т.е. $50 на облигацию)
+/// - FaceValue = 1,000 USDC (1_000_000_000 micro-units, 6 decimals)
+/// - CouponRateBps = 1000 (10.00% per annum)
+/// - Frequency = 2 (semi-annual payment)
+/// -> Entitlement = 50 * 1,000,000,000 * 1000 / (10000 * 2) = 2,500,000,000 (2,500 USDC, i.e. $50 per bond)
 pub fn calculate_coupon_entitlement(
     bonds_held: u64,
     face_value: u64,
@@ -38,7 +38,7 @@ pub fn calculate_coupon_entitlement(
     u64::try_from(entitlement).map_err(|_| KaseError::MathOverflow.into())
 }
 
-/// Вычисление суммы погашения номинала облигаций:
+/// Compute the bond principal redemption amount:
 /// Principal = BondsHeld * FaceValue
 pub fn calculate_redemption_entitlement(
     bonds_held: u64,
@@ -49,13 +49,13 @@ pub fn calculate_redemption_entitlement(
         .ok_or_else(|| KaseError::MathOverflow.into())
 }
 
-/// Проверка достижения кворума для голосования держателей облигаций:
+/// Check whether quorum is reached for a bondholder vote:
 /// QuorumReached = TotalVotes >= QuorumThreshold
 pub fn is_quorum_reached(total_votes: u64, quorum_threshold: u64) -> bool {
     total_votes >= quorum_threshold
 }
 
-/// Проверка принятия решения (простое большинство голосов "ЗА" от поданных):
+/// Check whether a decision passes (simple majority of "FOR" votes among votes cast):
 /// Passed = VotesFor > VotesAgainst
 pub fn is_proposal_passed(votes_for: u64, votes_against: u64) -> bool {
     votes_for > votes_against
@@ -67,12 +67,12 @@ mod tests {
 
     #[test]
     fn test_coupon_calculation_standard() {
-        // 1 облигация номиналом $1000, 10% годовых, 2 раза в год -> $50
+        // 1 bond with $1000 face value, 10% per annum, paid twice a year -> $50
         let face_value = 1_000_000_000u64; // 1,000 USDC
         let coupon = calculate_coupon_entitlement(1, face_value, 1000, 2).unwrap();
         assert_eq!(coupon, 50_000_000); // 50 USDC
 
-        // 100 облигаций -> $5,000
+        // 100 bonds -> $5,000
         let coupon_100 = calculate_coupon_entitlement(100, face_value, 1000, 2).unwrap();
         assert_eq!(coupon_100, 5_000_000_000); // 5,000 USDC
     }
