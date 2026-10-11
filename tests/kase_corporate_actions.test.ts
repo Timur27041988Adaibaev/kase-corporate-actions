@@ -312,7 +312,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
     assert.equal(
       entState.entitlementAmount.toString(),
       expectedCoupon.toString(),
-      "Купонное право должно составить ровно $175,000 USDC"
+      "Coupon entitlement must be exactly $175,000 USDC"
     );
     assert.equal(entState.isSettled, false);
   });
@@ -355,13 +355,13 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
 
     const balAfter = (await getAccount(provider.connection, bankASettlementAccount)).amount;
     const diff = balAfter - balBefore;
-    assert.equal(diff.toString(), "175000000000", "Bank A получил ровно $175,000 купона");
+    assert.equal(diff.toString(), "175000000000", "Bank A received exactly $175,000 in coupon");
 
     const entState = await program.account.holderEntitlement.fetch(bankAEntitlementPda);
-    assert.equal(entState.isSettled, true, "Статус выплаты должен быть isSettled=true");
+    assert.equal(entState.isSettled, true, "Payment status must be isSettled=true");
   });
 
-  it("Pass [Adversarial Attack]: Попытка повторного списания купона (Double-Claim Attack) пресечена", async () => {
+  it("Pass [Adversarial Attack]: Repeat coupon claim attempt (Double-Claim Attack) blocked", async () => {
     try {
       await program.methods
         .executeCouponPayment()
@@ -376,13 +376,13 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         })
         .signers([authority])
         .rpc();
-      assert.fail("Повторная выплата купона должна быть гарантированно заблокирована!");
+      assert.fail("A repeat coupon payout must be blocked!");
     } catch (err: any) {
       expect(err.toString()).to.include("AlreadySettled");
     }
   });
 
-  it("Pass [Adversarial Attack]: Попытка преждевременной выплаты до даты расчетов (Premature Coupon) пресечена", async () => {
+  it("Pass [Adversarial Attack]: Payout attempt before the settlement date (Premature Coupon) blocked", async () => {
     const futureActionId = new BN(202602);
     const [futureActionPda] = anchor.web3.PublicKey.findProgramAddressSync(
       [
@@ -466,7 +466,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         })
         .signers([authority])
         .rpc();
-      assert.fail("Преждевременная выплата купона до наступления даты расчетов должна быть отклонена!");
+      assert.fail("A coupon payout before the settlement date must be rejected!");
     } catch (err: any) {
       expect(err.toString()).to.include("InvalidSettlementDate");
     }
@@ -556,11 +556,11 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
     const bondsAfter = (await getAccount(provider.connection, bankABondAccount)).amount;
     const usdcAfter = (await getAccount(provider.connection, bankASettlementAccount)).amount;
 
-    assert.equal((bondsBefore - bondsAfter).toString(), "3500", "Ровно 3,500 облигаций сожжено");
-    assert.equal((usdcAfter - usdcBefore).toString(), "3500000000000", "Bank A получил $3,500,000");
+    assert.equal((bondsBefore - bondsAfter).toString(), "3500", "Exactly 3,500 bonds burned");
+    assert.equal((usdcAfter - usdcBefore).toString(), "3500000000000", "Bank A received $3,500,000");
 
     const bondState = await program.account.bondSecurity.fetch(bondSecurityPda);
-    assert.equal(bondState.activeSupply.toString(), "6500", "В обращении осталось 6,500 облигаций");
+    assert.equal(bondState.activeSupply.toString(), "6500", "6,500 bonds remain outstanding");
   });
 
   // ==========================================
@@ -625,7 +625,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
     assert.equal(prop.votesFor.toString(), "2500");
   });
 
-  it("Pass [Adversarial Attack]: Попытка двойного голосования (Double Voting) пресечена", async () => {
+  it("Pass [Adversarial Attack]: Double Voting attempt blocked", async () => {
     const [bankBVoterPda] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from("voter"), proposalPda.toBuffer(), bankB.publicKey.toBuffer()],
       program.programId
@@ -645,7 +645,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         })
         .signers([bankB])
         .rpc();
-      assert.fail("Повторный голос Bank B должен быть заблокирован!");
+      assert.fail("Bank B's repeat vote must be blocked!");
     } catch (err: any) {
       // PDA collision prevents re-initialization
       const errStr = err.toString();
@@ -653,7 +653,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
     }
   });
 
-  it("Pass [Adversarial Attack]: Попытка несанкционированного планирования действия хакером пресечена", async () => {
+  it("Pass [Adversarial Attack]: Unauthorized action scheduling by an attacker blocked", async () => {
     const fakeActionId = new BN(999999);
     const [fakeActionPda] = anchor.web3.PublicKey.findProgramAddressSync(
       [
@@ -688,13 +688,13 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         })
         .signers([hacker])
         .rpc();
-      assert.fail("Хакер не должен иметь возможность планировать действия!");
+      assert.fail("An attacker must not be able to schedule actions!");
     } catch (err: any) {
       expect(err.toString()).to.include("UnauthorizedAuthority");
     }
   });
 
-  it("Pass [Adversarial Attack]: Попытка несанкционированного утверждения резолюции хакером пресечена", async () => {
+  it("Pass [Adversarial Attack]: Unauthorized resolution approval by an attacker blocked", async () => {
     try {
       await program.methods
         .finalizeGovernanceProposal()
@@ -705,7 +705,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         })
         .signers([hacker])
         .rpc();
-      assert.fail("Хакер не должен иметь возможность утверждать голосование!");
+      assert.fail("An attacker must not be able to approve a vote!");
     } catch (err: any) {
       expect(err.toString()).to.include("UnauthorizedAuthority");
     }
@@ -727,10 +727,10 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
     assert.equal(prop.passed, true);
 
     const bondState = await program.account.bondSecurity.fetch(bondSecurityPda);
-    assert.equal(bondState.annualCouponBps, 1250, "Купонная ставка должна обновиться до 12.5% (1250 bps)");
+    assert.equal(bondState.annualCouponBps, 1250, "Coupon rate must update to 12.5% (1250 bps)");
   });
 
-  it("Pass [Adversarial Attack]: Попытка планирования действия по погашенной облигации (BondAlreadyMatured) пресечена", async () => {
+  it("Pass [Adversarial Attack]: Scheduling an action on a matured bond (BondAlreadyMatured) blocked", async () => {
     const maturedIsin = "KZDEMO000002";
     const [maturedBondPda] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from("bond"), Buffer.from(maturedIsin)],
@@ -864,7 +864,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         })
         .signers([authority])
         .rpc();
-      assert.fail("Планирование корпоративного действия по погашенной облигации должно быть заблокировано!");
+      assert.fail("Scheduling a corporate action on a matured bond must be blocked!");
     } catch (err: any) {
       expect(err.toString()).to.include("BondAlreadyMatured");
     }
