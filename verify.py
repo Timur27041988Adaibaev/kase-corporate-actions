@@ -768,7 +768,7 @@ def run_system_audit() -> bool:
     # Bundle Delivery ZIP Packages
     # ------------------------------------------------------------------------
     scratch_zip = os.path.abspath(os.path.join(project_root, "..", "kase_corporate_actions.zip"))
-    brain_zip = r"C:\Users\Тимур\.gemini\antigravity\brain\ae8d2edf-8368-40a4-a7ef-2fd587fef421\kase_corporate_actions.zip"
+    brain_zip = r"C:\Users\<user>\.gemini\antigravity\brain\ae8d2edf-8368-40a4-a7ef-2fd587fef421\kase_corporate_actions.zip"
 
     # Remove temporary scripts if present
     for temp_f in ["make_zip.py", "check_zip.py"]:
@@ -820,8 +820,8 @@ def run_system_audit() -> bool:
         print(f"  [WARN] Failed to write scratch zip: {e}")
 
     brain_paths = [
-        r"C:\Users\Тимур\.gemini\antigravity\brain\c8eb27ae-8348-4886-a33a-c48c4da9a631\kase_corporate_actions.zip",
-        r"C:\Users\Тимур\.gemini\antigravity\brain\ae8d2edf-8368-40a4-a7ef-2fd587fef421\kase_corporate_actions.zip",
+        r"C:\Users\<user>\.gemini\antigravity\brain\c8eb27ae-8348-4886-a33a-c48c4da9a631\kase_corporate_actions.zip",
+        r"C:\Users\<user>\.gemini\antigravity\brain\ae8d2edf-8368-40a4-a7ef-2fd587fef421\kase_corporate_actions.zip",
     ]
 
     for b_zip in brain_paths:
