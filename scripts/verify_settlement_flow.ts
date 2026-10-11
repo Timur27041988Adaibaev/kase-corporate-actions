@@ -142,7 +142,7 @@ async function runCorporateActionsVerification() {
   console.log(`  ActionVault PDA:   ${couponVaultPda.toBase58()}\n`);
 
   // =========================================================================
-  // SCENARIO 1: COUPON PAYMENT (ПОЛУГОДОВОЙ КУПОН)
+  // SCENARIO 1: COUPON PAYMENT (SEMI-ANNUAL COUPON)
   // =========================================================================
   console.log("-".repeat(88));
   console.log(">>> SCENARIO 1: COUPON PAYMENT SETTLEMENT");
@@ -211,7 +211,7 @@ async function runCorporateActionsVerification() {
   console.log(`\n  [OK] SCENARIO 1 PASSED: 100% of $${couponSnapshot.totalCouponPoolUsd.toLocaleString()} USDC distributed. Zero double-claims.`);
 
   // =========================================================================
-  // SCENARIO 2: BOND REDEMPTION & TOKEN BURN (ПОГАШЕНИЕ НОМИНАЛА)
+  // SCENARIO 2: BOND REDEMPTION & TOKEN BURN (PRINCIPAL REDEMPTION)
   // =========================================================================
   console.log("\n" + "-".repeat(88));
   console.log(">>> SCENARIO 2: BOND MATURITY REDEMPTION & TOKEN BURN");
@@ -281,7 +281,7 @@ async function runCorporateActionsVerification() {
   console.log(`\n  [OK] SCENARIO 2 PASSED: 10,000 Bond tokens burned. Active supply = 0. Bond marked is_matured = true.`);
 
   // =========================================================================
-  // SCENARIO 3: BONDHOLDER GOVERNANCE VOTING (ГОЛОСОВАНИЕ)
+  // SCENARIO 3: BONDHOLDER GOVERNANCE VOTING
   // =========================================================================
   console.log("\n" + "-".repeat(88));
   console.log(">>> SCENARIO 3: BONDHOLDER GOVERNANCE VOTING ON-CHAIN");
