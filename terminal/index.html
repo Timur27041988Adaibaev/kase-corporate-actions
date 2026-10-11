@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KASE Automated Corporate Actions Terminal | Kazakhstan Stock Exchange on Solana Devnet</title>
+  <meta name="description" content="Institutional financial terminal for automated corporate actions on Kazakhstan Stock Exchange (KASE) powered by Solana Devnet. Semi-annual coupons, principal redemption, token burns, and governance voting.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <!-- Official Solana Web3 CDN with fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.95.4/lib/index.iife.min.js"></script>
+  <script>
+    if (!window.solanaWeb3) {
+      document.write('<script src="https://unpkg.com/@solana/web3.js@1.95.4/lib/index.iife.min.js"><\/script>');
+    }
+  </script>
+</head>
+<body>
+
+  <!-- Ambient Institutional Glow Effects -->
+  <div class="ambient-glow glow-top-left" aria-hidden="true"></div>
+  <div class="ambient-glow glow-top-right" aria-hidden="true"></div>
+
+  <!-- Real-time Institutional Financial Ticker Bar -->
+  <aside class="ticker-bar" aria-label="Market Data Strip">
+    <div class="ticker-container">
+      <div class="ticker-item">
+        <span class="ticker-badge kase">KASE DIGITAL</span>
+        <span class="ticker-isin">KZDEMO000001</span>
+        <span class="ticker-sep">•</span>
+        <strong class="ticker-title">KASE Demo USD Bond 2026</strong>
+      </div>
+      <div class="ticker-item">
+        <span class="label">NOMINAL:</span>
+        <span class="ticker-val-green font-mono" id="tickerNominal">$1,000.00 USDC</span>
+      </div>
+      <div class="ticker-item">
+        <span class="label">COUPON:</span>
+        <span class="ticker-val-gold font-mono" id="tickerCouponRate">10.00% SEMI-ANNUAL</span>
+      </div>
+      <div class="ticker-item">
+        <span class="label">CSD STATUS:</span>
+        <span class="status-pill active font-mono">RECORD DATE ACTIVE</span>
+      </div>
+      <div class="ticker-item">
+        <span class="label">SETTLEMENT:</span>
+        <span class="ticker-highlight font-mono">T+0 REAL-TIME DvP</span>
+      </div>
+      <div class="ticker-item">
+        <span class="label">CLUSTER:</span>
+        <span class="ticker-val-cyan font-mono" id="tickerCluster">SOLANA DEVNET</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Top Institutional Header & Cluster Status Bar -->
+  <header class="header">
+    <div class="nav-bar">
+      <!-- KASE Brand Identifier -->
+      <div class="logo-section">
+        <div class="kase-logo-box">
+          <div class="kase-brand-mark" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+              <path d="M2 17l10 5 10-5"></path>
+              <path d="M2 12l10 5 10-5"></path>
+            </svg>
+          </div>
+          <div class="kase-brand-title">
+            <div class="brand-name">KASE <span class="brand-badge-term">FINANCIAL TERMINAL</span></div>
+            <div class="brand-desc">Kazakhstan Stock Exchange &bull; Central Securities Depository (KCSD)</div>
+          </div>
+        </div>
+        <div class="hackathon-tag" title="Superteam Kazakhstan 2026 Solana Hackathon Project">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>SUPERTEAM KAZAKHSTAN 2026</span>
+        </div>
+      </div>
+
+      <!-- Header Controls: Cluster Switcher, Signer Mode, Live Status, Slot, Airdrop, Wallet -->
+      <div class="header-controls">
+
+        <!-- Solana Cluster Switcher (Devnet vs Mainnet-Beta) -->
+        <div class="cluster-switcher-group" title="Select active Solana Network">
+          <div class="cluster-toggle" role="radiogroup" aria-label="Solana Cluster Selector">
+            <button id="btnClusterDevnet" class="btn-cluster-toggle active" data-cluster="devnet" role="radio" aria-checked="true" title="Solana Devnet (Testing & Free Airdrops)">
+              <span class="cluster-dot devnet"></span>
+              <span>Devnet</span>
+            </button>
+            <button id="btnClusterMainnet" class="btn-cluster-toggle" data-cluster="mainnet" role="radio" aria-checked="false" title="Solana Mainnet-Beta (Production On-Chain)">
+              <span class="cluster-dot mainnet"></span>
+              <span>Mainnet</span>
+              <span class="cluster-badge-mainnet">LIVE</span>
+            </button>
+          </div>
+          <button id="btnRpcSettings" class="btn-rpc-settings" title="Configure Custom Solana RPC Endpoint">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </button>
+          <span class="top-cluster-memo-pill font-mono" id="topClusterMemoPill" style="display: none;">Mainnet: Memo Program records only. KASE program: live on Devnet.</span>
+        </div>
+        
+        <!-- Signer Authority Mode Selector: Phantom vs CSD Operator -->
+        <div class="signer-mode-selector" title="Choose on-chain signer authority on Solana">
+          <button id="btnModePhantom" class="btn-signer-mode" title="Interactive browser extension signing via Phantom Wallet">
+            <span>🦊</span>
+            <span>Phantom</span>
+            <span class="signer-pill" id="phantomBadgePill">Connect</span>
+          </button>
+          <button id="btnModeOperator" class="btn-signer-mode operator-active" title="Autonomous KASE CSD Operator signing">
+            <span>🏛️</span>
+            <span>CSD Authority</span>
+          </button>
+          <span class="cluster-align-badge ok font-mono" id="phantomClusterAlignBadge" title="Phantom Wallet cluster alignment status">Aligned: Devnet</span>
+        </div>
+
+        <!-- Live Cluster Status -->
+        <div class="status-pill-box" id="clusterStatusBox" title="Solana Cluster Live Connection">
+          <div class="cluster-ping-dot" id="clusterPingDot"></div>
+          <div class="status-col">
+            <span class="status-title" id="clusterStatus">Solana Devnet</span>
+            <span class="status-sub" id="clusterLatency">Ping: 120ms</span>
+            <span class="status-memo-pill font-mono" id="clusterStatusMemoPill" style="display: none;">Mainnet: Memo Program records only. KASE program: live on Devnet.</span>
+          </div>
+        </div>
+
+        <!-- Live Slot Display -->
+        <div class="status-pill-box slot-box" title="Latest On-Chain Confirmed Slot from Solana Cluster">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="slot-icon" aria-hidden="true">
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+          </svg>
+          <div class="status-col">
+            <span class="status-title font-mono" id="devnetSlotDisplay">Slot #...</span>
+            <span class="status-sub" id="clusterCommitmentLabel">CONFIRMED COMMITMENT</span>
+          </div>
+        </div>
+
+        <!-- Devnet Airdrop Button / Mainnet Fee Badge -->
+        <button id="btnAirdrop" class="btn-airdrop" title="Request 1.0 SOL Devnet Airdrop for current active signer">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+          <span id="btnAirdropText">Airdrop +1 SOL (Devnet)</span>
+        </button>
+
+        <!-- Active Wallet Pill / Mode Selector -->
+        <div class="wallet-pill-container">
+          <div class="wallet-pill" id="walletPill" title="Active Signer on Solana Devnet">
+            <div class="wallet-avatar" id="walletAvatar">
+              <span id="avatarInitials">CSD</span>
+            </div>
+            <div class="wallet-details">
+              <div class="wallet-label-row">
+                <span id="walletRoleLabel" class="role-badge">CSD Operator</span>
+                <span id="walletAddressDisplay" class="wallet-address-text font-mono">KASEOp...8888</span>
+              </div>
+              <div class="wallet-balance-row">
+                <span class="sol-val font-mono" id="walletSolBalance">Loading SOL...</span>
+              </div>
+            </div>
+            <button class="btn-copy-address" id="btnCopyWalletAddress" title="Copy Devnet Address">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Connect Phantom / Disconnect Button -->
+          <button id="btnConnectWallet" class="btn-wallet" title="Connect Phantom Wallet or toggle between Phantom and CSD Operator Authority">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="2" y="4" width="20" height="16" rx="4"></rect>
+              <path d="M16 12h2"></path>
+            </svg>
+            <span id="walletBtnText">Connect Phantom</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+    <!-- Prominent Top Cluster Notification Bar when Mainnet is selected -->
+    <div id="topClusterNotificationBar" class="top-cluster-notification-bar" style="display: none;">
+      <span class="top-cluster-warn-badge">MAINNET RECORD NOTICE</span>
+      <span class="top-cluster-notice-text">Mainnet: Memo Program records only. KASE program: live on Devnet.</span>
+    </div>
+  </header>
+
+  <!-- Main Application Workspace -->
+  <main class="app-container">
+
+    <!-- Mainnet Safety & Real Fee Disclosure Banner -->
+    <div class="mainnet-safety-banner" id="mainnetSafetyBanner" style="display: none;">
+      <div class="mainnet-safety-left">
+        <div class="mainnet-badge-icon" aria-hidden="true">⚠️</div>
+        <div class="mainnet-safety-text">
+          <strong id="mainnetSafetyLabel">Mainnet: Memo Program records only. KASE program: live on Devnet.</strong>
+          <span>Запись корпоративных действий в Mainnet осуществляется исключительно через официальную программу Solana Memo Program (MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr). Anchor-программа KASE пока не задеплоена (live on Devnet). Сетевая комиссия оплачивается реальным SOL (~0.000005 SOL). Кран Airdrop в Mainnet отключен.</span>
+        </div>
+      </div>
+      <div class="mainnet-safety-right">
+        <div class="mainnet-balance-wrap font-mono" title="Текущий баланс активного подписанта в Mainnet-Beta">
+          <span class="mainnet-bal-label">Баланс Signer:</span>
+          <span class="mainnet-balance-val" id="mainnetSignerBalance">0.00000 SOL</span>
+        </div>
+        <span class="mainnet-fee-est font-mono">Est. Tx Fee: ~0.000005 SOL</span>
+        <button id="btnSwitchBackDevnet" class="btn-safety-devnet" title="Вернуться в песочницу Devnet">
+          Вернуться на Devnet
+        </button>
+      </div>
+    </div>
+
+    <!-- Phantom Cluster Synchronization Assistant Banner -->
+    <div class="phantom-guide-banner" id="phantomGuideBanner">
+      <div class="phantom-guide-left">
+        <div class="phantom-icon-badge" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="4"></rect>
+            <path d="M16 12h2"></path>
+          </svg>
+        </div>
+        <div class="phantom-guide-text" id="phantomGuideText">
+          <strong id="phantomGuideTitle">🦊 Синхронизация с Phantom Wallet (Solana Devnet):</strong>
+          <span id="phantomGuideBody">Каждое корпоративное действие открывает реальное окно расширения Phantom для вашего личного подтверждения. Для работы включите Devnet в Phantom (<strong>⚙️ Настройки ➔ Настройки разработчика ➔ Режим тестнета ➔ Solana Devnet</strong>). При балансе 0 SOL нажмите <strong>"Airdrop +1 SOL"</strong> в шапке.</span>
+        </div>
+      </div>
+      <div class="phantom-guide-actions">
+        <button id="btnBannerConnectPhantom" class="btn-guide-connect">
+          <span>Подключить Phantom</span>
+        </button>
+        <button id="btnBannerDismiss" class="btn-guide-dismiss" title="Скрыть подсказку">&times;</button>
+      </div>
+    </div>
+
+    <!-- Institutional Innovation Bar: Priority Fees, Multi-Oracle Consensus, Blinks, ISO 20022 & Hotkeys -->
+    <div class="innovation-bar" aria-label="Enterprise Blockchain Tools">
+      <div class="innovation-bar-left">
+        <!-- Priority Fee Selector -->
+        <div class="priority-fee-group" title="Solana Sealevel Priority Fee (ComputeBudgetProgram.setComputeUnitPrice)">
+          <span class="priority-fee-label">Priority Fee:</span>
+          <div class="priority-btn-group" role="radiogroup" aria-label="Priority Fee Tier">
+            <button type="button" class="btn-priority-tier active" id="btnFeeNormal" data-fee="normal">Normal (0)</button>
+            <button type="button" class="btn-priority-tier" id="btnFeeFast" data-fee="fast">Fast (+10k µL)</button>
+            <button type="button" class="btn-priority-tier" id="btnFeeTurbo" data-fee="turbo">Turbo (+50k µL)</button>
+          </div>
+          <div class="live-telemetry-badge" id="feeTelemetryBadge" title="Dynamic priority fee telemetry polled directly from recent cluster slots">
+            <span class="live-blink" aria-hidden="true"></span>
+            <span class="font-mono" id="feeTelemetryText">Sealevel: Live</span>
+          </div>
+        </div>
+
+        <!-- 3-Agent Oracle Consensus Button -->
+        <button type="button" class="btn-nav-utility accent-cyan" id="btnOpenOracle" title="Inspect 3-Agent Pre-Flight Consensus Engine">
+          <span>🛡️</span>
+          <span>3-Agent Oracle</span>
+          <span class="status-pill active" id="oracleQuickPill">3/3 APPROVED</span>
+        </button>
+
+        <!-- Solana Blinks & Actions Button -->
+        <button type="button" class="btn-nav-utility accent-gold" id="btnOpenBlinks" title="View & Test Dialect Solana Actions / Blinks">
+          <span>⚡</span>
+          <span>Solana Blinks</span>
+          <span class="status-pill font-mono">SPEC v2.1</span>
+        </button>
+      </div>
+
+      <div class="innovation-bar-right">
+        <!-- ISO 20022 Regulatory Engine Button -->
+        <button type="button" class="btn-nav-utility accent-green" id="btnOpenIso" title="Inspect & Export ISO 20022 XML/JSON Regulatory Reports">
+          <span>📄</span>
+          <span>ISO 20022 MX</span>
+        </button>
+
+        <!-- Adversarial Shield Jump Button -->
+        <button type="button" class="btn-nav-utility" id="btnScrollAdversarial" title="Jump to Chaos Engineering & Adversarial Defense Harness">
+          <span>⚔️</span>
+          <span>Adversarial Shield</span>
+        </button>
+
+        <!-- Audio Haptic Feedback Toggle -->
+        <button type="button" class="btn-nav-utility" id="btnToggleAudio" title="Toggle Synthesized Web Audio Haptic Feedback">
+          <span id="audioIcon">🔊</span>
+          <span id="audioLabel">Sound: ON</span>
+        </button>
+
+        <!-- Keyboard Shortcuts Help -->
+        <button type="button" class="btn-nav-utility" id="btnOpenShortcuts" title="Keyboard Shortcuts Cheat Sheet (Press ?)">
+          <kbd>?</kbd>
+          <span>Hotkeys</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Hero Financial Instrument Master KPI Grid (shadcn-inspired metric cards) -->
+    <section class="kpi-grid" aria-label="Instrument Master Metrics">
+      <div class="kpi-card gold">
+        <div class="kpi-header">
+          <span class="kpi-label">Instrument ISIN</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="kpi-icon"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></svg>
+        </div>
+        <div class="kpi-value gold font-mono" id="instIsin">KZDEMO000001</div>
+        <div class="kpi-footer">KASE Demo USD Bond 2026 (Demo Issuer JSC)</div>
+      </div>
+
+      <div class="kpi-card emerald">
+        <div class="kpi-header">
+          <span class="kpi-label">Face Value (Номинал)</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="kpi-icon"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="kpi-value green font-mono" id="statFaceValue">$1,000.00 USDC</div>
+        <div class="kpi-footer">1:1 USD Fiat Pegged &bull; 6 Decimals</div>
+      </div>
+
+      <div class="kpi-card gold">
+        <div class="kpi-header">
+          <span class="kpi-label">Coupon Structure</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="kpi-icon"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6z"/></svg>
+        </div>
+        <div class="kpi-value gold font-mono" id="summaryCouponRate">10.0% p.a. Semi-Annual</div>
+        <div class="kpi-footer" id="summaryCouponPerBond">$50.00 USDC / 6 Months</div>
+      </div>
+
+      <div class="kpi-card cyan">
+        <div class="kpi-header">
+          <span class="kpi-label">Total Issue Volume</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="kpi-icon"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+        <div class="kpi-value font-mono" id="statTotalIssue">10,000 Bonds</div>
+        <div class="kpi-footer" id="statNominalPool">$10,000,000.00 USDC Pool</div>
+      </div>
+
+      <div class="kpi-card emerald">
+        <div class="kpi-header">
+          <span class="kpi-label">Active Circulating Supply</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="kpi-icon"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div class="kpi-value green font-mono" id="statActiveSupply">10,000 Bonds</div>
+        <div class="kpi-footer" id="statSupplyStatus">Fully Subscribed (100%)</div>
+      </div>
+
+      <div class="kpi-card cyan">
+        <div class="kpi-header">
+          <span class="kpi-label">CSD Custody & Settlement</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="kpi-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="kpi-value cyan font-mono">Central Depository</div>
+        <div class="kpi-footer">Maturity: 2026-12-31 &bull; DvP T+0</div>
+      </div>
+    </section>
+
+    <!-- Institutional SPL Token-2022 (Token Extensions) & RWA Compliance Strip -->
+    <section class="token2022-strip" aria-label="SPL Token-2022 & RWA Compliance Standards">
+      <div class="token2022-strip-header">
+        <div class="token2022-badge-main">
+          <span class="token2022-indicator"></span>
+          <strong>SPL TOKEN-2022 &amp; RWA EXTENSIONS (2026 SOVEREIGN PROTOCOL STANDARD)</strong>
+        </div>
+        <div class="token2022-badge-status font-mono">
+          <span>PROGRAM: TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb &bull; DUAL-COMPLIANT</span>
+        </div>
+      </div>
+      <div class="token2022-badges-grid">
+        <div class="token2022-badge-item" title="Transfer Hooks execute automated AML whitelisting and DvP checks on every transaction">
+          <span class="badge-icon">🛡️</span>
+          <div class="badge-info">
+            <span class="badge-title">Transfer Hook</span>
+            <span class="badge-desc">Automated AML / KCSD DvP Rule Enforcement</span>
+          </div>
+          <span class="badge-pill active font-mono">ENFORCED</span>
+        </div>
+        <div class="token2022-badge-item" title="Confidential Transfers provide institutional banking privacy using zero-knowledge ElGamal encryption">
+          <span class="badge-icon">🔐</span>
+          <div class="badge-info">
+            <span class="badge-title">Confidential Transfers</span>
+            <span class="badge-desc">ElGamal Encryption for Interbank Privacy</span>
+          </div>
+          <span class="badge-pill active font-mono">READY</span>
+        </div>
+        <div class="token2022-badge-item" title="Permanent Delegate empowers KCSD Central Depository for legal dispute settlement and court orders">
+          <span class="badge-icon">🏛️</span>
+          <div class="badge-info">
+            <span class="badge-title">Permanent Delegate</span>
+            <span class="badge-desc">KCSD Depository Master Sovereign Authority</span>
+          </div>
+          <span class="badge-pill active font-mono">ANCHORED</span>
+        </div>
+        <div class="token2022-badge-item" title="Interest-Bearing Mint calculates continuous accrued coupon yield directly on-chain">
+          <span class="badge-icon">📈</span>
+          <div class="badge-info">
+            <span class="badge-title">Interest-Bearing Mint</span>
+            <span class="badge-desc">Continuous Accrued Coupon Yield Clock</span>
+          </div>
+          <span class="badge-pill active font-mono">10.00% p.a.</span>
+        </div>
+        <div class="token2022-badge-item" title="Versioned Transactions (v0) and dynamic microLamport priority fees for optimal Sealevel inclusion">
+          <span class="badge-icon">⚡</span>
+          <div class="badge-info">
+            <span class="badge-title">Versioned Tx (v0)</span>
+            <span class="badge-desc">Sealevel 2026 Micro-Lamport Priority Fee Routing</span>
+          </div>
+          <span class="badge-pill active font-mono">v0 ACTIVE</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Institutional Custody Allocation Bar (Behance / Dribbble Portfolio Bar) -->
+    <section class="custody-allocation-card" aria-label="Institutional Custody Allocation">
+      <div class="custody-allocation-header">
+        <div class="custody-allocation-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <span>Institutional Custody Allocation Across Central Depository (KCSD)</span>
+        </div>
+        <div class="custody-total-pill font-mono">
+          <span>10,000 BONDS / $10,000,000.00 USDC ALLOCATED (100%)</span>
+        </div>
+      </div>
+
+      <!-- Segmented Bar -->
+      <div class="segmented-progress-bar" title="Interactive custody distribution bar">
+        <div class="segment-item segment-bank-a" style="width: 35%" title="Bank A: 3,500 bonds (35%)"></div>
+        <div class="segment-item segment-bank-b" style="width: 25%" title="Bank B: 2,500 bonds (25%)"></div>
+        <div class="segment-item segment-broker-c" style="width: 20%" title="Broker C: 2,000 bonds (20%)"></div>
+        <div class="segment-item segment-bank-d" style="width: 12%" title="Bank D: 1,200 bonds (12%)"></div>
+        <div class="segment-item segment-retail" style="width: 8%" title="Retail Investors Pool: 800 bonds (8%)"></div>
+      </div>
+
+      <!-- Legend -->
+      <div class="custody-legend font-mono">
+        <div class="legend-item" id="legendBankA">
+          <div class="legend-swatch swatch-bank-a"></div>
+          <span class="legend-name">Bank A:</span>
+          <span class="legend-pct">3,500 (35.0%) &bull; $175k Coupon</span>
+        </div>
+        <div class="legend-item" id="legendBankB">
+          <div class="legend-swatch swatch-bank-b"></div>
+          <span class="legend-name">Bank B:</span>
+          <span class="legend-pct">2,500 (25.0%) &bull; $125k Coupon</span>
+        </div>
+        <div class="legend-item" id="legendBrokerC">
+          <div class="legend-swatch swatch-broker-c"></div>
+          <span class="legend-name">Broker C:</span>
+          <span class="legend-pct">2,000 (20.0%) &bull; $100k Coupon</span>
+        </div>
+        <div class="legend-item" id="legendBankD">
+          <div class="legend-swatch swatch-bank-d"></div>
+          <span class="legend-name">Bank D:</span>
+          <span class="legend-pct">1,200 (12.0%) &bull; $60k Coupon</span>
+        </div>
+        <div class="legend-item" id="legendRetail">
+          <div class="legend-swatch swatch-retail"></div>
+          <span class="legend-name">Retail Investors Pool:</span>
+          <span class="legend-pct">800 (8.0%) &bull; $40k Coupon</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Workspace Two-Column Grid -->
+    <div class="main-grid">
+
+      <!-- Left Column: Corporate Actions Scenarios & CSD Registry Table -->
+      <div class="left-col">
+
+        <!-- Scenarios Action Panel (shadcn Card with Radix Tabs) -->
+        <section class="scenario-panel" aria-label="Corporate Actions Execution Panel">
+          <div class="panel-header-bar">
+            <div class="panel-tag-label">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span id="panelTagWorkflow">KASE CORPORATE ACTIONS WORKFLOW &bull; REAL SOLANA DEVNET BROADCAST</span>
+            </div>
+            <div class="badge-execution-mode" id="executionModeBadge">
+              <span class="live-blink" aria-hidden="true"></span>
+              <span id="executionModeBadgeText">BROADCAST: DEVNET ON-CHAIN</span>
+            </div>
+          </div>
+
+          <!-- Scenario Segmented Tabs (Radix/shadcn style) -->
+          <div class="panel-tabs" role="tablist">
+            <button class="tab-btn active" data-tab="tab-coupon" id="tabBtnCoupon" role="tab" aria-selected="true">
+              <div class="tab-badge-num font-mono">01</div>
+              <div class="tab-text-group">
+                <span class="tab-sub">Scenario 1</span>
+                <strong>Coupon Distribution</strong>
+              </div>
+              <span class="tab-tag font-mono" id="tabCouponTag">$500,000 USDC</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-redemption" id="tabBtnRedemption" role="tab" aria-selected="false">
+              <div class="tab-badge-num font-mono">02</div>
+              <div class="tab-text-group">
+                <span class="tab-sub">Scenario 2</span>
+                <strong>Maturity & Token Burn</strong>
+              </div>
+              <span class="tab-tag font-mono">$10,000,000 USDC</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-voting" id="tabBtnVoting" role="tab" aria-selected="false">
+              <div class="tab-badge-num font-mono">03</div>
+              <div class="tab-text-group">
+                <span class="tab-sub">Scenario 3</span>
+                <strong>Bondholder Voting</strong>
+              </div>
+              <span class="tab-tag font-mono">Restructuring</span>
+            </button>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- TAB 1: COUPON PAYMENT SCENARIO                 -->
+          <!-- ============================================== -->
+          <div id="tab-coupon" class="tab-content active" role="tabpanel">
+            <div class="scenario-header">
+              <div class="scenario-title">
+                <div class="scenario-icon-box green" aria-hidden="true">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 14 14"></polyline>
+                  </svg>
+                </div>
+                <div>
+                  <h3>Semi-Annual Coupon Distribution Flow</h3>
+                  <div class="scenario-sub">Automated Record Date Snapshot &bull; Fixed-Point Entitlement &bull; Atomic Batch Disbursement</div>
+                </div>
+              </div>
+              <p class="scenario-desc">
+                Locks on-chain snapshot of eligible bondholders on Record Date, computes exact fixed-point entitlement ($50.00/bond), escrows USDC into the CorporateAction PDA Vault, and broadcasts atomic batch settlement instructions to the Solana Devnet cluster via the official Memo program.
+              </p>
+            </div>
+
+            <!-- Stepper Flow -->
+            <div class="step-flow">
+              <div class="step-card completed" id="stepCoupon1">
+                <div class="step-header">
+                  <span class="step-num font-mono">01</span>
+                  <span class="step-status-pill completed">COMPLETED</span>
+                </div>
+                <h4>Record-Date Snapshot</h4>
+                <p>CSD on-chain registry frozen. 10,000 bonds locked across 5 institutions.</p>
+              </div>
+              <div class="step-card completed" id="stepCoupon2">
+                <div class="step-header">
+                  <span class="step-num font-mono">02</span>
+                  <span class="step-status-pill completed">COMPLETED</span>
+                </div>
+                <h4>Entitlement Math</h4>
+                <p id="stepCouponMathDesc">Formula: (10,000 × $1,000 × 10%) / 2 = $500,000.00 USDC exact entitlement.</p>
+              </div>
+              <div class="step-card" id="stepCouponFunded">
+                <div class="step-header">
+                  <span class="step-num font-mono">03</span>
+                  <span class="step-status-pill" id="pillCouponFunded">AWAITING BROADCAST</span>
+                </div>
+                <h4>Vault Escrow Funded</h4>
+                <p id="stepCouponFundedDesc">Issuer deposits funds into CorporateAction PDA Vault on Solana Devnet.</p>
+              </div>
+              <div class="step-card" id="stepCouponSettled">
+                <div class="step-header">
+                  <span class="step-num font-mono">04</span>
+                  <span class="step-status-pill" id="pillCouponSettled">PENDING</span>
+                </div>
+                <h4>Settlement Dispatched</h4>
+                <p id="stepCouponSettledDesc">PDA transfers coupon funds directly to 5 holder accounts. Zero double-claims.</p>
+              </div>
+            </div>
+
+            <!-- Action Box -->
+            <div class="action-box">
+              <div class="metrics-table">
+                <div class="metric-row">
+                  <span class="metric-label">Corporate Action ID:</span>
+                  <span class="metric-val mono font-mono">#202601-COUPON</span>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-label">Payout per Bond (Nominal × Rate / Freq):</span>
+                  <span class="metric-val green mono font-mono" id="metricPayoutPerBond">$50.00 USDC</span>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-label">Total Entitlement Required for Issue (10,000 bonds):</span>
+                  <span class="metric-val gold mono font-mono" id="metricTotalCouponReq">$500,000.00 USDC</span>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-label" id="lblCouponMemoFormat">On-Chain Memo Format:</span>
+                  <span class="metric-val mono font-mono truncate-memo" id="metricCouponMemoPreview">KASE_CORP_ACT: ISIN=KZDEMO000001 | TYPE=COUPON_DISTRIBUTION | AMOUNT=$500,000.00_USDC | CSD=CONFIRMED</span>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-label">Current Settlement Status:</span>
+                  <span class="metric-val status-text-ready" id="couponStatusText">Ready for Real Solana Devnet Broadcast</span>
+                </div>
+              </div>
+
+              <button id="btnExecuteCoupon" class="btn-action pulse-green">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <span id="btnExecuteCouponText">Broadcast Scenario 1 to Solana Devnet ($500,000 USDC)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- TAB 2: BOND REDEMPTION SCENARIO                -->
+          <!-- ============================================== -->
+          <div id="tab-redemption" class="tab-content" role="tabpanel">
+            <div class="scenario-header">
+              <div class="scenario-title">
+                <div class="scenario-icon-box gold" aria-hidden="true">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3>Bond Maturity Principal Redemption & Token Burn</h3>
+                  <div class="scenario-sub">Clock Validation &bull; SPL Token CPI Burn &bull; 100% Principal DvP Settlement</div>
+                </div>
+              </div>
+              <p class="scenario-desc">
+                Validates maturity on-chain via Solana Clock sysvar, permanently burns all 10,000 bond SPL tokens to guarantee zero-reissuance, and distributes $10,000,000.00 principal capital from the PDA vault to all registered bondholders.
+              </p>
+            </div>
+
+            <!-- Stepper Flow -->
+            <div class="step-flow">
+              <div class="step-card completed" id="stepRedeem1">
+                <div class="step-header">
+                  <span class="step-num font-mono">01</span>
+                  <span class="step-status-pill completed">COMPLETED</span>
+                </div>
+                <h4>Maturity Clock Verified</h4>
+                <p>Instrument maturity verified on-chain via Solana Clock sysvar (2026-12-31).</p>
+              </div>
+              <div class="step-card completed" id="stepRedeem2">
+                <div class="step-header">
+                  <span class="step-num font-mono">02</span>
+                  <span class="step-status-pill completed">COMPLETED</span>
+                </div>
+                <h4>Principal Math</h4>
+                <p>10,000 bonds × $1,000 face value = $10,000,000.00 principal pool.</p>
+              </div>
+              <div class="step-card" id="stepRedeemBurned">
+                <div class="step-header">
+                  <span class="step-num font-mono">03</span>
+                  <span class="step-status-pill" id="pillRedeemBurned">AWAITING BROADCAST</span>
+                </div>
+                <h4>SPL Token Burn</h4>
+                <p>CPI Burn instruction permanently retires bond tokens from Solana circulation.</p>
+              </div>
+              <div class="step-card" id="stepRedeemSettled">
+                <div class="step-header">
+                  <span class="step-num font-mono">04</span>
+                  <span class="step-status-pill" id="pillRedeemSettled">PENDING</span>
+                </div>
+                <h4>Principal Dispatched</h4>
+                <p id="stepRedeemSettledDesc">Vault PDA releases $10,000,000 USDC directly to holder wallets on Devnet.</p>
+              </div>
+            </div>
+
+            <!-- Action Box -->
+            <div class="action-box">
+              <div class="metrics-table">
+                <div class="metric-row">
+                  <span class="metric-label">Corporate Action ID:</span>
+                  <span class="metric-val mono font-mono">#202699-REDEMPTION</span>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-label">Redemption Nominal per Bond:</span>
+                  <span class="metric-val green mono font-mono">$1,000.00 USDC</span>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-label">Total Principal Settlement Required:</span>
+                  <span class="metric-val gold mono font-mono">$10,000,000.00 USDC</span>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-label">Post-Redemption Token Status:</span>
+                  <span class="metric-val mono font-mono" id="redemptionStatusText">Active in Circulation</span>
+                </div>
+              </div>
+
+              <button id="btnExecuteRedemption" class="btn-action redemption pulse-gold">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                <span id="btnExecuteRedemptionText">Broadcast Scenario 2: Burn Tokens & Settle Principal ($10,000,000)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- TAB 3: BONDHOLDER VOTING SCENARIO              -->
+          <!-- ============================================== -->
+          <div id="tab-voting" class="tab-content" role="tabpanel">
+            <div class="scenario-header">
+              <div class="scenario-title">
+                <div class="scenario-icon-box cyan" aria-hidden="true">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                </div>
+                <div>
+                  <h3>Bondholder Governance & Terms Restructuring</h3>
+                  <div class="scenario-sub">Proposal #101 &bull; 1 Bond = 1 Vote &bull; VoterRecord PDA Protection</div>
+                </div>
+              </div>
+              <p class="scenario-desc">
+                On-chain governance proposal to restructure instrument terms (increase coupon to 12.5% p.a.). Institutional holders vote weighted by their snapshot balance. Enforces 50% quorum and prevents double-voting via VoterRecord PDA.
+              </p>
+            </div>
+
+            <!-- Action Box -->
+            <div class="action-box">
+              <div class="metrics-table">
+                <div class="metric-row">
+                  <span class="metric-label">Active Proposal #101:</span>
+                  <span class="metric-val highlight-white">"Restructure: Increase Coupon Rate to 12.5% p.a."</span>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-label">Proposer:</span>
+                  <span class="metric-val">Demo Issuer JSC (Issuer)</span>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-label">Quorum Requirement:</span>
+                  <span class="metric-val mono font-mono">5,000 Bonds (50.0% of Issue)</span>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-label">Current Quorum Progress:</span>
+                  <span class="metric-val gold mono font-mono" id="quorumText">0 / 5,000 Bonds (0%)</span>
+                </div>
+              </div>
+
+              <!-- Quorum Progress Bar -->
+              <div class="quorum-wrapper">
+                <div class="quorum-bar-bg">
+                  <div id="quorumFill" class="quorum-bar-fill" style="width: 0%"></div>
+                  <div class="quorum-target-line" title="50% Quorum Target Line"></div>
+                </div>
+                <div class="quorum-labels font-mono">
+                  <span>0%</span>
+                  <span class="target-label">50% Quorum Target</span>
+                  <span>100%</span>
+                </div>
+              </div>
+
+              <!-- Voting Action Buttons -->
+              <div class="voting-btn-row">
+                <button id="btnVoteFor" class="btn-vote vote-for">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span>Vote FOR (Bank A + Bank B: 6,000 votes)</span>
+                </button>
+                <button id="btnVoteAgainst" class="btn-vote vote-against">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                  <span>Vote AGAINST (Bank D: 1,200 votes)</span>
+                </button>
+                <button id="btnVoteAbstain" class="btn-vote vote-abstain">
+                  <span class="btn-vote-icon">⚪</span>
+                  <span class="btn-vote-title">VOTE ABSTAIN (Retail Pool: 800)</span>
+                  <span class="btn-vote-desc">Record neutral vote (8% supply)</span>
+                </button>
+              </div>
+
+              <button id="btnFinalizeVoting" class="btn-action finalize-vote">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <span>Finalize & Record Proposal Outcome On-Chain</span>
+              </button>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- Central Securities Depository (CSD) Registry Panel (shadcn data-table style) -->
+        <section class="registry-panel" aria-label="CSD Participant Holdings Registry">
+          <div class="panel-header-row">
+            <div class="panel-title-group">
+              <div class="csd-seal" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3>CSD Official Bondholder Registry & Snapshot Table</h3>
+                <div class="panel-sub">Record Date Snapshot: <strong>2026-10-06 00:00:00 UTC</strong> &bull; Click any row to inspect institutional dossier</div>
+              </div>
+            </div>
+            <div class="registry-badge font-mono">
+              <span>5 PARTICIPANTS &bull; 10,000 BONDS</span>
+            </div>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="csd-table">
+              <thead>
+                <tr>
+                  <th>Participant Institution</th>
+                  <th id="thWalletCol">Solana Devnet Wallet</th>
+                  <th>Bonds Held</th>
+                  <th>Nominal Value</th>
+                  <th id="thCouponCol">Coupon Entitlement</th>
+                  <th>Redemption Entitlement</th>
+                  <th>CSD Status</th>
+                </tr>
+              </thead>
+              <tbody id="registryTableBody">
+                <!-- Dynamically populated in app.js via BondMath engine -->
+              </tbody>
+              <tfoot>
+                <tr class="table-footer-row font-mono" id="registryTableFooter">
+                  <!-- Dynamically populated totals in app.js -->
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Right Column: Live Math HUD, Audit Console & Math Sandbox -->
+      <div class="right-col">
+
+        <!-- Live Financial Math Engine & Synchronization HUD (100% Rust-Frontend Math Sync) -->
+        <section class="math-hud-card" aria-label="Live Financial Math Engine">
+          <div class="math-hud-header">
+            <div class="math-hud-title">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              <span>Financial Math Synchronization Engine</span>
+            </div>
+            <span class="math-sync-badge font-mono">Anchor Rust ⟷ Web3 100% Synced</span>
+          </div>
+
+          <div class="math-formula-box">
+            <div class="math-formula-title">Anchor Math Invariant (programs/math.rs):</div>
+            <div class="math-formula-code font-mono">
+              Coupon = (BondsHeld × FaceValue × CouponBps) / (10,000 × Freq)<br>
+              Redemption = BondsHeld × FaceValue
+            </div>
+          </div>
+
+          <div class="math-sync-step-row">
+            <span class="label">Annual Coupon Bps (Basis Points):</span>
+            <span class="val gold font-mono" id="hudCouponBps">1,000 bps (10.00% p.a.)</span>
+          </div>
+          <div class="math-sync-step-row">
+            <span class="label">Payout Frequency (Полугодовая):</span>
+            <span class="val font-mono" id="hudFrequency">2 Payouts / Year</span>
+          </div>
+          <div class="math-sync-step-row">
+            <span class="label">Single-Bond Coupon Payout:</span>
+            <span class="val green font-mono" id="hudCouponPerBond">$50.00 USDC (50,000,000 units)</span>
+          </div>
+          <div class="math-sync-step-row">
+            <span class="label">Aggregate Issue Coupon (10,000 units):</span>
+            <span class="val green font-mono" id="hudAggregateCoupon">$500,000.00 USDC</span>
+          </div>
+          <div class="math-sync-step-row">
+            <span class="label">Aggregate Issue Principal (10,000 units):</span>
+            <span class="val gold font-mono" id="hudAggregatePrincipal">$10,000,000.00 USDC</span>
+          </div>
+        </section>
+
+        <!-- Live On-Chain Audit Trail Console -->
+        <section class="terminal-console" aria-label="Solana Devnet Live Audit Stream">
+          <div class="console-topbar">
+            <div class="console-title-group">
+              <span class="live-dot-green" aria-hidden="true"></span>
+              <span class="console-title font-mono" id="consoleTitleText">ON-CHAIN AUDIT TRAIL & SOLANA DEVNET STREAM</span>
+            </div>
+            <div class="console-actions">
+              <button id="btnAttackDoubleClaim" class="btn-console-tool attack-btn" title="Simulate double-claim exploit and verify on-chain halt">
+                <span>⚡ Attack: Double-Claim</span>
+              </button>
+              <button id="btnAttackDoubleVote" class="btn-console-tool attack-btn" title="Simulate duplicate vote exploit and verify VoterRecord PDA guard">
+                <span>⚡ Attack: Double-Vote</span>
+              </button>
+              <button id="btnResetSimulation" class="btn-console-tool reset-btn" title="Reset all scenario states back to initial 10,000 bonds">
+                <span>🔄 Reset</span>
+              </button>
+              <button id="btnClearLogs" class="btn-console-tool clear-btn" title="Clear console log messages">
+                <span>Clear</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Console Stream Window -->
+          <div id="consoleOutput" class="console-output" role="log" aria-live="polite">
+            <!-- Dynamically populated logs -->
+          </div>
+        </section>
+
+        <!-- Interactive Entitlement Math Sandbox Calculator -->
+        <section class="calc-panel" aria-label="Entitlement Math Sandbox">
+          <div class="calc-header">
+            <div class="calc-title-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+                <line x1="8" y1="6" x2="16" y2="6"></line>
+                <line x1="16" y1="14" x2="16" y2="14"></line>
+                <line x1="8" y1="14" x2="8" y2="14"></line>
+                <line x1="12" y1="14" x2="12" y2="14"></line>
+                <line x1="8" y1="18" x2="8" y2="18"></line>
+                <line x1="12" y1="18" x2="12" y2="18"></line>
+                <line x1="16" y1="18" x2="16" y2="18"></line>
+              </svg>
+              <h4>Entitlement Math Sandbox</h4>
+            </div>
+            <div class="calc-presets">
+              <button id="presetBenchmark" class="btn-preset active">KASE Benchmark (10%)</button>
+              <button id="presetHighYield" class="btn-preset">High-Yield (13.5%)</button>
+              <button id="presetZeroCoupon" class="btn-preset">Zero-Coupon (0%)</button>
+            </div>
+          </div>
+
+          <div class="calc-grid">
+            <div class="input-group">
+              <label for="calcBonds">Bonds Quantity (Units):</label>
+              <input type="number" id="calcBonds" value="500" min="1" step="1">
+            </div>
+            <div class="input-group">
+              <label for="calcFace">Face Value ($ USDC):</label>
+              <input type="number" id="calcFace" value="1000" min="100" step="50">
+            </div>
+            <div class="input-group">
+              <label for="calcRate">Annual Coupon (% p.a.):</label>
+              <input type="number" id="calcRate" value="10.0" min="0" max="100" step="0.1">
+            </div>
+            <div class="input-group">
+              <label for="calcFreq">Payout Frequency:</label>
+              <select id="calcFreq">
+                <option value="2">Semi-Annual (2 payouts/yr)</option>
+                <option value="1">Annual (1 payout/yr)</option>
+                <option value="4">Quarterly (4 payouts/yr)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="calc-result-box">
+            <div class="result-row primary">
+              <span class="res-label">Calculated Coupon Payout per Cycle:</span>
+              <span id="calcResultCoupon" class="res-amt green font-mono">$25,000.00 USDC</span>
+            </div>
+            <div class="result-row secondary">
+              <span class="res-label">Maturity Principal Redemption:</span>
+              <strong id="calcResultRedeem" class="res-amt gold font-mono">$500,000.00 USDC</strong>
+            </div>
+          </div>
+    <!-- Dedicated Adversarial & Chaos Engineering Shield Section -->
+    <section class="adversarial-panel" id="adversarialSection" aria-label="Chaos Engineering and Adversarial Defense Harness">
+      <div class="adversarial-header">
+        <div class="adversarial-title-group">
+          <div class="adversarial-icon-box" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <div>
+            <h3>Enterprise Chaos Engineering & Adversarial Shield (Zero-Vulnerability Invariant Harness)</h3>
+            <p>Испытание системы на устойчивость к атакам повторного воспроизведения (Replay), захвату кворума (Sybil), арифметическим переполнениям и отказам RPC узлов.</p>
+          </div>
+        </div>
+        <div class="adversarial-badge-status font-mono">
+          <span class="live-dot-green"></span>
+          <span>4/4 FORMAL SHIELDS ACTIVE</span>
+        </div>
+      </div>
+
+      <div class="adversarial-grid">
+        <!-- Attack 1: Double-Claim Replay -->
+        <div class="attack-card">
+          <div>
+            <div class="attack-card-header">
+              <span class="attack-badge-threat">EXPLOIT VECTOR 01</span>
+              <span class="status-pill active font-mono" id="shieldStatus1">SHIELD OK</span>
+            </div>
+            <h4>Double-Claim Replay Attack</h4>
+            <p>Злоумышленник перехватывает транзакцию выплаты купона и пытается повторно затребовать $500,000 из хранилища.</p>
+          </div>
+          <div class="attack-defense-info">
+            <strong>Защита Solana:</strong> PDA Account <code>CorporateAction.is_settled</code> блокирует повторный вызов с кодом <code>KaseError::AlreadySettled</code>.
+          </div>
+          <button type="button" class="btn-execute-attack" id="btnTestAttackDoubleClaim">
+            <span>⚡ Запустить атаку Double-Claim</span>
+          </button>
+        </div>
+
+        <!-- Attack 2: Sybil Double-Voting -->
+        <div class="attack-card">
+          <div>
+            <div class="attack-card-header">
+              <span class="attack-badge-threat">EXPLOIT VECTOR 02</span>
+              <span class="status-pill active font-mono" id="shieldStatus2">SHIELD OK</span>
+            </div>
+            <h4>Governance Sybil / Double-Vote</h4>
+            <p>Держатель пытается проголосовать одним и тем же пакетом акций дважды для искусственного накручивания кворума.</p>
+          </div>
+          <div class="attack-defense-info">
+            <strong>Защита Solana:</strong> Деривация PDA <code>b"voter", proposal_id, voter_key</code> вызывает коллизию адреса и немедленный откат в Sealevel.
+          </div>
+          <button type="button" class="btn-execute-attack" id="btnTestAttackDoubleVote">
+            <span>⚡ Запустить атаку Double-Vote</span>
+          </button>
+        </div>
+
+        <!-- Attack 3: Math Overflow Boundary -->
+        <div class="attack-card">
+          <div>
+            <div class="attack-card-header">
+              <span class="attack-badge-threat">EXPLOIT VECTOR 03</span>
+              <span class="status-pill active font-mono" id="shieldStatus3">SHIELD OK</span>
+            </div>
+            <h4>Arithmetic Overflow Injection</h4>
+            <p>Внедрение граничных значений (u64::MAX, нулевая частота или отрицательные базисные пункты) для повреждения стейта.</p>
+          </div>
+          <div class="attack-defense-info">
+            <strong>Защита Solana:</strong> Безопасная математика <code>checked_mul</code>, <code>checked_div</code> и <code>require!(freq > 0)</code> в <code>math.rs</code>.
+          </div>
+          <button type="button" class="btn-execute-attack" id="btnTestAttackMathOverflow">
+            <span>⚡ Запустить атаку Overflow</span>
+          </button>
+        </div>
+
+        <!-- Attack 4: RPC Node Circuit Breaker -->
+        <div class="attack-card">
+          <div>
+            <div class="attack-card-header">
+              <span class="attack-badge-threat">EXPLOIT VECTOR 04</span>
+              <span class="status-pill active font-mono" id="shieldStatus4">SHIELD OK</span>
+            </div>
+            <h4>RPC Node Drop & Circuit Breaker</h4>
+            <p>Внезапный сбой или отказ основного RPC провайдера в момент проведения расчетов.</p>
+          </div>
+          <div class="attack-defense-info">
+            <strong>Защита Терминала:</strong> Паттерн Circuit Breaker & Failover — автоматическое переключение на вторичный RPC без потери сессии.
+          </div>
+          <button type="button" class="btn-execute-attack" id="btnTestAttackRpcDrop">
+            <span>⚡ Запустить тест сбоя RPC</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Interactive Real Transaction Modal -->
+  <div class="modal-overlay" id="txModal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modalLoadingTitle">
+    <div class="modal-card">
+      
+      <!-- State 1: Broadcasting & Signing -->
+      <div id="modalLoadingView" class="modal-state">
+        <div class="tx-spinner-box">
+          <div class="spinner-ring"></div>
+          <div class="spinner-sol-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+              <path d="M2 17l10 5 10-5"></path>
+              <path d="M2 12l10 5 10-5"></path>
+            </svg>
+          </div>
+        </div>
+        <h3 id="modalLoadingTitle">Broadcasting to Solana Devnet...</h3>
+        <p id="modalLoadingSubtitle" class="modal-sub">Constructing Solana Memo instruction & signing transaction...</p>
+        
+        <!-- High-Visibility Phantom Signature Callout -->
+        <div id="phantomApprovalBox" class="phantom-approval-callout" style="display: none;">
+          <div class="phantom-callout-pulse">
+            <div class="phantom-ghost-icon">
+              <svg width="44" height="44" viewBox="0 0 128 128" fill="none">
+                <rect width="128" height="128" rx="28" fill="#AB9FF2"/>
+                <path d="M104.2 68.3C104.2 88.8 87.6 105.4 67.1 105.4C46.6 105.4 30 88.8 30 68.3C30 47.8 46.6 31.2 67.1 31.2C87.6 31.2 104.2 47.8 104.2 68.3Z" fill="#5E43DA"/>
+                <circle cx="56" cy="62" r="7" fill="white"/>
+                <circle cx="78" cy="62" r="7" fill="white"/>
+              </svg>
+            </div>
+          </div>
+          <div class="phantom-callout-text">
+            <h4>👉 ПОДТВЕРДИТЕ В PHANTOM КОШЕЛЬКЕ!</h4>
+            <p>Всплывающее окно Phantom открыто на вашем экране. Пожалуйста, нажмите <strong>"Подтвердить" / "Approve"</strong> в окне Phantom для отправки транзакции на Solana Devnet.</p>
+            <div class="phantom-subtip">💡 Если окно свернулось, нажмите на значок фиолетового призрака Phantom в панели расширений браузера.</div>
+          </div>
+        </div>
+
+        <div class="modal-steps-tracker">
+          <div class="modal-step-item" id="mStep1">
+            <span class="step-check">✔</span>
+            <span>1. Assembled Corporate Action Memo instruction</span>
+          </div>
+          <div class="modal-step-item" id="mStep2">
+            <span class="step-check">✔</span>
+            <span>2. Fetched latest confirmed blockhash</span>
+          </div>
+          <div class="modal-step-item active" id="mStep3">
+            <span class="step-pulse"></span>
+            <span id="mStep3Text">3. Awaiting signature & sending to cluster...</span>
+          </div>
+          <div class="modal-step-item" id="mStep4">
+            <span class="step-circle"></span>
+            <span id="mStep4Text">4. Awaiting Solana Devnet confirmation...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- State 2: Confirmed On-Chain -->
+      <div id="modalSuccessView" class="modal-state" style="display: none;">
+        <div class="success-badge-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <h3 id="modalSuccessTitle">Transaction Confirmed on Solana!</h3>
+        <p class="modal-sub" id="modalSuccessDesc">Corporate action settled and permanently recorded on-chain.</p>
+
+        <div class="tx-details-box">
+          <div class="tx-row">
+            <span class="tx-lbl">Signature:</span>
+            <div class="tx-hash-pill">
+              <span id="modalTxSigText" class="mono font-mono">5Uyx...89Za</span>
+              <button id="btnCopyTxSig" class="btn-copy-mini" title="Copy Signature">Copy</button>
+            </div>
+          </div>
+          <div class="tx-row">
+            <span class="tx-lbl">Confirmed Slot:</span>
+            <span id="modalTxSlotText" class="mono font-mono green">#...</span>
+          </div>
+          <div class="tx-row">
+            <span class="tx-lbl">On-Chain Memo:</span>
+            <span id="modalTxMemoText" class="mono font-mono memo-snippet">KASE_CORP_ACT...</span>
+          </div>
+          <div class="tx-row">
+            <span class="tx-lbl">Explorer Cluster:</span>
+            <span class="mono font-mono cyan" id="modalTxClusterText">Solana Devnet (100% Live)</span>
+          </div>
+        </div>
+
+        <div class="tx-phantom-activity-tip">
+          <span class="tip-icon">⚡</span>
+          <span>Транзакция зафиксирована в блокчейне! Вы можете открыть расширение Phantom и перейти во вкладку <strong>Активность (Activity)</strong> — транзакция отображается в истории вашего кошелька.</span>
+        </div>
+
+        <div class="modal-btn-row">
+          <a id="btnModalExplorer" href="#" target="_blank" rel="noopener" class="btn-explorer-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            <span id="btnModalExplorerText">Solana Explorer (Devnet)</span>
+          </a>
+          <a id="btnModalSolscan" href="#" target="_blank" rel="noopener" class="btn-explorer-link solscan" title="View on Solscan">
+            <span id="btnModalSolscanText">Solscan (Devnet)</span>
+          </a>
+          <button id="btnModalClose" class="btn-modal-dismiss">Done</button>
+        </div>
+      </div>
+
+      <!-- State 3: Error Encountered -->
+      <div id="modalErrorView" class="modal-state" style="display: none;">
+        <div class="error-badge-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+        </div>
+        <h3>Broadcast Notice</h3>
+        <p id="modalErrorMessage" class="modal-sub">Transaction was not processed.</p>
+        <button id="btnModalErrorClose" class="btn-modal-dismiss" style="margin-top: 16px;">Dismiss</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Signer Selection Modal (Interactive Choice Dialog) -->
+  <div class="modal-overlay" id="signerChoiceModal" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-card signer-choice-card">
+      <div class="signer-choice-header">
+        <div class="signer-choice-icon-wrap">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="4"></rect>
+            <path d="M16 12h2"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 id="signerChoiceTitle">Выберите режим подписания на Solana Devnet</h3>
+          <p class="modal-sub">Как вы хотите подтвердить выполнение этого корпоративного действия?</p>
+        </div>
+      </div>
+
+      <div class="signer-options-grid">
+        <div class="signer-opt-card featured" id="optChoosePhantom">
+          <div class="opt-badge">Рекомендуется для демонстрации</div>
+          <div class="opt-icon">🦊</div>
+          <h4>Phantom Wallet (Личный кошелек)</h4>
+          <p id="optPhantomTxDesc">Всплывающее окно Phantom откроется прямо в браузере. Вы лично нажимаете "Approve" для каждой реальной транзакции на Devnet.</p>
+          <div class="opt-features">
+            <span>✔ Интерактивное подтверждение в браузере</span>
+            <span>✔ Отображение в истории вашего Phantom</span>
+            <span id="optPhantomGasFeature">✔ Автоматическое пополнение бесплатного газа</span>
+          </div>
+          <button class="btn-opt-select btn-opt-phantom" id="btnConfirmChoosePhantom">
+            <span>Подключить Phantom и Подписать</span>
+          </button>
+        </div>
+
+        <div class="signer-opt-card" id="optChooseOperator">
+          <div class="opt-badge secondary">Автономный режим биржи</div>
+          <div class="opt-icon">🏛️</div>
+          <h4>CSD Operator Keypair (KASE Authority)</h4>
+          <p>Автоматическое подписание институциональным закрытым ключом биржи KASE без необходимости подтверждать вручную в расширении.</p>
+          <div class="opt-features">
+            <span id="optOperatorTxText">✔ 100% реальная транзакция на Solana Devnet</span>
+            <span>✔ Автономное пакетное исполнение</span>
+            <span>✔ Отображение в Solana Explorer</span>
+          </div>
+          <button class="btn-opt-select btn-opt-operator" id="btnConfirmChooseOperator">
+            <span>Выполнить от имени CSD Operator</span>
+          </button>
+        </div>
+      </div>
+
+      <button id="btnCancelSignerChoice" class="btn-modal-dismiss" style="width: 100%; margin-top: 14px;">Отмена</button>
+    </div>
+  </div>
+
+  <!-- CSD Depository Investor Dossier Modal -->
+  <div class="modal-overlay" id="dossierModal" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-card dossier-card">
+      <div class="dossier-header">
+        <div class="dossier-title-group">
+          <div class="bank-avatar-badge" id="dossierBankBadge">BA</div>
+          <div>
+            <h3 id="dossierBankName">Bank A Treasury</h3>
+            <div class="dossier-sub" id="dossierBin">BIN: 990140000001 &bull; KCSD Depository Sub-Account #1001</div>
+          </div>
+        </div>
+        <button id="btnDossierClose" class="btn-close-modal" aria-label="Close dossier">&times;</button>
+      </div>
+
+      <div class="dossier-grid">
+        <div class="dossier-item">
+          <div class="lbl" id="dossierWalletLabel">Solana Devnet Wallet</div>
+          <div class="val mono font-mono" id="dossierWallet">BankA...1111</div>
+        </div>
+        <div class="dossier-item">
+          <div class="lbl">Bonds Held in Custody</div>
+          <div class="val mono font-mono highlight-white" id="dossierBonds">3,500 Units</div>
+        </div>
+        <div class="dossier-item">
+          <div class="lbl">Nominal Face Value</div>
+          <div class="val mono font-mono highlight-gold" id="dossierNominal">$3,500,000.00 USDC</div>
+        </div>
+        <div class="dossier-item">
+          <div class="lbl">Semi-Annual Coupon Entitlement</div>
+          <div class="val mono font-mono highlight-green" id="dossierCoupon">$175,000.00 USDC</div>
+        </div>
+        <div class="dossier-item">
+          <div class="lbl">Principal Redemption Entitlement</div>
+          <div class="val mono font-mono highlight-cyan" id="dossierRedeem">$3,500,000.00 USDC</div>
+        </div>
+        <div class="dossier-item">
+          <div class="lbl">Tax Withholding Exemption</div>
+          <div class="val highlight-green">0.0% (Art. 654 Tax Code RK Exempt)</div>
+        </div>
+      </div>
+
+      <div class="dossier-footer">
+        <div class="dossier-status-pill font-mono" id="dossierStatusPill">ELIGIBLE FOR SETTLEMENT</div>
+        <button id="btnDossierAuditLog" class="btn-action-sm">Export CSD Dossier Audit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real-time Toast Notification Container -->
+  <div class="toast-container" id="toastContainer" aria-live="assertive"></div>
+
+  <!-- Institutional Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-left">
+        <strong>Kazakhstan Stock Exchange (KASE) &bull; Central Securities Depository (KCSD)</strong>
+        <div>Automated On-Chain Corporate Actions Architecture on Solana Devnet &amp; Mainnet-Beta &copy; 2026</div>
+      </div>
+      <div class="footer-right">
+        <span>Solana Memo Program ID: <code>MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr</code></span>
+        <a id="footerExplorerLink" href="https://explorer.solana.com/?cluster=devnet" target="_blank" rel="noopener" class="footer-link">Solana Explorer (Devnet) &rarr;</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Custom RPC Configuration Modal -->
+  <div class="modal-overlay" id="rpcConfigModal" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-card rpc-config-card">
+      <div class="rpc-config-header">
+        <div class="rpc-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+          </svg>
+        </div>
+        <div>
+          <h3>Solana RPC Configuration</h3>
+          <p class="modal-sub">Настройка пользовательских RPC-узлов для Devnet и Mainnet-Beta</p>
+        </div>
+        <button id="btnRpcModalClose" class="btn-close-modal" aria-label="Close RPC modal">&times;</button>
+      </div>
+
+      <div class="rpc-config-body">
+        <div class="rpc-field-group">
+          <label for="rpcDevnetInput">
+            <span class="cluster-dot devnet"></span>
+            <strong>Devnet RPC Endpoint:</strong>
+          </label>
+          <input type="text" id="rpcDevnetInput" class="rpc-text-input font-mono" placeholder="https://api.devnet.solana.com" />
+          <div class="rpc-hint">По умолчанию: <code>https://api.devnet.solana.com</code></div>
+        </div>
+
+        <div class="rpc-field-group">
+          <label for="rpcMainnetInput">
+            <span class="cluster-dot mainnet"></span>
+            <strong>Mainnet-Beta RPC Endpoint:</strong>
+          </label>
+          <input type="text" id="rpcMainnetInput" class="rpc-text-input font-mono" placeholder="https://api.mainnet-beta.solana.com" />
+          <div class="rpc-hint">По умолчанию: <code>https://api.mainnet-beta.solana.com</code> (или ваш приватный Helius / QuickNode / Triton RPC)</div>
+        </div>
+
+        <div class="rpc-presets-group">
+          <span class="rpc-presets-title">Быстрые пресеты:</span>
+          <div class="rpc-preset-buttons">
+            <button type="button" class="btn-rpc-preset" id="presetRpcDevnet">Devnet Official</button>
+            <button type="button" class="btn-rpc-preset" id="presetRpcMainnetOfficial">Mainnet Official</button>
+            <button type="button" class="btn-rpc-preset" id="presetRpcMainnetAnkr">Mainnet Ankr RPC</button>
+          </div>
+        </div>
+      </div>
+
+  <!-- 1. 3-Agent Pre-Flight Oracle Consensus Modal -->
+  <div class="modal-overlay" id="oracleModal" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-card oracle-modal-card">
+      <div class="rpc-config-header">
+        <div class="oracle-avatar">🛡️</div>
+        <div>
+          <h3>3-Agent Pre-Flight Consensus Oracle</h3>
+          <p class="modal-sub">Институциональный консенсус трех автономных оракулов перед исполнением сделок</p>
+        </div>
+        <button id="btnOracleModalClose" class="btn-close-modal" aria-label="Close Oracle modal">&times;</button>
+      </div>
+
+      <div class="oracle-grid">
+        <!-- Oracle 1 -->
+        <div class="oracle-item-card verified">
+          <div class="oracle-avatar">🏛️</div>
+          <div class="oracle-content">
+            <div class="oracle-content-header">
+              <h4>Oracle 1: CSD Registry &amp; Sanctions Gatekeeper</h4>
+              <span class="oracle-status-pill font-mono">VERIFIED PASS</span>
+            </div>
+            <p>Валидация БИН всех 5 банков-участников через центральный реестр KCSD. Проверка списков санкций (OFAC, FATF, КФМ РК) — 0 совпадений. Все счета активны.</p>
+          </div>
+        </div>
+
+        <!-- Oracle 2 -->
+        <div class="oracle-item-card verified">
+          <div class="oracle-avatar">🧮</div>
+          <div class="oracle-content">
+            <div class="oracle-content-header">
+              <h4>Oracle 2: Formal Math Invariant &amp; Sum Prover</h4>
+              <span class="oracle-status-pill font-mono">VERIFIED PASS</span>
+            </div>
+            <p>Формальное математическое доказательство сохранения баланса: $\sum \text{Entitlements} \equiv \text{PoolAmount}$. Защита от деления на ноль и дробных погрешностей (&lt;0.000001 USDC).</p>
+          </div>
+        </div>
+
+        <!-- Oracle 3 -->
+        <div class="oracle-item-card verified">
+          <div class="oracle-avatar">⚡</div>
+          <div class="oracle-content">
+            <div class="oracle-content-header">
+              <h4>Oracle 3: Vault Solvency &amp; Cluster Velocity</h4>
+              <span class="oracle-status-pill font-mono">VERIFIED PASS</span>
+            </div>
+            <p>Проверка ликвидности PDA-эскроу хранилища. Оценка скорости подтверждения блоков Solana Sealevel (&lt;400ms latency) и достаточности баланса газа.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="oracle-fingerprint-box">
+        <span class="oracle-fp-label font-mono">Consensus Proof Fingerprint:</span>
+        <span class="oracle-fp-val font-mono" id="oracleFingerprintText">SHA256: 4a9f...e82c &bull; 3/3 SIGNATURES ATTESTED</span>
+      </div>
+
+      <div class="rpc-config-footer">
+        <button id="btnDismissOracleModal" class="btn-modal-dismiss">Закрыть</button>
+        <button id="btnRunOracleAudit" class="btn-action-primary">
+          <span>🔄 Повторить аудит консенсуса</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Solana Actions & Blinks Showcase Modal -->
+  <div class="modal-overlay" id="blinksModal" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-card blinks-modal-card">
+      <div class="rpc-config-header">
+        <div class="oracle-avatar" style="background: rgba(153, 69, 255, 0.2); color: #ab9ff2;">⚡</div>
+        <div>
+          <h3>Solana Actions &amp; Blinks Specification</h3>
+          <p class="modal-sub">Интеграция корпоративных действий KASE прямо в Twitter/X, Telegram и Discord</p>
+        </div>
+        <button id="btnBlinksModalClose" class="btn-close-modal" aria-label="Close Blinks modal">&times;</button>
+      </div>
+
+      <!-- Live Blink Preview -->
+      <div class="blink-preview-container">
+        <div class="blink-header-row">
+          <span class="blink-solana-badge font-mono">
+            <span>●</span>
+            <span>DIALECT BLINKS COMPLIANT</span>
+          </span>
+          <span style="font-size: 11px; color: var(--text-muted);">Endpoint: <code>/api/actions/coupon</code></span>
+        </div>
+
+        <div class="blink-preview-card">
+          <div class="blink-card-banner">
+            <div class="blink-card-banner-title">KASE AUTOMATED CORPORATE ACTIONS</div>
+          </div>
+          <div class="blink-card-body">
+            <div class="blink-card-title" id="blinkCardTitle">KASE: Semi-Annual Coupon Distribution ($500k USDC)</div>
+            <div class="blink-card-desc" id="blinkCardDesc">
+              Authorize automated disbursement of $500,000.00 USDC for KASE Demo USD Bond 2026 across 5 KCSD custodian banks on Solana.
+            </div>
+            <div class="blink-card-actions">
+              <button class="btn-blink-action" id="btnTestBlinkExec">⚡ Подтвердить выплату ($500,000)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Copy Dial.to Link -->
+      <div class="blink-url-box">
+        <span style="font-size: 11px; font-weight: 700; color: #fff;">Dial.to URL:</span>
+        <input type="text" readonly id="blinkDialtoInput" class="blink-url-input font-mono" value="https://dial.to/?action=solana-action:http://localhost:8088/api/actions/coupon" />
+        <button type="button" class="btn-action-sm" id="btnCopyBlinkUrl">Скопировать</button>
+      </div>
+
+      <div class="rpc-config-footer" style="margin-top: 14px;">
+        <button id="btnDismissBlinksModal" class="btn-modal-dismiss">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. ISO 20022 Regulatory MX Inspector Modal -->
+  <div class="modal-overlay" id="isoModal" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-card iso-modal-card">
+      <div class="rpc-config-header">
+        <div class="oracle-avatar" style="background: rgba(0, 208, 132, 0.2); color: var(--kase-green);">📄</div>
+        <div>
+          <h3>ISO 20022 Financial MX Regulatory Engine</h3>
+          <p class="modal-sub">Экспорт стандартизированных финансовых сообщений (SWIFT / Euroclear / KCSD)</p>
+        </div>
+        <button id="btnIsoModalClose" class="btn-close-modal" aria-label="Close ISO modal">&times;</button>
+      </div>
+
+      <div class="iso-tabs-row">
+        <button class="btn-iso-tab active" data-schema="seev031" id="tabIsoSeev031">seev.031 (Notification)</button>
+        <button class="btn-iso-tab" data-schema="seev036" id="tabIsoSeev036">seev.036 (Movement Conf)</button>
+        <button class="btn-iso-tab" data-schema="seev004" id="tabIsoSeev004">seev.004 (Meeting Ballot)</button>
+        <div style="margin-left: auto; display: flex; gap: 6px;">
+          <button class="btn-rpc-preset" id="btnIsoToggleFormat">Switch to JSON</button>
+        </div>
+      </div>
+
+      <div class="iso-code-container" id="isoCodeDisplay">
+        <!-- Rendered formatted XML/JSON -->
+      </div>
+
+      <div class="iso-download-row">
+        <button class="btn-modal-dismiss" id="btnDismissIsoModal">Закрыть</button>
+        <button class="btn-action-sm" id="btnDownloadIsoJson">Скачать .JSON</button>
+        <button class="btn-action-primary" id="btnDownloadIsoXml">Скачать .XML (ISO 20022)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Keyboard Shortcuts Cheat Sheet Modal -->
+  <div class="modal-overlay" id="shortcutsModal" style="display: none;" role="dialog" aria-modal="true">
+    <div class="modal-card shortcuts-modal-card">
+      <div class="rpc-config-header">
+        <div class="oracle-avatar" style="background: rgba(255, 255, 255, 0.1); color: #fff;">⌨️</div>
+        <div>
+          <h3>Клавиатурные шорткаты (Raycast / Linear DX)</h3>
+          <p class="modal-sub">Быстрое управление биржевым терминалом без использования мыши</p>
+        </div>
+        <button id="btnShortcutsModalClose" class="btn-close-modal" aria-label="Close shortcuts modal">&times;</button>
+      </div>
+
+      <div class="shortcuts-table">
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Выполнить Сценарий 1 (Выплата купона)</span>
+          <div class="shortcut-keys"><kbd>1</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Выполнить Сценарий 2 (Погашение и сжигание)</span>
+          <div class="shortcut-keys"><kbd>2</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Голосовать "ЗА" по предложению #101</span>
+          <div class="shortcut-keys"><kbd>3</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Голосовать "ПРОТИВ" по предложению #101</span>
+          <div class="shortcut-keys"><kbd>4</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Переключить сеть Solana (Devnet ↔ Mainnet)</span>
+          <div class="shortcut-keys"><kbd>C</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Открыть аудит 3-Agent Oracle</span>
+          <div class="shortcut-keys"><kbd>O</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Открыть регуляторный инспектор ISO 20022</span>
+          <div class="shortcut-keys"><kbd>I</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Открыть витрину Solana Actions &amp; Blinks</span>
+          <div class="shortcut-keys"><kbd>B</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Сбросить состояние симуляции в исходное</span>
+          <div class="shortcut-keys"><kbd>R</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Закрыть любое модальное окно</span>
+          <div class="shortcut-keys"><kbd>Esc</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Открыть это окно подсказок горячих клавиш</span>
+          <div class="shortcut-keys"><kbd>?</kbd></div>
+        </div>
+      </div>
+
+      <div class="rpc-config-footer">
+        <button id="btnDismissShortcutsModal" class="btn-modal-dismiss">Понятно</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
