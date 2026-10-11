@@ -93,8 +93,8 @@ export const KASE_DEFAULT_HOLDERS: HolderPosition[] = [
 ];
 
 /**
- * Расчет купонного дохода по правилам KASE и Центрального Депозитария РК
- * Формула: Coupon = (BondsHeld * FaceValue * AnnualCouponBps) / (10,000 * CouponsPerYear)
+ * Coupon income calculation per the rules of KASE and the Central Securities Depository of the Republic of Kazakhstan
+ * Formula: Coupon = (BondsHeld * FaceValue * AnnualCouponBps) / (10,000 * CouponsPerYear)
  */
 export function calculateCouponEntitlement(
   bondsHeld: number,
@@ -126,8 +126,8 @@ export function calculateCouponEntitlement(
 }
 
 /**
- * Расчет погашения номинала при наступлении срока погашения облигации
- * Формула: Principal = BondsHeld * FaceValue
+ * Principal redemption calculation at bond maturity
+ * Formula: Principal = BondsHeld * FaceValue
  */
 export function calculateRedemptionEntitlement(
   bondsHeld: number,
@@ -150,7 +150,7 @@ export function calculateRedemptionEntitlement(
 }
 
 /**
- * Пакетный расчет купонных прав для всех участников реестра (Snapshot Entitlement List)
+ * Batch calculation of coupon entitlements for all register participants (Snapshot Entitlement List)
  */
 export function buildCouponSnapshot(
   holders: HolderPosition[] = KASE_DEFAULT_HOLDERS,
@@ -190,7 +190,7 @@ export function buildCouponSnapshot(
 }
 
 /**
- * Пакетный расчет погашения номинала для всех участников реестра (Snapshot Redemption List)
+ * Batch calculation of principal redemption for all register participants (Snapshot Redemption List)
  */
 export function buildRedemptionSnapshot(
   holders: HolderPosition[] = KASE_DEFAULT_HOLDERS,
@@ -231,7 +231,7 @@ export function buildRedemptionSnapshot(
 }
 
 /**
- * Подведение итогов голосования держателей облигаций (Scenario 3)
+ * Tally of the bondholder vote (Scenario 3)
  */
 export function tallyVotes(
   votesFor: number,
