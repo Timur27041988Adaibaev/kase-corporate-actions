@@ -6,7 +6,7 @@
 - **Demo bond:** `KZDEMO749442` → [`iA5gqu2fndMLJGX986gNcnq9a849q3Xapwu1iRvaMSs`](https://explorer.solana.com/address/iA5gqu2fndMLJGX986gNcnq9a849q3Xapwu1iRvaMSs?cluster=devnet)
 - **Final on-chain state:** coupon 12.50% (after vote), active supply 0, matured, bond mint supply 0; holders received 63,000 / 31,500 / 10,500 demo-USDC.
 
-| Шаг | Результат | Транзакция |
+| Step | Result | Transaction |
 |---|---|---|
 | 1. initialize_bond_instrument KZDEMO749442: 100 bonds x 1,000 USDC, 10% semi-annual | ✅ OK | [2oY9d6LB…](https://explorer.solana.com/tx/2oY9d6LByrFFsiK9JbGXKHbSMzy2zfB4WcXvDWsGUpa1dUYMUKK5sLYgAk8MCHfkkMMCW5CeEbHmLxRoGDsRhWim?cluster=devnet) |
 | 2.1 schedule_corporate_action #1 CouponPayment | ✅ OK | [2F6f4qDD…](https://explorer.solana.com/tx/2F6f4qDDMc1wpU4X21im7JZZojeCXXMifVSk6hK8ZZBBZHU14i1vZEnjroCbd9tZNfymLmZtEuSAWQwDCW5gtuJy?cluster=devnet) |
@@ -17,8 +17,8 @@
 | 2.4 execute_coupon_payment holder 1: 3000 USDC | ✅ OK | [3F2i1r1U…](https://explorer.solana.com/tx/3F2i1r1U3nZyq61AcTFEH8zMbg2DtZRbKG44z4ZquzKsyUhJRGWe313ZTpHXVfb5yrmqafcdcfwFrLku7sTvmWzL?cluster=devnet) |
 | 2.4 execute_coupon_payment holder 2: 1500 USDC | ✅ OK | [22df26NW…](https://explorer.solana.com/tx/22df26NWHjsQSFXc7MVzfvGQhXctUR6Ttqrig9ZBmKwzRxAcZfWmPhYRSzGkPFcruCGQUfzUuteE6eJnsTHHG6o9?cluster=devnet) |
 | 2.4 execute_coupon_payment holder 3: 500 USDC | ✅ OK | [5T8eHM2b…](https://explorer.solana.com/tx/5T8eHM2bN9xZZSvcVLdA7xKxDubr9QjmS7bCVcUaScQdJFhTmDsCAvDgzY6zBs9VXFJetskru9W4jaddoetMCe8n?cluster=devnet) |
-| ATTACK: double coupon claim holder 1 (must be rejected: AlreadySettled) | 🛡 отклонено | [5pJU8Ay7…](https://explorer.solana.com/tx/5pJU8Ay7nqLAQrqqSz8e2qc562u532ge6pCrVDSrBJswp3yuRoFtNZ55VvqDc8U5aBe5ZGUGehxHdMZaSrRTq6Bn?cluster=devnet) |
-| ATTACK: holder 3 tries to schedule an action (must be rejected: UnauthorizedAuthority) | 🛡 отклонено | [3EHKKsHt…](https://explorer.solana.com/tx/3EHKKsHtM2bnPmPXrgBf1PL4QiToBxdcn4TSL3FJRVkghH5hvt2Cq97H5ceuSbW79LD6yQHFUbXdrzVpXz9omDFg?cluster=devnet) |
+| ATTACK: double coupon claim holder 1 (must be rejected: AlreadySettled) | 🛡 rejected | [5pJU8Ay7…](https://explorer.solana.com/tx/5pJU8Ay7nqLAQrqqSz8e2qc562u532ge6pCrVDSrBJswp3yuRoFtNZ55VvqDc8U5aBe5ZGUGehxHdMZaSrRTq6Bn?cluster=devnet) |
+| ATTACK: holder 3 tries to schedule an action (must be rejected: UnauthorizedAuthority) | 🛡 rejected | [3EHKKsHt…](https://explorer.solana.com/tx/3EHKKsHtM2bnPmPXrgBf1PL4QiToBxdcn4TSL3FJRVkghH5hvt2Cq97H5ceuSbW79LD6yQHFUbXdrzVpXz9omDFg?cluster=devnet) |
 | 3.1 schedule_corporate_action #3 GovernanceVoting (record date) | ✅ OK | [4yjuhzAJ…](https://explorer.solana.com/tx/4yjuhzAJuq1nRqm1K3g6JgWGQxhFSg3TABoeqLatCynRZ54hJZXGYmkuc7Gfv6KjDJNfJATBAEGBfjDpXeiaYGYR?cluster=devnet) |
 | 3.2 record_holder_snapshot holder 1 (60 bonds) | ✅ OK | [TarTZ52f…](https://explorer.solana.com/tx/TarTZ52fQn97cc24ZPv7NYFELBC8CVkLu5a3F3k8QiwTGTeTpgBvpGpZyLcGSpbm29i9Zyr1p5poTAMwQbzHKVN?cluster=devnet) |
 | 3.2 record_holder_snapshot holder 2 (30 bonds) | ✅ OK | [qfBshBfi…](https://explorer.solana.com/tx/qfBshBfitr3gT1dpRRj4hCDWqHsg6vXQabTH78HpzNzQLgvMTJVm1DxFraxnYRxhePFH1Ce5Df9JgVJjoNGrvLL?cluster=devnet) |
@@ -27,7 +27,7 @@
 | 3.4 cast_bondholder_vote holder 1: For (weight 60) | ✅ OK | [2jLorUxe…](https://explorer.solana.com/tx/2jLorUxeG8ebD531Jctv9PLFCyeUVgYaH1LrYuhJKqvhAKQJSa5RKkDK3mZw1VtXckCjJLKDdzHpo6Hm5QHXqoo7?cluster=devnet) |
 | 3.4 cast_bondholder_vote holder 2: Against (weight 30) | ✅ OK | [3c1MwH8p…](https://explorer.solana.com/tx/3c1MwH8pEMF788XuSx4sJXYK1jfX9S5cn4qF6AXH9mDYFY6QoJW9vnKA9sZRXacw9ND8hhkvFx2PV1eGLxARa5XW?cluster=devnet) |
 | 3.4 cast_bondholder_vote holder 3: Abstain (weight 10) | ✅ OK | [5X6L1rV8…](https://explorer.solana.com/tx/5X6L1rV8LwpFjDXBUZwBxUj98EqHNUWfCnBNAXGiyNg3VWc6gH1aRErhfErzEYjusZbh7Ma238s6tLc94DSkGkbe?cluster=devnet) |
-| ATTACK: holder 1 votes twice (must be rejected: voter record exists) | 🛡 отклонено | [3ond4Abv…](https://explorer.solana.com/tx/3ond4AbvZPtJxx4tC4Y8xUBUakDZSSYVGShGFYz9zPQJvXpJN4JbUV9PhLukN5wx2KBLnqBouwmsALGfnqRWrw2z?cluster=devnet) |
+| ATTACK: holder 1 votes twice (must be rejected: voter record exists) | 🛡 rejected | [3ond4Abv…](https://explorer.solana.com/tx/3ond4AbvZPtJxx4tC4Y8xUBUakDZSSYVGShGFYz9zPQJvXpJN4JbUV9PhLukN5wx2KBLnqBouwmsALGfnqRWrw2z?cluster=devnet) |
 | 3.5 finalize_governance_proposal #101 (60 for / 30 against / 10 abstain) | ✅ OK | [3Lx15aoW…](https://explorer.solana.com/tx/3Lx15aoWpzxkDaQL3fphVsJzAJnCYhroC13mXkbQMjoYEUNi8X3F2CEAPNjiTgECnMhq9AqcVhVziswTFyRCqJww?cluster=devnet) |
 | 4.1 schedule_corporate_action #2 BondRedemption | ✅ OK | [5YwBBJ8y…](https://explorer.solana.com/tx/5YwBBJ8yzwHXA8EAV52KXdEa6H1pai1WosgM5hjiZvjetqrEnJnaGCKviJ8SSaAiZeNe3a3wZYV5gRucLopvoWYJ?cluster=devnet) |
 | 4.2 record_holder_snapshot holder 1 (60 bonds) | ✅ OK | [2dNBgsnh…](https://explorer.solana.com/tx/2dNBgsnhTRgCWnTU8uwSoBisMh4v5P1BNGzx7KfRyhDC4DR9ADo4ahptrAtN478LNkw8iZHkfkvJjCWSo8N8pU3f?cluster=devnet) |
@@ -37,4 +37,7 @@
 | 4.4 execute_bond_redemption holder 1: burn 60 bonds, pay 60000 USDC | ✅ OK | [RkEuxZVt…](https://explorer.solana.com/tx/RkEuxZVtdfYCKf7ikQ9xYfyd5UrMq4xqGhfGZUn28jSLJHaZuny4jMvyWKcm1FtRwVftrt6MXy4cDqztMGzqfMv?cluster=devnet) |
 | 4.4 execute_bond_redemption holder 2: burn 30 bonds, pay 30000 USDC | ✅ OK | [4sVSv1Kh…](https://explorer.solana.com/tx/4sVSv1Khv9LqXUvYHMR5SSqkHnCYS3w1q6NQRL5MGw2uN9jSMj2zDbsgSLUmZbrEaLiy9RQZftaTSC5M3riLj6S7?cluster=devnet) |
 | 4.4 execute_bond_redemption holder 3: burn 10 bonds, pay 10000 USDC | ✅ OK | [w77unAEL…](https://explorer.solana.com/tx/w77unAEL1pUPEXNH9EWusdnFnTrguYu4tHxtGAhi57Pxh5jKRaPnS5XaexVKYK8jWCmaBbdm12eMRXwPntXUj52?cluster=devnet) |
-| ATTACK: holder 1 redeems twice (must be rejected) | 🛡 отклонено | [122Yd9Xu…](https://explorer.solana.com/tx/122Yd9XuX3R6216L6cAvfQZtizt6NtVEFgAoEFeAaL8HPRFhV6b4WUS3qgMGSbGB2rdScZuBLNvjRcP95ofK3o9N?cluster=devnet) |
+| ATTACK: holder 1 redeems twice (must be rejected) | 🛡 rejected | [122Yd9Xu…](https://explorer.solana.com/tx/122Yd9XuX3R6216L6cAvfQZtizt6NtVEFgAoEFeAaL8HPRFhV6b4WUS3qgMGSbGB2rdScZuBLNvjRcP95ofK3o9N?cluster=devnet) |
+
+## Note on error messages
+The program binary deployed on Devnet was built before the source comments and `#[msg]` strings were translated from Russian to English. Error **codes and names** (e.g. `AlreadySettled`, `UnauthorizedAuthority`) and all program logic are identical; only the human-readable message text in on-chain logs is still Russian until the next rebuild/upgrade under the same program ID.
