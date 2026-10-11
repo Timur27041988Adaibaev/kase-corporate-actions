@@ -2,72 +2,72 @@ use anchor_lang::prelude::*;
 
 #[error_code]
 pub enum KaseError {
-    #[msg("Номинал облигации должен быть больше нуля (Face value must be > 0).")]
+    #[msg("Bond face value must be greater than zero.")]
     InvalidFaceValue,
 
-    #[msg("Годовая ставка купона не может превышать 100% (10000 bps).")]
+    #[msg("Annual coupon rate cannot exceed 100% (10000 bps).")]
     InvalidCouponRate,
 
-    #[msg("Частота выплат купона должна быть 1, 2, 4 или 12 раз в год.")]
+    #[msg("Coupon payment frequency must be 1, 2, 4 or 12 times per year.")]
     InvalidCouponFrequency,
 
-    #[msg("Дата погашения инструмента должна быть в будущем.")]
+    #[msg("Instrument maturity date must be in the future.")]
     InvalidMaturityDate,
 
-    #[msg("Срок действия корпоративного действия не наступил.")]
+    #[msg("The corporate action date has not been reached yet.")]
     RecordDateNotReached,
 
-    #[msg("Облигация уже погашена (Bond is already matured/redeemed).")]
+    #[msg("Bond is already matured/redeemed.")]
     BondAlreadyMatured,
 
-    #[msg("Дата погашения облигации еще не наступила.")]
+    #[msg("Bond maturity date has not been reached yet.")]
     MaturityNotReached,
 
-    #[msg("Недостаточно средств в хранилище корпоративного действия.")]
+    #[msg("Insufficient funds in the corporate action vault.")]
     InsufficientVaultFunds,
 
-    #[msg("Баланс инвестора на дату фиксации реестра равен нулю.")]
+    #[msg("Investor balance on the record date is zero.")]
     ZeroHolderBalance,
 
-    #[msg("Право на выплату уже исполнено (Entitlement already claimed/settled).")]
+    #[msg("Entitlement already claimed/settled.")]
     AlreadySettled,
 
-    #[msg("Токен-аккаунт инвестора не соответствует ожидаемому владельцу.")]
+    #[msg("Investor token account does not match the expected owner.")]
     InvalidHolderTokenAccount,
 
-    #[msg("Токен-аккаунт не соответствует минту расчетной валюты или облигации.")]
+    #[msg("Token account does not match the settlement currency mint or the bond mint.")]
     InvalidTokenMint,
 
-    #[msg("Недостаточно прав для выполнения действия (Только KASE / Эмитент / ЦД).")]
+    #[msg("Unauthorized to perform this action (KASE / Issuer / CSD only).")]
     UnauthorizedAuthority,
 
-    #[msg("Голосование по предложению уже завершено или еще не началось.")]
+    #[msg("Voting on this proposal has already ended or has not started yet.")]
     VotingPeriodClosed,
 
-    #[msg("Инвестор уже проголосовал по данному предложению (Double voting prevented).")]
+    #[msg("Investor has already voted on this proposal (double voting prevented).")]
     AlreadyVoted,
 
-    #[msg("Кворум для принятия решения не достигнут.")]
+    #[msg("Quorum for the decision has not been reached.")]
     QuorumNotMet,
 
-    #[msg("Предложение уже исполнено на бирже.")]
+    #[msg("Proposal has already been executed on the exchange.")]
     ProposalAlreadyExecuted,
 
-    #[msg("Переполнение при вычислении финансовых параметров (Math overflow).")]
+    #[msg("Math overflow while computing financial parameters.")]
     MathOverflow,
 
-    #[msg("Недопустимый статус корпоративного действия.")]
+    #[msg("Invalid corporate action status.")]
     InvalidActionStatus,
 
-    #[msg("ISIN код облигации не может быть пустым или длиннее 16 символов (Invalid ISIN).")]
+    #[msg("Invalid ISIN: bond ISIN code cannot be empty or longer than 16 characters.")]
     InvalidIsin,
 
-    #[msg("Заголовок предложения не может быть пустым или превышать 96 символов.")]
+    #[msg("Proposal title cannot be empty or exceed 96 characters.")]
     InvalidProposalTitle,
 
-    #[msg("Дата расчетов не может предшествовать дате фиксации реестра (Record Date).")]
+    #[msg("Settlement date cannot precede the record date.")]
     InvalidSettlementDate,
 
-    #[msg("Попытка повторного использования голоса или несоответствие реестру (Vote Recycling prevented).")]
+    #[msg("Attempt to reuse a vote or register mismatch (vote recycling prevented).")]
     VoteRecyclingForbidden,
 }
