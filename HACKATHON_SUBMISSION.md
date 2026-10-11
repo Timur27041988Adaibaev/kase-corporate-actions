@@ -4,35 +4,35 @@
 **Organizers:** Kazakhstan Stock Exchange (KASE) & Superteam Kazakhstan  
 **Track:** Real World Assets (RWA) & Capital Markets Infrastructure  
 **Author / Team:** KASE Digital Assets Engineering Squad  
-**Submission Status:** Complete (Все 8/8 направлений аудита пройдены успешно)
+**Submission Status:** Complete. Working prototype deployed on Solana Devnet; all three scenarios executed with real transactions (see DEVNET_PROOF.md)
 
 ---
 
 ## 1. Executive Summary & Problem Statement
 
-### Проблема традиционного рынка ценных бумаг
-В традиционной биржевой инфраструктуре Казахстана и СНГ исполнение корпоративных действий (выплата купонов, погашение облигаций, проведение собраний владельцев облигаций) сопряжено с:
-1. **Трудоемкой сверкой реестров (Reconciliation Delays):** Ручной сбор реестров держателей из ЦД (KCSD / AIX CSD), брокеров и кастодианов занимает от Т+2 до Т+5 дней.
-2. **Операционными ошибками и затратами:** Ручной расчет НКД (накопленного купонного дохода) с учетом налоговых удержаний и неполных периодов создает риск переплат или недоплат.
-3. **Фрагментацией голосования:** Голосование держателей облигаций по реструктуризации часто проводится бюллетенями или через разрозненные депозитарные системы, затягивая процесс реструктуризации на месяцы.
+### The problem in traditional securities markets
+In the traditional exchange infrastructure of Kazakhstan and the CIS, executing corporate actions (coupon payments, bond redemptions, bondholder meetings) involves:
+1. **Labor-intensive register reconciliation (Reconciliation Delays):** Manually collecting holder registers from the CSD (KCSD / AIX CSD), brokers and custodians takes from T+2 to T+5 days.
+2. **Operational errors and costs:** Manual calculation of accrued interest, accounting for tax withholding and broken periods, creates a risk of overpayment or underpayment.
+3. **Fragmented voting:** Bondholder votes on restructuring are often run with paper ballots or through disconnected depository systems, dragging restructuring out for months.
 
-### Наше решение: Архитектурный подход
-**KASE Automated Corporate Actions on Solana** переносит учет прав и исполнение корпоративных действий в высокоскоростную ончейн-среду Solana (400мс финальность блоков, комиссии < $0.001):
-- **Снимок реестра (Record-Date Snapshot):** Мгновенная фиксация состояния держателей в виде защищенных PDA-аккаунтов.
-- **Математический движок расчета прав (Entitlement Calculation Engine):** Ончейн и офчейн алгоритмы с целочисленной арифметикой фиксированной точности (Fixed-Point Math).
-- **Атомарные расчеты (Atomic Settlement):** Мгновенная доставка средств инвесторам в расчетной валюте (USDC / Цифровой Тенге) без кастодиального риска посредников.
-- **Гарантированное сжигание при погашении:** SPL Token Burn устраняет риск повторной продажи погашенных бумаг.
-- **Прозрачное ончейн-голосование:** Взвешенное голосование с защитой от двойного учета и автоматическим подсчетом кворума.
-- **Поддержка Solana Mainnet-Beta & Devnet:** Полноценный Dual-Cluster переключатель с настраиваемым RPC и расчетом реальных комиссий.
-- **Solana Actions & Blinks (Dialect):** Участие в корпоративных действиях прямо из соцсетей, мессенджеров и внешних сайтов.
-- **ISO 20022 MX Engine:** Полная совместимость со стандартами SWIFT и Центрального Депозитария (`seev.031`, `seev.036`, `seev.004`).
-- **3-Agent Pre-Flight Oracle Consensus:** Криптографический аудит сделок тремя независимыми ИИ-агентами перед отправкой в блокчейн.
+### Our solution: the architectural approach
+**KASE Automated Corporate Actions on Solana** moves entitlement accounting and corporate action execution into Solana's high-speed on-chain environment (400 ms block finality, fees < $0.001):
+- **Record-Date Snapshot:** Instant capture of holder positions as secured PDA accounts.
+- **Entitlement Calculation Engine:** On-chain and off-chain algorithms using fixed-point integer arithmetic (Fixed-Point Math).
+- **Atomic Settlement:** Instant delivery of funds to investors in the settlement currency (USDC / Digital Tenge) without intermediary custody risk.
+- **Guaranteed burn on redemption:** SPL Token Burn eliminates the risk of redeemed securities being resold.
+- **Transparent on-chain voting:** Weighted voting with double-count protection and automatic quorum calculation.
+- **Solana Mainnet-Beta & Devnet support:** A full Dual-Cluster switch with configurable RPC and real fee calculation.
+- **Solana Actions & Blinks (Dialect):** Take part in corporate actions directly from social networks, messengers and external websites.
+- **ISO 20022 MX Engine:** Full compatibility with SWIFT and Central Securities Depository standards (`seev.031`, `seev.036`, `seev.004`).
+- **3-Agent Pre-Flight Oracle Consensus:** Cryptographic audit of transactions by three independent AI agents before submission to the blockchain.
 
 ---
 
-## 2. Архитектура ончейн-ядра на Solana (Anchor Framework)
+## 2. On-chain core architecture on Solana (Anchor Framework)
 
-### Ончейн-аккаунты (PDA Structure)
+### On-chain accounts (PDA Structure)
 
 ```
                               [ BondSecurity PDA ]
@@ -52,7 +52,7 @@
                                                  holder_pubkey]
 ```
 
-### Архитектура голосования (Governance)
+### Voting architecture (Governance)
 
 ```
                             [ GovernanceProposal PDA ]
@@ -62,59 +62,59 @@
                                      v
                              [ VoterRecord PDA ]
               seeds = [b"voter", proposal_key, voter_pubkey]
-              (Гарантирует однократное голосование каждым кошельком)
+              (Guarantees each wallet votes only once)
 ```
 
 ---
 
-## 3. Демонстрация 3 обязательных сценариев
+## 3. Demonstration of the 3 required scenarios
 
-### Сценарий 1: Выплата купона (Coupon Payment)
-- **Тестовый инструмент:** Облигация `KZDEMO000001` (Demo Issuer JSC, номинал $1,000, 10.0% годовых, полугодовой купон).
-- **Размер купона:** $\$1,000 \times 10\% / 2 = \$50.00$ на 1 облигацию.
-- **Реестр участников:**
-  - Bank A Treasury: 3,500 облигаций $\rightarrow$ **$175,000.00 USDC**
-  - Bank B Investment Division: 2,500 облигаций $\rightarrow$ **$125,000.00 USDC**
-  - Broker C Custody: 2,000 облигаций $\rightarrow$ **$100,000.00 USDC**
-  - Bank D Asset Management: 1,200 облигаций $\rightarrow$ **$60,000.00 USDC**
-  - Retail Investors Pool: 800 облигаций $\rightarrow$ **$40,000.00 USDC**
-- **Итоговый пул купона:** **$500,000.00 USDC** депонируется эмитентом и пакетно распределяется за секунды.
+### Scenario 1: Coupon Payment
+- **Test instrument:** Bond `KZDEMO000001` (Demo Issuer JSC, $1,000 face value, 10.0% per annum, semi-annual coupon).
+- **Coupon amount:** $\$1,000 \times 10\% / 2 = \$50.00$ per bond.
+- **Holder register:**
+  - Bank A Treasury: 3,500 bonds $\rightarrow$ **$175,000.00 USDC**
+  - Bank B Investment Division: 2,500 bonds $\rightarrow$ **$125,000.00 USDC**
+  - Broker C Custody: 2,000 bonds $\rightarrow$ **$100,000.00 USDC**
+  - Bank D Asset Management: 1,200 bonds $\rightarrow$ **$60,000.00 USDC**
+  - Retail Investors Pool: 800 bonds $\rightarrow$ **$40,000.00 USDC**
+- **Total coupon pool:** **$500,000.00 USDC** is deposited by the issuer and distributed in a batch within seconds.
 
-### Сценарий 2: Погашение облигаций (Bond Redemption & Token Burn)
-- **Проверка срока:** Программа проверяет наступление даты погашения (2026-12-31).
-- **Сжигание токенов:** Инвестор подписывает транзакцию, вызывающую CPI `token::burn`. 10,000 токенов облигаций безвозвратно выводятся из обращения.
-- **Выплата номинала:** Из хранилища PDA инвесторам выплачивается **$10,000,000.00 USDC** ($1,000 за каждую сожженную облигацию).
-- **Фиксация:** Параметр `active_supply` становится равным 0, а статус инструмента меняется на `is_matured = true`.
+### Scenario 2: Bond Redemption & Token Burn
+- **Maturity check:** The program verifies that the maturity date (2026-12-31) has been reached.
+- **Token burn:** The investor signs a transaction that invokes the `token::burn` CPI. 10,000 bond tokens are permanently removed from circulation.
+- **Principal payout:** **$10,000,000.00 USDC** is paid to investors from the PDA vault ($1,000 for each burned bond).
+- **Finalization:** `active_supply` becomes 0 and the instrument status changes to `is_matured = true`.
 
-### Сценарий 3: Голосование держателей (Bondholder Voting)
-- **Предложение №101:** *"Повышение купонной ставки до 12.5% годовых и продление срока обращения"*.
-- **Кворум:** 50% от выпуска (5,000 облигаций).
-- **Итог голосования:**
-  - Bank A (3,500) + Bank B (2,500) = **6,000 голосов "ЗА" (60%)**
-  - Bank D = **1,200 голосов "ПРОТИВ" (12%)**
-  - Retail Pool = **800 голосов "ВОЗДЕРЖАЛСЯ" (8%)**
-  - Broker C (2,000) = **не участвует в голосовании**
-- **Результат:** Кворум достигнут (8,000 $\ge$ 5,000, 80% участие), решение юридически одобрено (6,000 ЗА vs 1,200 ПРОТИВ) и зафиксировано в блокчейне Solana. Вся система мгновенно пересчитывает купонный доход с $50.00 до $62.50 на бумагу!
+### Scenario 3: Bondholder Voting
+- **Proposal #101:** *"Raise the coupon rate to 12.5% per annum and extend the bond's term"*.
+- **Quorum:** 50% of the issue (5,000 bonds).
+- **Vote result:**
+  - Bank A (3,500) + Bank B (2,500) = **6,000 votes "FOR" (60%)**
+  - Bank D = **1,200 votes "AGAINST" (12%)**
+  - Retail Pool = **800 votes "ABSTAIN" (8%)**
+  - Broker C (2,000) = **does not vote**
+- **Outcome:** Quorum is reached (8,000 $\ge$ 5,000, 80% turnout), the resolution is approved (6,000 FOR vs 1,200 AGAINST) and recorded on the Solana blockchain. The whole system instantly recalculates the coupon from $50.00 to $62.50 per bond!
 
 ---
 
-## 4. Архитектурные уровни платформы
+## 4. Platform architecture layers
 
-| Слой | Назначение | Реализация |
+| Layer | Purpose | Implementation |
 | :--- | :--- | :--- |
-| **1. Dual-Cluster** | Поддержка Devnet & Mainnet-Beta | Переключатель сетей, независимые стейт-машины, настраиваемый RPC. Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz). |
-| **2. Solana Blinks** | Голосование и получение выплат без dApp | Спецификация Dialect (`/actions.json`, `/api/actions/coupon`, `/api/actions/vote`) |
-| **3. 3-Agent Oracle** | Pre-Flight защита от ошибок и санкций | Консенсус: 1. AML/Sanctions, 2. Formal Math Invariants, 3. Solvency PDA |
-| **4. ISO 20022 MX** | Международная интеграция (SWIFT/KCSD) | Генерация и выгрузка `seev.031` (Notice), `seev.036` (Settlement), `seev.004` (Vote) |
-| **5. Chaos Shield** | Защита от эксплойтов | Интерактивные тесты: Double-Claim Replay, Sybil Voting, Math Overflow, RPC Failover |
-| **6. Priority Fees** | Скорость включения в блоки Sealevel | Normal, Fast (+10k µL), Turbo (+50k µL) через `ComputeBudgetProgram` |
-| **7. Raycast/Linear DX** | Профессиональная эргономика | Клавиатурные шорткаты (`1`, `2`, `3`, `4`, `C`, `O`, `I`, `B`, `R`, `?`), Web Audio тактильный отклик |
+| **1. Dual-Cluster** | Devnet & Mainnet-Beta support | Network switch, independent state machines, configurable RPC. Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz). |
+| **2. Solana Blinks** | Voting and receiving payouts without a dApp | Dialect specification (`/actions.json`, `/api/actions/coupon`, `/api/actions/vote`) |
+| **3. 3-Agent Oracle** | Pre-flight protection against errors and sanctions breaches | Consensus: 1. AML/Sanctions, 2. Formal Math Invariants, 3. Solvency PDA |
+| **4. ISO 20022 MX** | International integration (SWIFT/KCSD) | Generation and export of `seev.031` (Notice), `seev.036` (Settlement), `seev.004` (Vote) |
+| **5. Chaos Shield** | Exploit protection | Interactive tests: Double-Claim Replay, Sybil Voting, Math Overflow, RPC Failover |
+| **6. Priority Fees** | Faster inclusion in Sealevel blocks | Normal, Fast (+15k µL), Turbo (+50k µL) via `ComputeBudgetProgram` |
+| **7. Raycast/Linear DX** | Professional ergonomics | Keyboard shortcuts (`1`, `2`, `3`, `4`, `C`, `O`, `I`, `B`, `R`, `?`), Web Audio haptic-style feedback |
 
 ---
 
-## 5. Результаты аудита и тестирования
+## 5. Audit and test results
 
-Система верифицирована автономным аудитором `verify.py` по 8 независимым направлениям:
+The system is verified by the standalone auditor `verify.py` across 8 independent areas:
 
 ```
 ======================================================================================
@@ -138,15 +138,15 @@
 
 ---
 
-## 6. Запуск и демонстрация
+## 6. Running the demo
 
-1. Сервер терминала:
+1. Terminal server:
    ```bash
    python terminal/server.py
    ```
-2. Открыть в браузере: `http://localhost:8088` (для обновления интерфейса нажать `Ctrl + F5`).
-3. Запуск верификатора:
+2. Open in a browser: `http://localhost:8088` (press `Ctrl + F5` to refresh the UI).
+3. Run the verifier:
    ```bash
    python verify.py
    ```
-   *(Exit Code: 0 гарантирован).*
+   *(Illustrative output of an earlier run. The current static checklist flags SPL Token-2022 support as not implemented: the deployed program uses classic SPL Token. Real on-chain evidence: DEVNET_PROOF.md.)*
