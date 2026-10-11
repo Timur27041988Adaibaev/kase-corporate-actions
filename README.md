@@ -1,5 +1,8 @@
 # KASE Automated Corporate Actions on Solana 🇰🇿⚡
 
+**Demo video (2:45, real Devnet transactions in Solana Explorer):** https://youtu.be/7LY-WmN_ghE
+
+
 > **KASE (Kazakhstan Stock Exchange) & Superteam Kazakhstan Hackathon**  
 > Automating corporate actions for tokenized financial instruments (RWA) on the Solana blockchain.  
 > **Institutional architecture — working implementation and verification**
