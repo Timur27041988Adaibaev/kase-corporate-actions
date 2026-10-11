@@ -26,159 +26,159 @@ pub enum VoteChoice {
 #[account]
 #[derive(InitSpace, Debug)]
 pub struct BondSecurity {
-    /// Международный идентификационный номер ценной бумаги (ISIN, e.g. "KZDEMO000001")
+    /// International Securities Identification Number (ISIN, e.g. "KZDEMO000001")
     #[max_len(16)]
     pub isin: String,
 
-    /// Эмитент облигации (Demo Issuer JSC)
+    /// Bond issuer (Demo Issuer JSC)
     pub issuer: Pubkey,
 
-    /// Биржевой регулятор / Центральный Депозитарий (KASE CSD / KCSD)
+    /// Exchange regulator / Central Securities Depository (KASE CSD / KCSD)
     pub authority: Pubkey,
 
-    /// SPL Mint токена облигации
+    /// SPL Mint of the bond token
     pub bond_mint: Pubkey,
 
-    /// SPL Mint расчетной валюты (USDC / Цифровой Тенге)
+    /// SPL Mint of the settlement currency (USDC / Digital Tenge)
     pub settlement_mint: Pubkey,
 
-    /// Номинальная стоимость одной облигации (например, 1,000 USDC = 1_000_000_000 микро-юнитов)
+    /// Face value of one bond (e.g. 1,000 USDC = 1_000_000_000 micro-units)
     pub face_value: u64,
 
-    /// Годовая купонная ставка в базисных пунктах (1000 bps = 10.00%)
+    /// Annual coupon rate in basis points (1000 bps = 10.00%)
     pub annual_coupon_bps: u16,
 
-    /// Частота выплат купона в год (2 = полугодовая выплата)
+    /// Coupon payments per year (2 = semi-annual)
     pub coupons_per_year: u8,
 
-    /// Общий объем выпуска (в штуках облигаций)
+    /// Total issue size (number of bonds)
     pub total_supply: u64,
 
-    /// Текущий активный объем в обращении (уменьшается при погашении/сжигании)
+    /// Current outstanding supply (decreases on redemption/burn)
     pub active_supply: u64,
 
-    /// Дата погашения облигации (Unix timestamp)
+    /// Bond maturity date (Unix timestamp)
     pub maturity_timestamp: i64,
 
-    /// Флаг полного погашения инструмента
+    /// Flag: instrument fully redeemed
     pub is_matured: bool,
 
-    /// Bump seed для PDA
+    /// Bump seed for the PDA
     pub bump: u8,
 }
 
 #[account]
 #[derive(InitSpace, Debug)]
 pub struct CorporateAction {
-    /// Уникальный номер корпоративного действия в реестре KASE
+    /// Unique corporate action number in the KASE register
     pub action_id: u64,
 
-    /// Ссылка на мастер-аккаунт облигации
+    /// Reference to the bond master account
     pub bond_security: Pubkey,
 
-    /// Тип действия (Купон, Погашение, Голосование)
+    /// Action type (Coupon, Redemption, Vote)
     pub action_type: ActionType,
 
-    /// Текущий статус выполнения
+    /// Current execution status
     pub status: ActionStatus,
 
-    /// Дата фиксации реестра держателей (Record Date)
+    /// Holder register record date (Record Date)
     pub record_date_timestamp: i64,
 
-    /// Дата исполнения расчета (Payment / Settlement Date)
+    /// Settlement execution date (Payment / Settlement Date)
     pub settlement_timestamp: i64,
 
-    /// Общий объем средств, требуемый для выплаты пулу держателей (в единицах расчетного токена)
+    /// Total funds required to pay the holder pool (in settlement token units)
     pub total_entitlement_required: u64,
 
-    /// Общий объем фактически выплаченных средств
+    /// Total funds actually paid out
     pub total_settled_amount: u64,
 
-    /// Общий объем облигаций, включенных в снимок реестра
+    /// Total bonds included in the register snapshot
     pub snapshot_bonds_count: u64,
 
-    /// Количество обработанных инвесторов
+    /// Number of investors processed
     pub settled_holders_count: u32,
 
-    /// Хранилище средств корпоративного действия (PDA токен-аккаунт)
+    /// Corporate action funds vault (PDA token account)
     pub vault: Pubkey,
 
-    /// Bump seed аккаунта действия
+    /// Bump seed of the action account
     pub bump: u8,
 
-    /// Bump seed токен-хранилища
+    /// Bump seed of the token vault
     pub vault_bump: u8,
 }
 
 #[account]
 #[derive(InitSpace, Debug)]
 pub struct HolderEntitlement {
-    /// Корпоративное действие
+    /// Corporate action
     pub corporate_action: Pubkey,
 
-    /// Адрес кошелька держателя
+    /// Holder wallet address
     pub holder: Pubkey,
 
-    /// Баланс облигаций на дату отсечки (Record Date)
+    /// Bond balance on the cut-off date (Record Date)
     pub bonds_held: u64,
 
-    /// Расчитанный объем прав (купон в USDC или номинал к погашению)
+    /// Calculated entitlement (coupon in USDC or principal to redeem)
     pub entitlement_amount: u64,
 
-    /// Флаг исполнения выплаты / погашения
+    /// Flag: payment / redemption executed
     pub is_settled: bool,
 
-    /// Временная метка исполнения
+    /// Execution timestamp
     pub settled_timestamp: i64,
 
-    /// Bump seed для PDA права
+    /// Bump seed of the entitlement PDA
     pub bump: u8,
 }
 
 #[account]
 #[derive(InitSpace, Debug)]
 pub struct GovernanceProposal {
-    /// Идентификатор предложения
+    /// Proposal identifier
     pub proposal_id: u64,
 
-    /// Облигационный инструмент
+    /// Bond instrument
     pub bond_security: Pubkey,
 
-    /// Инициатор предложения (Эмитент или крупный держатель)
+    /// Proposal initiator (issuer or a major holder)
     pub proposer: Pubkey,
 
-    /// Название корпоративного решения (например: "Реструктуризация: Повышение ставки купона до 12.5%")
+    /// Title of the corporate resolution (e.g. "Restructuring: raise the coupon rate to 12.5%")
     #[max_len(96)]
     pub title: String,
 
-    /// Хэш описания и аудиторского заключения KASE
+    /// Hash of the description and the KASE audit opinion
     pub description_hash: [u8; 32],
 
-    /// Начало голосования
+    /// Voting start
     pub voting_start: i64,
 
-    /// Окончание голосования
+    /// Voting end
     pub voting_end: i64,
 
-    /// Суммарный вес голосов "ЗА"
+    /// Total weight of "FOR" votes
     pub votes_for: u64,
 
-    /// Суммарный вес голосов "ПРОТИВ"
+    /// Total weight of "AGAINST" votes
     pub votes_against: u64,
 
-    /// Суммарный вес голосов "ВОЗДЕРЖАЛСЯ"
+    /// Total weight of "ABSTAIN" votes
     pub votes_abstain: u64,
 
-    /// Порог кворума в штуках облигаций (например, 50% от выпуска)
+    /// Quorum threshold in number of bonds (e.g. 50% of the issue)
     pub quorum_threshold_bonds: u64,
 
-    /// Новая годовая ставка купона при одобрении реструктуризации (в bps, e.g. 1250 = 12.50%)
+    /// New annual coupon rate if the restructuring is approved (in bps, e.g. 1250 = 12.50%)
     pub new_coupon_rate_bps: u16,
 
-    /// Флаг подведения итогов
+    /// Flag: vote finalized
     pub finalized: bool,
 
-    /// Флаг принятия резолюции
+    /// Flag: resolution passed
     pub passed: bool,
 
     /// Bump seed
