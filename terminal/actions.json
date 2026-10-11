@@ -1,0 +1,16 @@
+{
+  "rules": [
+    {
+      "pathPattern": "/api/actions/**",
+      "apiPath": "/api/actions/**"
+    },
+    {
+      "pathPattern": "/kase/**",
+      "apiPath": "/api/actions/**"
+    },
+    {
+      "pathPattern": "/blinks/**",
+      "apiPath": "/api/actions/**"
+    }
+  ]
+}
