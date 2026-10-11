@@ -201,17 +201,17 @@
         <div class="mainnet-badge-icon" aria-hidden="true">⚠️</div>
         <div class="mainnet-safety-text">
           <strong id="mainnetSafetyLabel">Mainnet: Memo Program records only. KASE program: live on Devnet.</strong>
-          <span>Запись корпоративных действий в Mainnet осуществляется исключительно через официальную программу Solana Memo Program (MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr). Anchor-программа KASE пока не задеплоена (live on Devnet). Сетевая комиссия оплачивается реальным SOL (~0.000005 SOL). Кран Airdrop в Mainnet отключен.</span>
+          <span>On Mainnet, corporate actions are recorded exclusively through the official Solana Memo Program (MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr). The KASE Anchor program is not yet deployed on Mainnet (it is live on Devnet). Network fees are paid in real SOL (~0.000005 SOL). The Airdrop faucet is disabled on Mainnet.</span>
         </div>
       </div>
       <div class="mainnet-safety-right">
-        <div class="mainnet-balance-wrap font-mono" title="Текущий баланс активного подписанта в Mainnet-Beta">
-          <span class="mainnet-bal-label">Баланс Signer:</span>
+        <div class="mainnet-balance-wrap font-mono" title="Current balance of the active signer on Mainnet-Beta">
+          <span class="mainnet-bal-label">Signer balance:</span>
           <span class="mainnet-balance-val" id="mainnetSignerBalance">0.00000 SOL</span>
         </div>
         <span class="mainnet-fee-est font-mono">Est. Tx Fee: ~0.000005 SOL</span>
-        <button id="btnSwitchBackDevnet" class="btn-safety-devnet" title="Вернуться в песочницу Devnet">
-          Вернуться на Devnet
+        <button id="btnSwitchBackDevnet" class="btn-safety-devnet" title="Return to the Devnet sandbox">
+          Return to Devnet
         </button>
       </div>
     </div>
@@ -226,15 +226,15 @@
           </svg>
         </div>
         <div class="phantom-guide-text" id="phantomGuideText">
-          <strong id="phantomGuideTitle">🦊 Синхронизация с Phantom Wallet (Solana Devnet):</strong>
-          <span id="phantomGuideBody">Каждое корпоративное действие открывает реальное окно расширения Phantom для вашего личного подтверждения. Для работы включите Devnet в Phantom (<strong>⚙️ Настройки ➔ Настройки разработчика ➔ Режим тестнета ➔ Solana Devnet</strong>). При балансе 0 SOL нажмите <strong>"Airdrop +1 SOL"</strong> в шапке.</span>
+          <strong id="phantomGuideTitle">🦊 Phantom Wallet sync (Solana Devnet):</strong>
+          <span id="phantomGuideBody">Each corporate action opens a real Phantom extension window for your personal approval. To use it, enable Devnet in Phantom (<strong>⚙️ Settings ➔ Developer Settings ➔ Testnet Mode ➔ Solana Devnet</strong>). If your balance is 0 SOL, click <strong>"Airdrop +1 SOL"</strong> in the header.</span>
         </div>
       </div>
       <div class="phantom-guide-actions">
         <button id="btnBannerConnectPhantom" class="btn-guide-connect">
-          <span>Подключить Phantom</span>
+          <span>Connect Phantom</span>
         </button>
-        <button id="btnBannerDismiss" class="btn-guide-dismiss" title="Скрыть подсказку">&times;</button>
+        <button id="btnBannerDismiss" class="btn-guide-dismiss" title="Hide tip">&times;</button>
       </div>
     </div>
 
@@ -310,7 +310,7 @@
 
       <div class="kpi-card emerald">
         <div class="kpi-header">
-          <span class="kpi-label">Face Value (Номинал)</span>
+          <span class="kpi-label">Face Value</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="kpi-icon"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         </div>
         <div class="kpi-value green font-mono" id="statFaceValue">$1,000.00 USDC</div>
@@ -851,7 +851,7 @@
             <span class="val gold font-mono" id="hudCouponBps">1,000 bps (10.00% p.a.)</span>
           </div>
           <div class="math-sync-step-row">
-            <span class="label">Payout Frequency (Полугодовая):</span>
+            <span class="label">Payout Frequency (Semi-Annual):</span>
             <span class="val font-mono" id="hudFrequency">2 Payouts / Year</span>
           </div>
           <div class="math-sync-step-row">
@@ -966,7 +966,7 @@
           </div>
           <div>
             <h3>Enterprise Chaos Engineering & Adversarial Shield (Zero-Vulnerability Invariant Harness)</h3>
-            <p>Испытание системы на устойчивость к атакам повторного воспроизведения (Replay), захвату кворума (Sybil), арифметическим переполнениям и отказам RPC узлов.</p>
+            <p>Stress-testing the system against replay attacks, quorum capture (Sybil), arithmetic overflows and RPC node failures.</p>
           </div>
         </div>
         <div class="adversarial-badge-status font-mono">
@@ -984,13 +984,13 @@
               <span class="status-pill active font-mono" id="shieldStatus1">SHIELD OK</span>
             </div>
             <h4>Double-Claim Replay Attack</h4>
-            <p>Злоумышленник перехватывает транзакцию выплаты купона и пытается повторно затребовать $500,000 из хранилища.</p>
+            <p>An attacker intercepts the coupon payment transaction and tries to claim the $500,000 from the vault a second time.</p>
           </div>
           <div class="attack-defense-info">
-            <strong>Защита Solana:</strong> PDA Account <code>CorporateAction.is_settled</code> блокирует повторный вызов с кодом <code>KaseError::AlreadySettled</code>.
+            <strong>Solana protection:</strong> PDA Account <code>CorporateAction.is_settled</code> blocks the repeat call with error code <code>KaseError::AlreadySettled</code>.
           </div>
           <button type="button" class="btn-execute-attack" id="btnTestAttackDoubleClaim">
-            <span>⚡ Запустить атаку Double-Claim</span>
+            <span>⚡ Launch Double-Claim attack</span>
           </button>
         </div>
 
@@ -1002,13 +1002,13 @@
               <span class="status-pill active font-mono" id="shieldStatus2">SHIELD OK</span>
             </div>
             <h4>Governance Sybil / Double-Vote</h4>
-            <p>Держатель пытается проголосовать одним и тем же пакетом акций дважды для искусственного накручивания кворума.</p>
+            <p>A holder tries to vote the same block of securities twice to artificially inflate the quorum.</p>
           </div>
           <div class="attack-defense-info">
-            <strong>Защита Solana:</strong> Деривация PDA <code>b"voter", proposal_id, voter_key</code> вызывает коллизию адреса и немедленный откат в Sealevel.
+            <strong>Solana protection:</strong> Deriving the PDA <code>b"voter", proposal_id, voter_key</code> causes an address collision and an immediate rollback in Sealevel.
           </div>
           <button type="button" class="btn-execute-attack" id="btnTestAttackDoubleVote">
-            <span>⚡ Запустить атаку Double-Vote</span>
+            <span>⚡ Launch Double-Vote attack</span>
           </button>
         </div>
 
@@ -1020,13 +1020,13 @@
               <span class="status-pill active font-mono" id="shieldStatus3">SHIELD OK</span>
             </div>
             <h4>Arithmetic Overflow Injection</h4>
-            <p>Внедрение граничных значений (u64::MAX, нулевая частота или отрицательные базисные пункты) для повреждения стейта.</p>
+            <p>Injecting edge-case values (u64::MAX, zero frequency or negative basis points) to corrupt state.</p>
           </div>
           <div class="attack-defense-info">
-            <strong>Защита Solana:</strong> Безопасная математика <code>checked_mul</code>, <code>checked_div</code> и <code>require!(freq > 0)</code> в <code>math.rs</code>.
+            <strong>Solana protection:</strong> Safe math with <code>checked_mul</code>, <code>checked_div</code> and <code>require!(freq > 0)</code> in <code>math.rs</code>.
           </div>
           <button type="button" class="btn-execute-attack" id="btnTestAttackMathOverflow">
-            <span>⚡ Запустить атаку Overflow</span>
+            <span>⚡ Launch Overflow attack</span>
           </button>
         </div>
 
@@ -1038,13 +1038,13 @@
               <span class="status-pill active font-mono" id="shieldStatus4">SHIELD OK</span>
             </div>
             <h4>RPC Node Drop & Circuit Breaker</h4>
-            <p>Внезапный сбой или отказ основного RPC провайдера в момент проведения расчетов.</p>
+            <p>A sudden outage or failure of the primary RPC provider during settlement.</p>
           </div>
           <div class="attack-defense-info">
-            <strong>Защита Терминала:</strong> Паттерн Circuit Breaker & Failover — автоматическое переключение на вторичный RPC без потери сессии.
+            <strong>Terminal protection:</strong> Circuit Breaker & Failover pattern — automatic switch to a secondary RPC without losing the session.
           </div>
           <button type="button" class="btn-execute-attack" id="btnTestAttackRpcDrop">
-            <span>⚡ Запустить тест сбоя RPC</span>
+            <span>⚡ Run RPC failure test</span>
           </button>
         </div>
       </div>
@@ -1084,9 +1084,9 @@
             </div>
           </div>
           <div class="phantom-callout-text">
-            <h4>👉 ПОДТВЕРДИТЕ В PHANTOM КОШЕЛЬКЕ!</h4>
-            <p>Всплывающее окно Phantom открыто на вашем экране. Пожалуйста, нажмите <strong>"Подтвердить" / "Approve"</strong> в окне Phantom для отправки транзакции на Solana Devnet.</p>
-            <div class="phantom-subtip">💡 Если окно свернулось, нажмите на значок фиолетового призрака Phantom в панели расширений браузера.</div>
+            <h4>👉 APPROVE IN YOUR PHANTOM WALLET!</h4>
+            <p>The Phantom pop-up is open on your screen. Please click <strong>"Approve"</strong> in the Phantom window to send the transaction to Solana Devnet.</p>
+            <div class="phantom-subtip">💡 If the window was minimized, click the purple Phantom ghost icon in your browser's extensions bar.</div>
           </div>
         </div>
 
@@ -1145,7 +1145,7 @@
 
         <div class="tx-phantom-activity-tip">
           <span class="tip-icon">⚡</span>
-          <span>Транзакция зафиксирована в блокчейне! Вы можете открыть расширение Phantom и перейти во вкладку <strong>Активность (Activity)</strong> — транзакция отображается в истории вашего кошелька.</span>
+          <span>The transaction is recorded on the blockchain! Open the Phantom extension and go to the <strong>Activity</strong> tab — the transaction appears in your wallet history.</span>
         </div>
 
         <div class="modal-btn-row">
@@ -1192,44 +1192,44 @@
           </svg>
         </div>
         <div>
-          <h3 id="signerChoiceTitle">Выберите режим подписания на Solana Devnet</h3>
-          <p class="modal-sub">Как вы хотите подтвердить выполнение этого корпоративного действия?</p>
+          <h3 id="signerChoiceTitle">Choose a signing mode on Solana Devnet</h3>
+          <p class="modal-sub">How do you want to approve this corporate action?</p>
         </div>
       </div>
 
       <div class="signer-options-grid">
         <div class="signer-opt-card featured" id="optChoosePhantom">
-          <div class="opt-badge">Рекомендуется для демонстрации</div>
+          <div class="opt-badge">Recommended for the demo</div>
           <div class="opt-icon">🦊</div>
-          <h4>Phantom Wallet (Личный кошелек)</h4>
-          <p id="optPhantomTxDesc">Всплывающее окно Phantom откроется прямо в браузере. Вы лично нажимаете "Approve" для каждой реальной транзакции на Devnet.</p>
+          <h4>Phantom Wallet (personal wallet)</h4>
+          <p id="optPhantomTxDesc">The Phantom pop-up opens right in your browser. You personally click "Approve" for every real transaction on Devnet.</p>
           <div class="opt-features">
-            <span>✔ Интерактивное подтверждение в браузере</span>
-            <span>✔ Отображение в истории вашего Phantom</span>
-            <span id="optPhantomGasFeature">✔ Автоматическое пополнение бесплатного газа</span>
+            <span>✔ Interactive approval in the browser</span>
+            <span>✔ Shows up in your Phantom history</span>
+            <span id="optPhantomGasFeature">✔ Automatic free gas top-up</span>
           </div>
           <button class="btn-opt-select btn-opt-phantom" id="btnConfirmChoosePhantom">
-            <span>Подключить Phantom и Подписать</span>
+            <span>Connect Phantom and Sign</span>
           </button>
         </div>
 
         <div class="signer-opt-card" id="optChooseOperator">
-          <div class="opt-badge secondary">Автономный режим биржи</div>
+          <div class="opt-badge secondary">Exchange autonomous mode</div>
           <div class="opt-icon">🏛️</div>
           <h4>CSD Operator Keypair (KASE Authority)</h4>
-          <p>Автоматическое подписание институциональным закрытым ключом биржи KASE без необходимости подтверждать вручную в расширении.</p>
+          <p>Automatic signing with the KASE exchange's institutional private key, with no manual approval in the extension.</p>
           <div class="opt-features">
-            <span id="optOperatorTxText">✔ 100% реальная транзакция на Solana Devnet</span>
-            <span>✔ Автономное пакетное исполнение</span>
-            <span>✔ Отображение в Solana Explorer</span>
+            <span id="optOperatorTxText">✔ 100% real transaction on Solana Devnet</span>
+            <span>✔ Autonomous batch execution</span>
+            <span>✔ Visible in Solana Explorer</span>
           </div>
           <button class="btn-opt-select btn-opt-operator" id="btnConfirmChooseOperator">
-            <span>Выполнить от имени CSD Operator</span>
+            <span>Execute as CSD Operator</span>
           </button>
         </div>
       </div>
 
-      <button id="btnCancelSignerChoice" class="btn-modal-dismiss" style="width: 100%; margin-top: 14px;">Отмена</button>
+      <button id="btnCancelSignerChoice" class="btn-modal-dismiss" style="width: 100%; margin-top: 14px;">Cancel</button>
     </div>
   </div>
 
@@ -1312,7 +1312,7 @@
         </div>
         <div>
           <h3>Solana RPC Configuration</h3>
-          <p class="modal-sub">Настройка пользовательских RPC-узлов для Devnet и Mainnet-Beta</p>
+          <p class="modal-sub">Configure custom RPC nodes for Devnet and Mainnet-Beta</p>
         </div>
         <button id="btnRpcModalClose" class="btn-close-modal" aria-label="Close RPC modal">&times;</button>
       </div>
@@ -1324,7 +1324,7 @@
             <strong>Devnet RPC Endpoint:</strong>
           </label>
           <input type="text" id="rpcDevnetInput" class="rpc-text-input font-mono" placeholder="https://api.devnet.solana.com" />
-          <div class="rpc-hint">По умолчанию: <code>https://api.devnet.solana.com</code></div>
+          <div class="rpc-hint">Default: <code>https://api.devnet.solana.com</code></div>
         </div>
 
         <div class="rpc-field-group">
@@ -1333,11 +1333,11 @@
             <strong>Mainnet-Beta RPC Endpoint:</strong>
           </label>
           <input type="text" id="rpcMainnetInput" class="rpc-text-input font-mono" placeholder="https://api.mainnet-beta.solana.com" />
-          <div class="rpc-hint">По умолчанию: <code>https://api.mainnet-beta.solana.com</code> (или ваш приватный Helius / QuickNode / Triton RPC)</div>
+          <div class="rpc-hint">Default: <code>https://api.mainnet-beta.solana.com</code> (or your private Helius / QuickNode / Triton RPC)</div>
         </div>
 
         <div class="rpc-presets-group">
-          <span class="rpc-presets-title">Быстрые пресеты:</span>
+          <span class="rpc-presets-title">Quick presets:</span>
           <div class="rpc-preset-buttons">
             <button type="button" class="btn-rpc-preset" id="presetRpcDevnet">Devnet Official</button>
             <button type="button" class="btn-rpc-preset" id="presetRpcMainnetOfficial">Mainnet Official</button>
@@ -1353,7 +1353,7 @@
         <div class="oracle-avatar">🛡️</div>
         <div>
           <h3>3-Agent Pre-Flight Consensus Oracle</h3>
-          <p class="modal-sub">Институциональный консенсус трех автономных оракулов перед исполнением сделок</p>
+          <p class="modal-sub">Institutional consensus of three autonomous oracles before trade execution</p>
         </div>
         <button id="btnOracleModalClose" class="btn-close-modal" aria-label="Close Oracle modal">&times;</button>
       </div>
@@ -1367,7 +1367,7 @@
               <h4>Oracle 1: CSD Registry &amp; Sanctions Gatekeeper</h4>
               <span class="oracle-status-pill font-mono">VERIFIED PASS</span>
             </div>
-            <p>Валидация БИН всех 5 банков-участников через центральный реестр KCSD. Проверка списков санкций (OFAC, FATF, КФМ РК) — 0 совпадений. Все счета активны.</p>
+            <p>BIN validation of all 5 participant banks against the KCSD central register. Sanctions list screening (OFAC, FATF, Kazakhstan FMA) — 0 matches. All accounts active.</p>
           </div>
         </div>
 
@@ -1379,7 +1379,7 @@
               <h4>Oracle 2: Formal Math Invariant &amp; Sum Prover</h4>
               <span class="oracle-status-pill font-mono">VERIFIED PASS</span>
             </div>
-            <p>Формальное математическое доказательство сохранения баланса: $\sum \text{Entitlements} \equiv \text{PoolAmount}$. Защита от деления на ноль и дробных погрешностей (&lt;0.000001 USDC).</p>
+            <p>Formal mathematical proof of balance conservation: $\sum \text{Entitlements} \equiv \text{PoolAmount}$. Protection against division by zero and fractional rounding errors (&lt;0.000001 USDC).</p>
           </div>
         </div>
 
@@ -1391,7 +1391,7 @@
               <h4>Oracle 3: Vault Solvency &amp; Cluster Velocity</h4>
               <span class="oracle-status-pill font-mono">VERIFIED PASS</span>
             </div>
-            <p>Проверка ликвидности PDA-эскроу хранилища. Оценка скорости подтверждения блоков Solana Sealevel (&lt;400ms latency) и достаточности баланса газа.</p>
+            <p>Liquidity check of the PDA escrow vault. Assessment of Solana Sealevel block confirmation speed (&lt;400ms latency) and sufficiency of the gas balance.</p>
           </div>
         </div>
       </div>
@@ -1402,9 +1402,9 @@
       </div>
 
       <div class="rpc-config-footer">
-        <button id="btnDismissOracleModal" class="btn-modal-dismiss">Закрыть</button>
+        <button id="btnDismissOracleModal" class="btn-modal-dismiss">Close</button>
         <button id="btnRunOracleAudit" class="btn-action-primary">
-          <span>🔄 Повторить аудит консенсуса</span>
+          <span>🔄 Re-run consensus audit</span>
         </button>
       </div>
     </div>
@@ -1417,7 +1417,7 @@
         <div class="oracle-avatar" style="background: rgba(153, 69, 255, 0.2); color: #ab9ff2;">⚡</div>
         <div>
           <h3>Solana Actions &amp; Blinks Specification</h3>
-          <p class="modal-sub">Интеграция корпоративных действий KASE прямо в Twitter/X, Telegram и Discord</p>
+          <p class="modal-sub">KASE corporate actions embedded directly in Twitter/X, Telegram and Discord</p>
         </div>
         <button id="btnBlinksModalClose" class="btn-close-modal" aria-label="Close Blinks modal">&times;</button>
       </div>
@@ -1442,7 +1442,7 @@
               Authorize automated disbursement of $500,000.00 USDC for KASE Demo USD Bond 2026 across 5 KCSD custodian banks on Solana.
             </div>
             <div class="blink-card-actions">
-              <button class="btn-blink-action" id="btnTestBlinkExec">⚡ Подтвердить выплату ($500,000)</button>
+              <button class="btn-blink-action" id="btnTestBlinkExec">⚡ Approve payout ($500,000)</button>
             </div>
           </div>
         </div>
@@ -1452,11 +1452,11 @@
       <div class="blink-url-box">
         <span style="font-size: 11px; font-weight: 700; color: #fff;">Dial.to URL:</span>
         <input type="text" readonly id="blinkDialtoInput" class="blink-url-input font-mono" value="https://dial.to/?action=solana-action:http://localhost:8088/api/actions/coupon" />
-        <button type="button" class="btn-action-sm" id="btnCopyBlinkUrl">Скопировать</button>
+        <button type="button" class="btn-action-sm" id="btnCopyBlinkUrl">Copy</button>
       </div>
 
       <div class="rpc-config-footer" style="margin-top: 14px;">
-        <button id="btnDismissBlinksModal" class="btn-modal-dismiss">Закрыть</button>
+        <button id="btnDismissBlinksModal" class="btn-modal-dismiss">Close</button>
       </div>
     </div>
   </div>
@@ -1468,7 +1468,7 @@
         <div class="oracle-avatar" style="background: rgba(0, 208, 132, 0.2); color: var(--kase-green);">📄</div>
         <div>
           <h3>ISO 20022 Financial MX Regulatory Engine</h3>
-          <p class="modal-sub">Экспорт стандартизированных финансовых сообщений (SWIFT / Euroclear / KCSD)</p>
+          <p class="modal-sub">Export of standardized financial messages (SWIFT / Euroclear / KCSD)</p>
         </div>
         <button id="btnIsoModalClose" class="btn-close-modal" aria-label="Close ISO modal">&times;</button>
       </div>
@@ -1487,9 +1487,9 @@
       </div>
 
       <div class="iso-download-row">
-        <button class="btn-modal-dismiss" id="btnDismissIsoModal">Закрыть</button>
-        <button class="btn-action-sm" id="btnDownloadIsoJson">Скачать .JSON</button>
-        <button class="btn-action-primary" id="btnDownloadIsoXml">Скачать .XML (ISO 20022)</button>
+        <button class="btn-modal-dismiss" id="btnDismissIsoModal">Close</button>
+        <button class="btn-action-sm" id="btnDownloadIsoJson">Download .JSON</button>
+        <button class="btn-action-primary" id="btnDownloadIsoXml">Download .XML (ISO 20022)</button>
       </div>
     </div>
   </div>
@@ -1500,61 +1500,61 @@
       <div class="rpc-config-header">
         <div class="oracle-avatar" style="background: rgba(255, 255, 255, 0.1); color: #fff;">⌨️</div>
         <div>
-          <h3>Клавиатурные шорткаты (Raycast / Linear DX)</h3>
-          <p class="modal-sub">Быстрое управление биржевым терминалом без использования мыши</p>
+          <h3>Keyboard shortcuts (Raycast / Linear DX)</h3>
+          <p class="modal-sub">Fast control of the exchange terminal without a mouse</p>
         </div>
         <button id="btnShortcutsModalClose" class="btn-close-modal" aria-label="Close shortcuts modal">&times;</button>
       </div>
 
       <div class="shortcuts-table">
         <div class="shortcut-row">
-          <span class="shortcut-desc">Выполнить Сценарий 1 (Выплата купона)</span>
+          <span class="shortcut-desc">Run Scenario 1 (Coupon payment)</span>
           <div class="shortcut-keys"><kbd>1</kbd></div>
         </div>
         <div class="shortcut-row">
-          <span class="shortcut-desc">Выполнить Сценарий 2 (Погашение и сжигание)</span>
+          <span class="shortcut-desc">Run Scenario 2 (Redemption and burn)</span>
           <div class="shortcut-keys"><kbd>2</kbd></div>
         </div>
         <div class="shortcut-row">
-          <span class="shortcut-desc">Голосовать "ЗА" по предложению #101</span>
+          <span class="shortcut-desc">Vote "FOR" on proposal #101</span>
           <div class="shortcut-keys"><kbd>3</kbd></div>
         </div>
         <div class="shortcut-row">
-          <span class="shortcut-desc">Голосовать "ПРОТИВ" по предложению #101</span>
+          <span class="shortcut-desc">Vote "AGAINST" on proposal #101</span>
           <div class="shortcut-keys"><kbd>4</kbd></div>
         </div>
         <div class="shortcut-row">
-          <span class="shortcut-desc">Переключить сеть Solana (Devnet ↔ Mainnet)</span>
+          <span class="shortcut-desc">Switch Solana network (Devnet ↔ Mainnet)</span>
           <div class="shortcut-keys"><kbd>C</kbd></div>
         </div>
         <div class="shortcut-row">
-          <span class="shortcut-desc">Открыть аудит 3-Agent Oracle</span>
+          <span class="shortcut-desc">Open 3-Agent Oracle audit</span>
           <div class="shortcut-keys"><kbd>O</kbd></div>
         </div>
         <div class="shortcut-row">
-          <span class="shortcut-desc">Открыть регуляторный инспектор ISO 20022</span>
+          <span class="shortcut-desc">Open ISO 20022 regulatory inspector</span>
           <div class="shortcut-keys"><kbd>I</kbd></div>
         </div>
         <div class="shortcut-row">
-          <span class="shortcut-desc">Открыть витрину Solana Actions &amp; Blinks</span>
+          <span class="shortcut-desc">Open Solana Actions &amp; Blinks showcase</span>
           <div class="shortcut-keys"><kbd>B</kbd></div>
         </div>
         <div class="shortcut-row">
-          <span class="shortcut-desc">Сбросить состояние симуляции в исходное</span>
+          <span class="shortcut-desc">Reset the simulation to its initial state</span>
           <div class="shortcut-keys"><kbd>R</kbd></div>
         </div>
         <div class="shortcut-row">
-          <span class="shortcut-desc">Закрыть любое модальное окно</span>
+          <span class="shortcut-desc">Close any modal window</span>
           <div class="shortcut-keys"><kbd>Esc</kbd></div>
         </div>
         <div class="shortcut-row">
-          <span class="shortcut-desc">Открыть это окно подсказок горячих клавиш</span>
+          <span class="shortcut-desc">Open this hotkey help window</span>
           <div class="shortcut-keys"><kbd>?</kbd></div>
         </div>
       </div>
 
       <div class="rpc-config-footer">
-        <button id="btnDismissShortcutsModal" class="btn-modal-dismiss">Понятно</button>
+        <button id="btnDismissShortcutsModal" class="btn-modal-dismiss">Got it</button>
       </div>
     </div>
   </div>
