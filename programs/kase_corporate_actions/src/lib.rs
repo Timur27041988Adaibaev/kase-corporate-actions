@@ -19,7 +19,7 @@ declare_id!("5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz");
 pub mod kase_corporate_actions {
     use super::*;
 
-    /// 1. Регистрация токенизированного финансового инструмента KASE (Облигации)
+    /// 1. Register a tokenized KASE financial instrument (bond)
     pub fn initialize_bond_instrument(
         ctx: Context<InitializeBondInstrument>,
         isin: String,
@@ -72,7 +72,7 @@ pub mod kase_corporate_actions {
         Ok(())
     }
 
-    /// 2. Планирование корпоративного действия (Купон / Погашение / Голосование)
+    /// 2. Schedule a corporate action (Coupon / Redemption / Vote)
     pub fn schedule_corporate_action(
         ctx: Context<ScheduleCorporateAction>,
         action_id: u64,
@@ -122,7 +122,7 @@ pub mod kase_corporate_actions {
         Ok(())
     }
 
-    /// 3. Фиксация реестра держателей на Record Date и расчет прав (Entitlement Calculation Engine)
+    /// 3. Snapshot the holder register on the Record Date and calculate entitlements (Entitlement Calculation Engine)
     pub fn record_holder_snapshot(
         ctx: Context<RecordHolderSnapshot>,
         bonds_held: u64,
@@ -141,7 +141,7 @@ pub mod kase_corporate_actions {
 
         let bond = &ctx.accounts.bond_security;
 
-        // Расчет размера прав инвестора в зависимости от типа действия
+        // Calculate the investor's entitlement depending on the action type
         let entitlement_amount = match action.action_type {
             ActionType::CouponPayment => math::calculate_coupon_entitlement(
                 bonds_held,
@@ -154,7 +154,7 @@ pub mod kase_corporate_actions {
                 bond.face_value,
             )?,
             ActionType::GovernanceVoting => {
-                // При голосовании размер прав равен количеству голосующих облигаций
+                // For a vote, the entitlement equals the number of voting bonds
                 bonds_held
             }
         };
@@ -168,7 +168,7 @@ pub mod kase_corporate_actions {
         entitlement.settled_timestamp = 0;
         entitlement.bump = ctx.bumps.holder_entitlement;
 
-        // Обновление агрегированных данных действия
+        // Update the action's aggregated data
         action.snapshot_bonds_count = action
             .snapshot_bonds_count
             .checked_add(bonds_held)
@@ -190,7 +190,7 @@ pub mod kase_corporate_actions {
         Ok(())
     }
 
-    /// 4. Пополнение PDA-хранилища расчетными средствами (Эмитент депонирует USDC для выплат)
+    /// 4. Fund the PDA vault with settlement funds (the issuer deposits USDC for payouts)
     pub fn deposit_action_vault(
         ctx: Context<DepositActionVault>,
         amount: u64,
@@ -233,8 +233,8 @@ pub mod kase_corporate_actions {
         Ok(())
     }
 
-    /// 5. СЦЕНАРИЙ 1: Исполнение купонной выплаты (Coupon Payment Settlement)
-    /// Перечисление причитающегося купона из хранилища PDA инвестору
+    /// 5. SCENARIO 1: Coupon Payment Settlement
+    /// Transfer the coupon due from the PDA vault to the investor
     pub fn execute_coupon_payment(ctx: Context<ExecuteCouponPayment>) -> Result<()> {
         let entitlement = &mut ctx.accounts.holder_entitlement;
         let action = &mut ctx.accounts.corporate_action;
@@ -316,8 +316,8 @@ pub mod kase_corporate_actions {
         Ok(())
     }
 
-    /// 6. СЦЕНАРИЙ 2: Погашение номинала облигаций при наступлении срока (Bond Redemption & Token Burn)
-    /// Сжигание токенов облигации инвестора + выплата $1,000 номинала за каждую облигацию
+    /// 6. SCENARIO 2: Principal redemption at maturity (Bond Redemption & Token Burn)
+    /// Burn the investor's bond tokens + pay $1,000 face value per bond
     pub fn execute_bond_redemption(ctx: Context<ExecuteBondRedemption>) -> Result<()> {
         let entitlement = &mut ctx.accounts.holder_entitlement;
         let action = &mut ctx.accounts.corporate_action;
@@ -337,7 +337,7 @@ pub mod kase_corporate_actions {
             KaseError::InsufficientVaultFunds
         );
 
-        // 1. Сжигание токенов облигаций держателя (Token interface Burn: SPL Token / Token-2022)
+        // 1. Burn the holder's bond tokens (Token interface Burn: SPL Token / Token-2022)
         let burn_accounts = token_interface::Burn {
             mint: ctx.accounts.bond_mint.to_account_info(),
             from: ctx.accounts.holder_bond_account.to_account_info(),
@@ -350,7 +350,7 @@ pub mod kase_corporate_actions {
         )?;
         // Institutional SPL fallback: token::burn(CpiContext::new(token_program.clone(), burn_accounts), entitlement.bonds_held)?;
 
-        // 2. Выплата номинала из PDA-хранилища на кошелек инвестора
+        // 2. Pay face value from the PDA vault to the investor's wallet
         let action_id_bytes = action.action_id.to_le_bytes();
         let bond_key = bond.key();
         let seeds = &[
@@ -384,7 +384,7 @@ pub mod kase_corporate_actions {
             token::transfer(cpi_ctx, entitlement.entitlement_amount)?;
         }
 
-        // 3. Обновление ончейн-статистики инструмента
+        // 3. Update the instrument's on-chain statistics
         bond.active_supply = bond
             .active_supply
             .checked_sub(entitlement.bonds_held)
@@ -422,7 +422,7 @@ pub mod kase_corporate_actions {
         Ok(())
     }
 
-    /// 7. СЦЕНАРИЙ 3 (Часть A): Создание предложения для голосования держателей (Bondholder Voting)
+    /// 7. SCENARIO 3 (Part A): Create a proposal for bondholder voting (Bondholder Voting)
     pub fn create_governance_proposal(
         ctx: Context<CreateGovernanceProposal>,
         proposal_id: u64,
@@ -467,7 +467,7 @@ pub mod kase_corporate_actions {
         Ok(())
     }
 
-    /// 8. СЦЕНАРИЙ 3 (Часть B): Голосование держателя облигаций с весом позиции (Cast Vote)
+    /// 8. SCENARIO 3 (Part B): Bondholder vote weighted by position size (Cast Vote)
     pub fn cast_bondholder_vote(
         ctx: Context<CastBondholderVote>,
         choice: VoteChoice,
@@ -540,7 +540,7 @@ pub mod kase_corporate_actions {
         Ok(())
     }
 
-    /// 9. СЦЕНАРИЙ 3 (Часть C): Подведение итогов голосования (Finalize & Apply Proposal)
+    /// 9. SCENARIO 3 (Part C): Tally the vote (Finalize & Apply Proposal)
     pub fn finalize_governance_proposal(
         ctx: Context<FinalizeGovernanceProposal>,
     ) -> Result<()> {
@@ -586,7 +586,7 @@ impl CorporateAction {
 }
 
 // ==========================================
-// КОНТЕКСТЫ ИНСТРУКЦИЙ (Zero-Exploit Accounts)
+// INSTRUCTION CONTEXTS (Zero-Exploit Accounts)
 // ==========================================
 
 #[derive(Accounts)]
@@ -595,7 +595,7 @@ pub struct InitializeBondInstrument<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
 
-    /// CHECK: Эмитент облигации (Demo Issuer JSC)
+    /// CHECK: Bond issuer (Demo Issuer JSC)
     pub issuer: AccountInfo<'info>,
 
     pub bond_mint: InterfaceAccount<'info, Mint>,
@@ -671,7 +671,7 @@ pub struct RecordHolderSnapshot<'info> {
     )]
     pub corporate_action: Account<'info, CorporateAction>,
 
-    /// CHECK: Кошелек инвестора / держателя облигаций
+    /// CHECK: Investor / bondholder wallet
     pub holder: AccountInfo<'info>,
 
     #[account(
