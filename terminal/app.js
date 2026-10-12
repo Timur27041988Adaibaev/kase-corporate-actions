@@ -1151,13 +1151,13 @@ function updateClusterUI() {
       pillS1Funded.className = "step-status-pill completed";
     }
     if (pillS1Settled) {
-      pillS1Settled.textContent = "100% SETTLED";
+      pillS1Settled.textContent = "NOT EXECUTED";
       pillS1Settled.className = "step-status-pill completed";
     }
     if (s1StatusText) {
       s1StatusText.textContent = isMainnet
-        ? `100% Settled (${totalCouponFormatted} USDC Memo Record on Mainnet-Beta in Slot #${cs.couponSlot || 'LIVE'}. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).)`
-        : `100% Settled (${totalCouponFormatted} USDC Distributed on ${cluster.shortName} in Slot #${cs.couponSlot || 'LIVE'})`;
+        ? `Memo record only — no coupon settlement executed on Mainnet-Beta.`
+        : `Memo record only — no USDC transferred on ${cluster.shortName}.`;
       s1StatusText.style.color = "var(--kase-green)";
     }
   } else {
@@ -1897,10 +1897,10 @@ function openDossier(h, idx) {
 
   const statusPill = document.getElementById("dossierStatusPill");
   if (state.couponSettled && !state.redemptionSettled) {
-    statusPill.textContent = "COUPON DISTRIBUTED & VERIFIED";
+    statusPill.textContent = "MEMO ONLY — NOT SETTLED";
     statusPill.style.color = "var(--kase-green)";
   } else if (state.redemptionSettled) {
-    statusPill.textContent = "BONDS BURNED & PRINCIPAL REDEEMED";
+    statusPill.textContent = "MEMO ONLY — NO BURN OR TRANSFER";
     statusPill.style.color = "var(--danger)";
   } else {
     statusPill.textContent = "ELIGIBLE FOR SETTLEMENT";
@@ -1969,8 +1969,8 @@ function renderTable() {
   // Render Table Summary Footer Row
   if (tfoot) {
     let footerStatus = "100% CSD CUSTODY";
-    if (state.couponSettled && !state.redemptionSettled) footerStatus = "COUPON DISTRIBUTED";
-    if (state.redemptionSettled) footerStatus = "100% BURNED & REDEEMED";
+    if (state.couponSettled && !state.redemptionSettled) footerStatus = "MEMO RECORD ONLY — NO PAYMENT";
+    if (state.redemptionSettled) footerStatus = "NO BURN OR REDEMPTION EXECUTED";
 
     tfoot.innerHTML = `
       <td><strong>TOTAL ISSUE AGGREGATE</strong></td>
