@@ -697,7 +697,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         governanceActionId,
         { governanceVoting: {} },
         new anchor.BN(now - 100),
-        new anchor.BN(now + 60)
+        new anchor.BN(now + 180)
       )
       .accounts({
         authority: authority.publicKey,
