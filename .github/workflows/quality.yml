@@ -62,4 +62,10 @@ jobs:
           npm install --no-audit --no-fund
           npm install --global yarn@1.22.22
       - name: Build and run Anchor integration tests on local validator
-        run: anchor test
+        env:
+          RUSTUP_TOOLCHAIN: stable
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          rustc --version
+          cargo --version
+          anchor test
