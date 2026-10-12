@@ -289,6 +289,28 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
     assert.deepEqual(actionState.actionType, { couponPayment: {} });
   });
 
+  it("Pass [Adversarial Attack]: Reject inflated holder snapshot above real SPL balance", async () => {
+    try {
+      await program.methods
+        .recordHolderSnapshot(new BN(3501))
+        .accounts({
+          authority: authority.publicKey,
+          bondSecurity: bondSecurityPda,
+          corporateAction: couponActionPda,
+          holder: bankA.publicKey,
+          holderBondAccount: bankABondAccount,
+          holderEntitlement: bankAEntitlementPda,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+        })
+        .signers([authority])
+        .rpc();
+      assert.fail("Snapshot must not exceed the holder's real token balance.");
+    } catch (err: any) {
+      expect(err.toString()).to.include("InvalidHolderTokenAccount");
+    }
+  });
+
   it("Step 3 [Scenario 1]: Record Snapshot for Bank A (3,500 bonds = $175,000 coupon entitlement)", async () => {
     const bondsHeld = new BN(3500);
 
