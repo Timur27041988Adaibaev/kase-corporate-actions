@@ -39,15 +39,17 @@ jobs:
         with:
           node-version: "20"
       - uses: dtolnay/rust-toolchain@stable
-      - name: Ensure current stable Rust toolchain
+      - name: Install Rust toolchain compatible with Anchor 0.31 IDL generation
         run: |
           set -euo pipefail
-          rustup toolchain install stable --profile minimal
-          rustup default stable
-          rustup update stable
+          # Anchor 0.31.x IDL seed parsing is sensitive to token spacing from
+          # some newer proc_macro2/Rust toolchains. Pin a verified compatible
+          # host toolchain instead of tracking latest stable.
+          rustup toolchain install 1.91.0 --profile minimal
+          rustup default 1.91.0
           rustc --version
           cargo --version
-          rustc --version | grep -E '1\.(8[0-9]|[9-9][0-9])\.'
+          rustc --version | grep -F '1.91.0'
       - name: Install pinned Anchor CLI release binary
         run: |
           set -euo pipefail
@@ -82,7 +84,7 @@ jobs:
           npm install --global yarn@1.22.22
       - name: Build and run Anchor integration tests on local validator
         env:
-          RUSTUP_TOOLCHAIN: stable
+          RUSTUP_TOOLCHAIN: "1.91.0"
         run: |
           set -euo pipefail
           export PATH="$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH"
