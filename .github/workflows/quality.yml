@@ -1,0 +1,28 @@
+name: Quality checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  syntax-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Check Python syntax
+        run: python -m py_compile terminal/server.py
+      - name: Check browser JavaScript syntax
+        run: node --check terminal/app.js
+      - name: Run server smoke tests
+        run: python -m unittest discover -s tests -p 'test_server_*.py' -v
+      - name: Check Anchor program Rust compilation
+        run: cargo check --manifest-path programs/kase_corporate_actions/Cargo.toml
