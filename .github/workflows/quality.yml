@@ -39,27 +39,22 @@ jobs:
         with:
           node-version: "20"
       - uses: dtolnay/rust-toolchain@stable
-      - name: Install Rust toolchain compatible with Anchor 0.31 IDL generation
+      - name: Install Rust toolchain compatible with Anchor IDL generation
         run: |
           set -euo pipefail
-          # Anchor 0.31.x IDL seed parsing is sensitive to token spacing from
-          # some newer proc_macro2/Rust toolchains. Pin a verified compatible
-          # host toolchain instead of tracking latest stable.
-          rustup toolchain install 1.91.0 --profile minimal
-          rustup default 1.91.0
+          # Anchor 0.32.1 includes the updated IDL generation implementation.
           rustc --version
           cargo --version
-          rustc --version | grep -F '1.91.0'
       - name: Install pinned Anchor CLI release binary
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.cargo/bin"
           curl --fail --silent --show-error --location --retry 3 \
-            https://github.com/otter-sec/anchor/releases/download/v0.31.1/anchor-0.31.1-x86_64-unknown-linux-gnu \
+            https://github.com/coral-xyz/anchor/releases/download/v0.32.1/anchor-0.32.1-x86_64-unknown-linux-gnu \
             --output "$HOME/.cargo/bin/anchor"
           chmod 0755 "$HOME/.cargo/bin/anchor"
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          anchor --version | grep -F "0.31.1"
+          anchor --version | grep -F "0.32.1"
       - name: Install compatible Solana CLI
         run: |
           set -euo pipefail
@@ -72,7 +67,7 @@ jobs:
           solana --version
           anchor --version
           solana --version | grep -F "2.2.16"
-          anchor --version | grep -F "0.31.1"
+          anchor --version | grep -F "0.32.1"
       - name: Configure local Solana wallet
         run: |
           mkdir -p "$HOME/.config/solana"
@@ -84,27 +79,15 @@ jobs:
           npm install --global yarn@1.22.22
       - name: Build and run Anchor integration tests on local validator
         env:
-          RUSTUP_TOOLCHAIN: "1.91.0"
         run: |
           set -euo pipefail
           export PATH="$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH"
           rustc --version
           cargo --version
           solana --version | grep -F "2.2.16"
-          anchor --version | grep -F "0.31.1"
+          anchor --version | grep -F "0.32.1"
           # Solana 2.2's SBF toolchain uses Cargo 1.84, which cannot parse
           # zeroize_derive 1.5.0's edition2024 manifest. Resolve with the
           # host Cargo and pin the compatible transitive version in Cargo.lock.
           cargo update -p zeroize_derive --precise 1.4.3
-          # Keep Anchor procedural macros aligned with the pinned 0.31.1 runtime.
-          cargo update -p anchor-attribute-access-control --precise 0.31.1
-          cargo update -p anchor-attribute-account --precise 0.31.1
-          cargo update -p anchor-attribute-constant --precise 0.31.1
-          cargo update -p anchor-attribute-error --precise 0.31.1
-          cargo update -p anchor-attribute-event --precise 0.31.1
-          cargo update -p anchor-attribute-program --precise 0.31.1
-          cargo update -p anchor-derive-accounts --precise 0.31.1
-          cargo update -p anchor-derive-serde --precise 0.31.1
-          cargo update -p anchor-derive-space --precise 0.31.1
-          cargo update -p anchor-syn --precise 0.31.1
           anchor test
