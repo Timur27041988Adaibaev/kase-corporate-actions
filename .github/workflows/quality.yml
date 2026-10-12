@@ -85,7 +85,7 @@ jobs:
           RUSTUP_TOOLCHAIN: stable
         run: |
           set -euo pipefail
-          export PATH="$HOME/.local/share/solana/install/active_release/bin:$HOME/.cargo/bin:$PATH"
+          export PATH="$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH"
           rustc --version
           cargo --version
           solana --version | grep -F "2.2.16"
