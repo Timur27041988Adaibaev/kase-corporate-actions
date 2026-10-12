@@ -1298,6 +1298,7 @@ async function switchCluster(clusterId, customRpc = null) {
   checkPhantomClusterAlignment();
 
   await pollClusterStats();
+  await refreshAnchorProgramStatus();
   await refreshWalletBalance();
 }
 
@@ -3019,6 +3020,33 @@ function setupExtendedListeners() {
       closeAllModals();
     }
   });
+}
+
+async function refreshAnchorProgramStatus() {
+  const statusEl = document.getElementById("anchorProgramStatus");
+  if (!statusEl) return;
+  statusEl.textContent = "KASE Anchor Devnet: checking…";
+  try {
+    const response = await fetch("/api/chain-status", { cache: "no-store" });
+    const data = await response.json();
+    if (data.rpc_verified && data.program_executable) {
+      statusEl.textContent = "KASE Anchor Devnet: executable account found";
+      statusEl.title = "The configured program account is executable on Devnet. This does not verify that its binary matches the current repository or that the browser UI executes settlement instructions.";
+      statusEl.style.color = "var(--success, #2f9e66)";
+    } else if (data.status === "PROGRAM_NOT_EXECUTABLE") {
+      statusEl.textContent = "KASE Anchor Devnet: not executable";
+      statusEl.title = "The configured account is missing or not executable on Devnet. No settlement is available through this UI.";
+      statusEl.style.color = "var(--warning, #b7791f)";
+    } else {
+      statusEl.textContent = "KASE Anchor Devnet: status unavailable";
+      statusEl.title = String(data.message || "The Devnet RPC could not verify the program account.");
+      statusEl.style.color = "var(--warning, #b7791f)";
+    }
+  } catch (error) {
+    statusEl.textContent = "KASE Anchor Devnet: status unavailable";
+    statusEl.title = "Could not reach the same-origin /api/chain-status endpoint.";
+    statusEl.style.color = "var(--warning, #b7791f)";
+  }
 }
 
 // ==============================================================================
