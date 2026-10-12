@@ -821,20 +821,20 @@ pub struct ExecuteBondRedemption<'info> {
     pub holder: Signer<'info>,
 
     #[account(mut)]
-    pub bond_security: Account<'info, BondSecurity>,
+    pub bond_security: Box<Account<'info, BondSecurity>>,
 
     #[account(
         mut,
         has_one = bond_security
     )]
-    pub corporate_action: Account<'info, CorporateAction>,
+    pub corporate_action: Box<Account<'info, CorporateAction>>,
 
     #[account(
         mut,
         seeds = [b"action_vault", corporate_action.key().as_ref()],
         bump = corporate_action.vault_bump
     )]
-    pub action_vault: InterfaceAccount<'info, TokenAccount>,
+    pub action_vault: Box<InterfaceAccount<'info, TokenAccount>>,
 
     #[account(
         mut,
@@ -842,27 +842,27 @@ pub struct ExecuteBondRedemption<'info> {
         bump = holder_entitlement.bump,
         constraint = holder_entitlement.holder == holder.key() @ KaseError::InvalidHolderTokenAccount
     )]
-    pub holder_entitlement: Account<'info, HolderEntitlement>,
+    pub holder_entitlement: Box<Account<'info, HolderEntitlement>>,
 
     #[account(
         mut,
         constraint = bond_mint.key() == bond_security.bond_mint @ KaseError::InvalidTokenMint
     )]
-    pub bond_mint: InterfaceAccount<'info, Mint>,
+    pub bond_mint: Box<InterfaceAccount<'info, Mint>>,
 
     #[account(
         mut,
         constraint = holder_bond_account.owner == holder.key() @ KaseError::InvalidHolderTokenAccount,
         constraint = holder_bond_account.mint == bond_security.bond_mint @ KaseError::InvalidTokenMint
     )]
-    pub holder_bond_account: InterfaceAccount<'info, TokenAccount>,
+    pub holder_bond_account: Box<InterfaceAccount<'info, TokenAccount>>,
 
     #[account(
         mut,
         constraint = holder_settlement_account.owner == holder.key() @ KaseError::InvalidHolderTokenAccount,
         constraint = holder_settlement_account.mint == bond_security.settlement_mint @ KaseError::InvalidTokenMint
     )]
-    pub holder_settlement_account: InterfaceAccount<'info, TokenAccount>,
+    pub holder_settlement_account: Box<InterfaceAccount<'info, TokenAccount>>,
 
     #[account(
         constraint = settlement_mint.key() == bond_security.settlement_mint @ KaseError::InvalidTokenMint
