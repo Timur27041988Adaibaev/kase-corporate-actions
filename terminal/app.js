@@ -2872,30 +2872,14 @@ async function runOracleConsensusAudit() {
   const modal = document.getElementById("oracleModal");
   if (modal) modal.style.display = "flex";
 
-  appendLog("ORACLE", "tag-broadcast", "Starting the institutional audit by the 3-Agent Pre-Flight Consensus Engine...");
-
-  try {
-    const res = await fetch("/api/oracle/consensus");
-    if (res.ok) {
-      const data = await res.json();
-      const fpEl = document.getElementById("oracleFingerprintText");
-      if (fpEl) {
-        fpEl.textContent = `SHA256: ${data.consensusFingerprint.slice(0, 16)}... • ${data.quorum} SIGNATURES ATTESTED`;
-      }
-      playAudioCue("success");
-      showToast("3/3 Consensus Reached", "All 3 independent oracles (AML, Math, Solvency) approved the transaction!", "success");
-      appendLog("ORACLE-OK", "tag-ok", `3/3 consensus confirmed! Attestation hash: ${data.consensusFingerprint.slice(0, 16)}...`);
-      return;
-    }
-  } catch (e) {}
-
-  // Safe deterministic client-side consensus calculation
-  const fp = "SHA256: 4a9f81b2c3d4e5f6 • 3/3 SIGNATURES ATTESTED";
+  appendLog("ORACLE", "tag-warn", "Oracle consensus unavailable: independent registry, AML, solvency, and entitlement providers are not configured.");
   const fpEl = document.getElementById("oracleFingerprintText");
-  if (fpEl) fpEl.textContent = fp;
-  playAudioCue("success");
-  showToast("3/3 Consensus Reached", "All 3 independent oracles (AML, Math, Solvency) approved the transaction!", "success");
-  appendLog("ORACLE-OK", "tag-ok", "3/3 consensus confirmed! Attestation hash: 4a9f81b2c3d4e5f6...");
+  if (fpEl) fpEl.textContent = "UNAVAILABLE — no independent attestations";
+  showToast(
+    "Oracle consensus unavailable",
+    "No independent oracle sources are connected. No approval or quorum is asserted.",
+    "warning"
+  );
 }
 
 function closeOracleModal() {
