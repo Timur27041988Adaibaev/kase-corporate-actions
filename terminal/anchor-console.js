@@ -205,7 +205,7 @@ async function castVote() {
   }).instruction();
   const sig=await sendWalletTx([ix]);
   const proposal=await program.account.governanceProposal.fetch(state.proposal);
-  setStatus("voteState","VOTE RECORDED on-chain\\nFOR: "+fmt(proposal.votesFor.toNumber())+" · AGAINST: "+fmt(proposal.votesAgainst.toNumber())+" · ABSTAIN: "+fmt(proposal.votesAbstain.toNumber())+"\\nVoting ends: "+new Date(state.voteEnd*1000).toLocaleTimeString()+"\\nTransaction: "+sig);
+  setStatus("voteState","VOTE RECORDED on-chain\nFOR: "+fmt(proposal.votesFor.toNumber())+" · AGAINST: "+fmt(proposal.votesAgainst.toNumber())+" · ABSTAIN: "+fmt(proposal.votesAbstain.toNumber())+"\nVoting ends: "+new Date(state.voteEnd*1000).toLocaleTimeString()+"\nTransaction: "+sig);
   log("Vote recorded on-chain and tally read back from the proposal account.");
 }
 async function finalizeVote() {
