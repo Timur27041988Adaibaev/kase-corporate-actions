@@ -39,6 +39,15 @@ jobs:
         with:
           node-version: "20"
       - uses: dtolnay/rust-toolchain@stable
+      - name: Ensure current stable Rust toolchain
+        run: |
+          set -euo pipefail
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustup update stable
+          rustc --version
+          cargo --version
+          rustc --version | grep -E '1\.(8[0-9]|[9-9][0-9])\.'
       - name: Install Anchor CLI
         run: |
           export PATH="$HOME/.cargo/bin:$PATH"
