@@ -151,6 +151,14 @@ pub mod kase_corporate_actions {
         );
 
         let bond = &ctx.accounts.bond_security;
+        let next_snapshot_count = action
+            .snapshot_bonds_count
+            .checked_add(bonds_held)
+            .ok_or(KaseError::MathOverflow)?;
+        require!(
+            next_snapshot_count <= bond.active_supply,
+            KaseError::SnapshotExceedsActiveSupply
+        );
 
         // Calculate the investor's entitlement depending on the action type
         let entitlement_amount = match action.action_type {
@@ -180,10 +188,7 @@ pub mod kase_corporate_actions {
         entitlement.bump = ctx.bumps.holder_entitlement;
 
         // Update the action's aggregated data
-        action.snapshot_bonds_count = action
-            .snapshot_bonds_count
-            .checked_add(bonds_held)
-            .ok_or(KaseError::MathOverflow)?;
+        action.snapshot_bonds_count = next_snapshot_count;
         action.total_entitlement_required = action
             .total_entitlement_required
             .checked_add(entitlement_amount)
