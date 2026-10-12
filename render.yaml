@@ -7,4 +7,4 @@ services:
     buildCommand: echo "No third-party Python dependencies required"
     startCommand: python server.py
     healthCheckPath: /api/health
-    autoDeploy: true
+    autoDeploy: false
