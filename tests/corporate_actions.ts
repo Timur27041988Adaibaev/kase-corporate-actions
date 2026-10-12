@@ -13,6 +13,7 @@ import {
   SYSVAR_RENT_PUBKEY,
 } from "@solana/web3.js";
 import { expect } from "chai";
+import { sendAndConfirmTransaction, Transaction, TransactionInstruction } from "@solana/web3.js";
 
 describe("KASE corporate actions — local-validator end-to-end", () => {
   const provider = anchor.AnchorProvider.env();
@@ -20,24 +21,34 @@ describe("KASE corporate actions — local-validator end-to-end", () => {
   const program = anchor.workspace.KaseCorporateActions as Program<any>;
   const authority = (provider.wallet as anchor.Wallet).payer;
 
-  async function chainTimestamp(connection: any): Promise<number> {
-    let slot = await connection.getSlot("confirmed");
-    for (let offset = 0; offset < 10 && slot > offset; offset++) {
-      const timestamp = await connection.getBlockTime(slot - offset);
-      if (timestamp !== null) return timestamp;
-    }
-    return Math.floor(Date.now() / 1000);
+async function chainTimestamp(connection: any): Promise<number> {
+  let slot = await connection.getSlot("confirmed");
+  for (let offset = 0; offset < 10 && slot > offset; offset++) {
+    const timestamp = await connection.getBlockTime(slot - offset);
+    if (timestamp !== null) return timestamp;
   }
+  return Math.floor(Date.now() / 1000);
+}
 
-  async function warpToTimestamp(connection: any, targetTimestamp: number): Promise<void> {
-    const currentTimestamp = await chainTimestamp(connection);
-    if (targetTimestamp <= currentTimestamp) return;
-    const currentSlot = await connection.getSlot("confirmed");
-    const slotsToAdvance = Math.ceil((targetTimestamp - currentTimestamp) / 0.4) + 3;
-    const response = await connection._rpcRequest("warpSlot", [currentSlot + slotsToAdvance]);
-    if (response?.error) throw new Error("Local validator warpSlot failed: " + JSON.stringify(response.error));
-    await connection.getLatestBlockhash("confirmed");
+async function waitUntilTimestamp(connection: any, targetTimestamp: number, payer: any): Promise<void> {
+  let now = await chainTimestamp(connection);
+  let attempts = 0;
+  const memoProgram = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+  const maxAttempts = Math.max(20, Math.ceil(Math.max(0, targetTimestamp - now) * 8) + 20);
+  while (now < targetTimestamp && attempts < maxAttempts) {
+    const tx = new Transaction().add(new TransactionInstruction({
+      keys: [],
+      programId: memoProgram,
+      data: Buffer.from("KASE_TEST_CLOCK_HEARTBEAT"),
+    }));
+    await sendAndConfirmTransaction(connection, tx, [payer], { commitment: "confirmed" });
+    now = await chainTimestamp(connection);
+    attempts++;
   }
+  if (now < targetTimestamp) {
+    throw new Error(`Local validator clock did not reach ${targetTimestamp}; current time is ${now} after ${attempts} heartbeat transactions.`);
+  }
+}
 
   it("executes a real coupon transfer, governance vote/finalization, and redemption/burn", async () => {
     const connection = provider.connection;
@@ -47,9 +58,9 @@ describe("KASE corporate actions — local-validator end-to-end", () => {
     const redemptionActionId = new BN(now + 2);
     const governanceActionId = new BN(now + 3);
     const proposalId = new BN(now + 101);
-    const couponSettlementAt = now + 180;
-    const voteEndsAt = now + 240;
-    const maturityAt = now + 300;
+    const couponSettlementAt = now + 30;
+    const voteEndsAt = now + 45;
+    const maturityAt = now + 60;
     const faceValue = new BN(1_000_000_000); // 1,000 settlement tokens at 6 decimals
     const couponAmount = new BN(50_000_000); // 10% annual coupon, paid semi-annually
     const principalAmount = new BN(1_000_000_000);
@@ -230,7 +241,7 @@ describe("KASE corporate actions — local-validator end-to-end", () => {
       expect(String(error?.message || error)).to.match(/already in use|custom program error|already voted|0x0/i);
     }
 
-    const waitUntil = async (timestamp: number) => warpToTimestamp(connection, timestamp);
+    const waitUntil = async (timestamp: number) => waitUntilTimestamp(connection, timestamp, authority);
 
     await waitUntil(couponSettlementAt);
     const beforeCoupon = await connection.getTokenAccountBalance(holderSettlement.address);
