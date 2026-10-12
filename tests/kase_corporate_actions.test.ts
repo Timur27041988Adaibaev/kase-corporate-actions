@@ -227,7 +227,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
   });
 
   it("Step 1: KASE CSD registers bond instrument KZDEMO000001", async () => {
-    const maturity = new anchor.BN(Math.floor(Date.now() / 1000) + 2); // 2s maturity to allow lifecycle test execution
+    const maturity = new anchor.BN(Math.floor(Date.now() / 1000) + 60); // Leave enough time for the initialization transaction to confirm
 
     await program.methods
       .initializeBondInstrument(
@@ -888,7 +888,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
     const testBondMint = await createMint(provider.connection, authority, authority.publicKey, null, 0);
     const holderAcc = await createAccount(provider.connection, bankA, testBondMint, bankA.publicKey);
     await mintTo(provider.connection, authority, testBondMint, holderAcc, authority.publicKey, 1);
-    testMaturityTimestamp = Math.floor(Date.now() / 1000) + 5;
+    testMaturityTimestamp = Math.floor(Date.now() / 1000) + 60;
     testMaturity = new anchor.BN(testMaturityTimestamp);
 
     await program.methods
@@ -933,7 +933,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         testActionId,
         { bondRedemption: {} },
         new anchor.BN(now - 20),
-        new anchor.BN(now + 3)
+        new anchor.BN(testMaturityTimestamp)
       )
       .accounts({
         authority: authority.publicKey,
