@@ -45,6 +45,9 @@ jobs:
           echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
       - name: Install Anchor CLI
         run: |
+          # Keep rustup's stable compiler ahead of Solana's bundled rustc shim.
+          export PATH="$HOME/.cargo/bin:$PATH"
+          rustc --version
           cargo install --git https://github.com/coral-xyz/anchor avm --locked
           echo "$HOME/.avm/bin" >> "$GITHUB_PATH"
           "$HOME/.cargo/bin/avm" install 0.30.1
