@@ -408,8 +408,8 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({
                 "status": "healthy",
                 "service": "kase-corporate-actions-terminal",
-                "mode": "memo-attestation-prototype",
-                "settlement": "not-executed-by-terminal",
+                "mode": "memo-dashboard-plus-devnet-anchor-console",
+                "settlement": "devnet-test-token-only; production-rails-not-connected",
             }).encode("utf-8"))
             return
 
@@ -434,7 +434,7 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
                     "program_account_exists": account is not None,
                     "program_executable": bool(account and account.get("executable")),
                     "rpc_verified": True,
-                    "settlement_integration": "not-connected-to-browser-terminal",
+                    "settlement_integration": "devnet-anchor-console; binary-compatibility-not-proven",
                     "settlement_executed": False,
                 }
                 payload["status"] = "PROGRAM_DEPLOYED" if payload["program_executable"] else "PROGRAM_NOT_EXECUTABLE"
