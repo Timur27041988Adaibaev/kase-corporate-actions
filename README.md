@@ -1,6 +1,6 @@
 # KASE Automated Corporate Actions on Solana 🇰🇿⚡
 
-**Demo video (3:01, real Devnet transactions in Solana Explorer):** https://youtu.be/ilgyZc630uU
+**Demo video (3:01, Solana Devnet Memo attestations):** https://youtu.be/ilgyZc630uU
 
 **Pitch video (1:52):** https://youtu.be/h4huY2L8oc4
 
@@ -12,13 +12,13 @@
 
 > **KASE (Kazakhstan Stock Exchange) & Superteam Kazakhstan Hackathon**  
 > Automating corporate actions for tokenized financial instruments (RWA) on the Solana blockchain.  
-> **Institutional architecture — working implementation and verification**
+> **Prototype — Anchor program source, integration tests, and browser terminal**
 
 ---
 
 ## 🏛 Project overview
 
-The project is an institutional platform that automates the lifecycle of securities (bonds) for the Kazakhstan Stock Exchange (KASE) and the Central Securities Depository of the Republic of Kazakhstan (KCSD).
+The project is a prototype intended to explore how corporate actions for tokenized bonds could be implemented on Solana for a KASE/KCSD-style workflow. It is not connected to official KASE/KCSD systems and is not a production financial service.
 
 The repository includes the Anchor program source and a browser terminal prototype. The full end-to-end cycle is **not yet integrated or verified in the web UI**. The current UI can write Memo attestations; it does not execute the actual coupon/redemption settlement or Anchor governance vote.
 
