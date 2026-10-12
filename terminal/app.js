@@ -2925,12 +2925,12 @@ async function testBlinkExecution() {
   closeBlinksModal();
   appendLog("BLINK", "tag-broadcast", "Preparing a Solana Memo attestation via the Actions endpoint; no settlement instruction is called.");
   
-  // Trigger scenario 1 directly
+  // Trigger the memo-attestation action only; this does not execute settlement
   const btn = document.getElementById("btnExecuteCoupon");
   if (btn && !btn.disabled) {
     btn.click();
   } else {
-    showToast("Blink Executed", "The coupon payment scenario has already been finalized in the register.", "info");
+    showToast("Memo Action Unavailable", "No new Memo transaction was submitted. Coupon settlement is not executed through Anchor in this UI.", "warning");
   }
 }
 
