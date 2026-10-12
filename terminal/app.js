@@ -1761,7 +1761,7 @@ function showModalLoading(title, subtitle) {
   const tEl = document.getElementById("modalLoadingTitle");
   const sEl = document.getElementById("modalLoadingSubtitle");
   if (tEl) tEl.textContent = title || `Broadcasting to ${cluster.name}...`;
-  if (sEl) sEl.textContent = subtitle || "Executing real on-chain corporate action...";
+  if (sEl) sEl.textContent = subtitle || "Preparing a Memo transaction; no financial settlement or governance vote will execute.";
 
   // Reset steps
   [1, 2, 3, 4].forEach((n) => {
