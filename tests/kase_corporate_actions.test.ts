@@ -352,6 +352,10 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
       authority.publicKey,
       7000
     );
+    const [bankBCouponEntitlementPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("entitlement"), couponActionPda.toBuffer(), bankB.publicKey.toBuffer()],
+      program.programId
+    );
     try {
       await program.methods
         .recordHolderSnapshot(new BN(6501))
@@ -361,7 +365,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
           corporateAction: couponActionPda,
           holder: bankB.publicKey,
           holderBondAccount: bankBBondAccount,
-          holderEntitlement: bankBEntitlementPda,
+          holderEntitlement: bankBCouponEntitlementPda,
           systemProgram: anchor.web3.SystemProgram.programId,
           rent: anchor.web3.SYSVAR_RENT_PUBKEY,
         })
