@@ -264,7 +264,7 @@
         <button type="button" class="btn-nav-utility accent-cyan" id="btnOpenOracle" title="Inspect 3-Agent Pre-Flight Consensus Engine">
           <span>🛡️</span>
           <span>3-Agent Oracle</span>
-          <span class="status-pill active" id="oracleQuickPill">3/3 APPROVED</span>
+          <span class="status-pill active" id="oracleQuickPill">CONSENSUS UNAVAILABLE</span>
         </button>
 
         <!-- Solana Blinks & Actions Button -->
@@ -1358,7 +1358,7 @@
         <div class="oracle-avatar">🛡️</div>
         <div>
           <h3>3-Agent Pre-Flight Consensus Oracle</h3>
-          <p class="modal-sub">Institutional consensus of three autonomous oracles before trade execution</p>
+          <p class="modal-sub">Independent oracle providers are not connected; no consensus or approval is asserted.</p>
         </div>
         <button id="btnOracleModalClose" class="btn-close-modal" aria-label="Close Oracle modal">&times;</button>
       </div>
@@ -1370,9 +1370,9 @@
           <div class="oracle-content">
             <div class="oracle-content-header">
               <h4>Oracle 1: CSD Registry &amp; Sanctions Gatekeeper</h4>
-              <span class="oracle-status-pill font-mono">VERIFIED PASS</span>
+              <span class="oracle-status-pill font-mono">NOT CONFIGURED</span>
             </div>
-            <p>BIN validation of all 5 participant banks against the KCSD central register. Sanctions list screening (OFAC, FATF, Kazakhstan FMA) — 0 matches. All accounts active.</p>
+            <p>No KCSD registry or sanctions-screening provider is connected. No AML result is available.</p>
           </div>
         </div>
 
@@ -1384,7 +1384,7 @@
               <h4>Oracle 2: Formal Math Invariant &amp; Sum Prover</h4>
               <span class="oracle-status-pill font-mono">VERIFIED PASS</span>
             </div>
-            <p>Formal mathematical proof of balance conservation: $\sum \text{Entitlements} \equiv \text{PoolAmount}$. Protection against division by zero and fractional rounding errors (&lt;0.000001 USDC).</p>
+            <p>No independent math-oracle attestation is connected. Local calculator outputs are not a formal proof or external approval.</p>
           </div>
         </div>
 
@@ -1396,14 +1396,14 @@
               <h4>Oracle 3: Vault Solvency &amp; Cluster Velocity</h4>
               <span class="oracle-status-pill font-mono">VERIFIED PASS</span>
             </div>
-            <p>Liquidity check of the PDA escrow vault. Assessment of Solana Sealevel block confirmation speed (&lt;400ms latency) and sufficiency of the gas balance.</p>
+            <p>No live settlement-vault solvency check or independent cluster-velocity oracle is connected.</p>
           </div>
         </div>
       </div>
 
       <div class="oracle-fingerprint-box">
         <span class="oracle-fp-label font-mono">Consensus Proof Fingerprint:</span>
-        <span class="oracle-fp-val font-mono" id="oracleFingerprintText">SHA256: 4a9f...e82c &bull; 3/3 SIGNATURES ATTESTED</span>
+        <span class="oracle-fp-val font-mono" id="oracleFingerprintText">UNAVAILABLE — no independent attestations</span>
       </div>
 
       <div class="rpc-config-footer">
@@ -1442,12 +1442,12 @@
             <div class="blink-card-banner-title">KASE AUTOMATED CORPORATE ACTIONS</div>
           </div>
           <div class="blink-card-body">
-            <div class="blink-card-title" id="blinkCardTitle">KASE: Semi-Annual Coupon Distribution ($500k USDC)</div>
+            <div class="blink-card-title" id="blinkCardTitle">KASE Demo: Coupon Memo Attestation Only</div>
             <div class="blink-card-desc" id="blinkCardDesc">
-              Authorize automated disbursement of $500,000.00 USDC for KASE Demo USD Bond 2026 across 5 KCSD custodian banks on Solana.
+              Creates a Solana Memo text record only. No USDC is transferred and no settlement is executed.
             </div>
             <div class="blink-card-actions">
-              <button class="btn-blink-action" id="btnTestBlinkExec">⚡ Approve payout ($500,000)</button>
+              <button class="btn-blink-action" id="btnTestBlinkExec">⚡ Create Memo Record Only</button>
             </div>
           </div>
         </div>
@@ -1456,7 +1456,7 @@
       <!-- Copy Dial.to Link -->
       <div class="blink-url-box">
         <span style="font-size: 11px; font-weight: 700; color: #fff;">Dial.to URL:</span>
-        <input type="text" readonly id="blinkDialtoInput" class="blink-url-input font-mono" value="https://dial.to/?action=solana-action:http://localhost:8088/api/actions/coupon" />
+        <input type="text" readonly id="blinkDialtoInput" class="blink-url-input font-mono" value="" placeholder="Use Copy to build a link for this deployed host" />
         <button type="button" class="btn-action-sm" id="btnCopyBlinkUrl">Copy</button>
       </div>
 
@@ -1473,7 +1473,7 @@
         <div class="oracle-avatar" style="background: rgba(0, 208, 132, 0.2); color: var(--kase-green);">📄</div>
         <div>
           <h3>ISO 20022 Financial MX Regulatory Engine</h3>
-          <p class="modal-sub">Export of standardized financial messages (SWIFT / Euroclear / KCSD)</p>
+          <p class="modal-sub">Downloadable illustrative ISO 20022 sample templates — not official KCSD/SWIFT messages.</p>
         </div>
         <button id="btnIsoModalClose" class="btn-close-modal" aria-label="Close ISO modal">&times;</button>
       </div>
