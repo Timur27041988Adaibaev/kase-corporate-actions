@@ -2316,73 +2316,26 @@ function initListeners() {
     document.getElementById(id)?.addEventListener("input", updateCalculator);
   });
 
-  // Adversarial Attack Buttons
-  document.getElementById("btnAttackDoubleClaim")?.addEventListener("click", () => {
-    appendLog("ATTACK", "tag-warn", "Attack: attempting a repeat coupon claim (Double-Claim) on action #202601...");
-    if (CLUSTERS[currentCluster].isMainnet) {
-      appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
-      appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
-      appendLog("IX", "tag-cpi", "Instruction: Solana Memo Invariant Audit (KASE program: live on Devnet)");
-      appendLog("REPLAY", "tag-broadcast", "Mainnet Memo Notice: KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz). Invariants enforced on Devnet.");
-    } else {
-      appendLog("CPI", "tag-cpi", "Program 5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz invoke [1] (Deployed on Devnet; terminal replay simulated)");
-      appendLog("IX", "tag-cpi", "Instruction: ExecuteCouponPayment (Target: Bank A PDA Vault)");
-      appendLog("REPLAY", "tag-broadcast", "Devnet Simulation: Double-claim call rejected by Anchor contract logic");
-    }
+  // Security scenarios are explicitly UI-only until they submit real Anchor instructions.
+  const showUnverifiedSecurityScenario = (title, message) => {
+    playAudioCue("alert");
+    appendLog("SIMULATION", "tag-warn", title);
+    appendLog("NOT-VERIFIED", "tag-warn", message);
+    showToast("Simulation only", message, "warning");
+  };
 
-    setTimeout(() => {
-      if (CLUSTERS[currentCluster].isMainnet) {
-        appendLog(
-          "HALTED",
-          "tag-err",
-          "ERROR 0x1783 (AlreadySettled): Repeat-payout protection is implemented in the Anchor program code (simulation). Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)."
-        );
-        appendLog("SECURITY", "tag-ok", "On-chain invariant confirmed: repeat claims are strictly blocked by the program on Devnet.");
-        showToast("Security Invariant Passed", "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).", "warning");
-      } else {
-        appendLog(
-          "HALTED",
-          "tag-err",
-          "UI demonstration only: this button does not submit an on-chain claim."
-        );
-        appendLog("SECURITY", "tag-ok", "UI demonstration only: no on-chain double-claim test was executed.");
-        showToast("Security Invariant Passed", "UI demonstration only; no on-chain claim was attempted.", "warning");
-      }
-    }, 500);
+  document.getElementById("btnAttackDoubleClaim")?.addEventListener("click", () => {
+    showUnverifiedSecurityScenario(
+      "UI-only scenario: duplicate coupon claim",
+      "No transaction was sent. The deployed program's AlreadySettled protection was not tested."
+    );
   });
 
   document.getElementById("btnAttackDoubleVote")?.addEventListener("click", () => {
-    appendLog("ATTACK", "tag-warn", "Attack: attempting a repeat vote on Proposal #101 with Bank B's key...");
-    if (CLUSTERS[currentCluster].isMainnet) {
-      appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
-      appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
-      appendLog("IX", "tag-cpi", "Instruction: Solana Memo Invariant Audit (KASE program: live on Devnet)");
-      appendLog("REPLAY", "tag-broadcast", "Mainnet Memo Notice: KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz). Invariants enforced on Devnet.");
-    } else {
-      appendLog("CPI", "tag-cpi", "Program 5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz invoke [1] (Deployed on Devnet; terminal replay simulated)");
-      appendLog("IX", "tag-cpi", "Instruction: CastBondholderVote (VoterRecord PDA Init Attempt)");
-      appendLog("REPLAY", "tag-broadcast", "Devnet Simulation: Double-vote call rejected via VoterRecord PDA collision");
-    }
-
-    setTimeout(() => {
-      if (CLUSTERS[currentCluster].isMainnet) {
-        appendLog(
-          "HALTED",
-          "tag-err",
-          "ERROR 0x0 (AccountAlreadyInitialized): The VoterRecord PDA collision is implemented in the Anchor program code (simulation). Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)."
-        );
-        appendLog("SECURITY", "tag-ok", "On-chain invariant confirmed: 1 Bond = 1 Vote is strictly enforced by the program on Devnet.");
-        showToast("Security Invariant Passed", "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).", "warning");
-      } else {
-        appendLog(
-          "HALTED",
-          "tag-err",
-          "UI demonstration only: this button does not call the Anchor program or test duplicate-vote protection."
-        );
-        appendLog("SECURITY", "tag-ok", "UI demonstration only: no on-chain double-vote test was executed.");
-        showToast("Security Invariant Passed", "UI demonstration only; the Anchor instruction was not called.", "warning");
-      }
-    }, 500);
+    showUnverifiedSecurityScenario(
+      "UI-only scenario: duplicate governance vote",
+      "No transaction was sent. On-chain duplicate-vote protection was not tested."
+    );
   });
 
   // ============================================================================
