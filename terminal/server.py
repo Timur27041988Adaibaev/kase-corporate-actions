@@ -19,7 +19,7 @@ import sys
 import hashlib
 import time
 
-PORT = 8088
+PORT = int(os.environ.get("PORT", "8088"))
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
 # ISO 20022 Schemas for KASE
