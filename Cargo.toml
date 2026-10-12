@@ -9,3 +9,7 @@ overflow-checks = true
 lto = "fat"
 codegen-units = 1
 opt-level = 3
+
+[workspace.metadata.solana]
+# Platform tools v1.52 includes Cargo support for edition2024 dependencies.
+tools-version = "v1.52"
