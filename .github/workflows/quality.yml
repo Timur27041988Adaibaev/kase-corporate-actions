@@ -48,14 +48,15 @@ jobs:
           rustc --version
           cargo --version
           rustc --version | grep -E '1\.(8[0-9]|[9-9][0-9])\.'
-      - name: Install Anchor CLI
+      - name: Install pinned Anchor CLI without AVM toolchain switching
+        env:
+          RUSTUP_TOOLCHAIN: stable
         run: |
+          set -euo pipefail
           export PATH="$HOME/.cargo/bin:$PATH"
           rustc --version
-          cargo install --git https://github.com/coral-xyz/anchor avm --locked
-          echo "$HOME/.avm/bin" >> "$GITHUB_PATH"
-          "$HOME/.cargo/bin/avm" install 0.31.1
-          "$HOME/.cargo/bin/avm" use 0.31.1
+          cargo install --git https://github.com/coral-xyz/anchor --tag v0.31.1 anchor-cli --locked --force
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
       - name: Install compatible Solana CLI
         run: |
           set -euo pipefail
@@ -63,9 +64,8 @@ jobs:
           SOLANA_BIN="$HOME/.local/share/solana/install/active_release/bin"
           test -x "$SOLANA_BIN/solana"
           echo "$SOLANA_BIN" >> "$GITHUB_PATH"
-          echo "$HOME/.avm/bin" >> "$GITHUB_PATH"
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          export PATH="$SOLANA_BIN:$HOME/.avm/bin:$HOME/.cargo/bin:$PATH"
+          export PATH="$SOLANA_BIN:$HOME/.cargo/bin:$PATH"
           solana --version
           anchor --version
           solana --version | grep -F "2.2.16"
@@ -84,7 +84,7 @@ jobs:
           RUSTUP_TOOLCHAIN: stable
         run: |
           set -euo pipefail
-          export PATH="$HOME/.local/share/solana/install/active_release/bin:$HOME/.avm/bin:$HOME/.cargo/bin:$PATH"
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$HOME/.cargo/bin:$PATH"
           rustc --version
           cargo --version
           solana --version | grep -F "2.2.16"
