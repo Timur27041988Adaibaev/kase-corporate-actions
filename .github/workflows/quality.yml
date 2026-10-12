@@ -47,10 +47,8 @@ jobs:
         run: |
           export PATH="$HOME/.cargo/bin:$PATH"
           rustc --version
-          cargo install --git https://github.com/coral-xyz/anchor avm --locked
-          echo "$HOME/.avm/bin" >> "$GITHUB_PATH"
-          "$HOME/.cargo/bin/avm" install 0.31.1
-          "$HOME/.cargo/bin/avm" use 0.31.1
+          cargo install --git https://github.com/coral-xyz/anchor --tag v0.31.1 anchor-cli --locked
+          anchor --version
       - name: Configure local Solana wallet
         run: |
           mkdir -p "$HOME/.config/solana"
