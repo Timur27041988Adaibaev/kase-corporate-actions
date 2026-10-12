@@ -2345,21 +2345,11 @@ function initListeners() {
   // SCENARIO 1: EXECUTE COUPON PAYMENT ON SOLANA DEVNET
   // ============================================================================
   async function executeCouponDistribution() {
-    const btn = document.getElementById("btnExecuteCoupon");
-    if (btn?.disabled) return;
-    if (btn) btn.disabled = true;
-    const cluster = CLUSTERS[currentCluster];
-    const totalCouponFormatted = formatUSD(BondMath.calculateCoupon(BondMath.terms.totalSupply));
-    const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=DEMO_MEMO_ATTESTATION | REQUESTED_ACTION=COUPON_DISTRIBUTION | AMOUNT_REFERENCE=${totalCouponFormatted}_USDC | EXECUTION=NOT_PERFORMED`;
-
-    try {
-      await broadcastRealSolanaTransaction({
-        actionTitle: `Memo Attestation Only: Coupon Request (${totalCouponFormatted} USDC reference) [${cluster.shortName}]`,
-        memoText,
-      });
-    } finally {
-      if (btn) btn.disabled = false;
+    if (currentCluster !== "devnet") {
+      showToast("Devnet only", "Real Anchor test-token settlement is restricted to Solana Devnet. No Mainnet transaction was sent.", "warning");
+      return;
     }
+    window.location.href = "./anchor.html";
   }
   window.executeCouponDistribution = executeCouponDistribution;
 
@@ -2373,21 +2363,11 @@ function initListeners() {
   // SCENARIO 2: EXECUTE BOND REDEMPTION & SPL TOKEN BURN
   // ============================================================================
   async function executeBondRedemption() {
-    const btn = document.getElementById("btnExecuteRedemption");
-    if (btn?.disabled) return;
-    if (btn) btn.disabled = true;
-    const cluster = CLUSTERS[currentCluster];
-    const totalPrincipalFormatted = formatUSD(BondMath.calculateRedemption(BondMath.terms.totalSupply));
-    const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=DEMO_MEMO_ATTESTATION | REQUESTED_ACTION=REDEMPTION_AND_BURN | UNITS_REFERENCE=10,000 | AMOUNT_REFERENCE=${totalPrincipalFormatted}_USDC | EXECUTION=NOT_PERFORMED`;
-
-    try {
-      await broadcastRealSolanaTransaction({
-        actionTitle: `Memo Attestation Only: Redemption Request (${totalPrincipalFormatted} reference) [${cluster.shortName}]`,
-        memoText,
-      });
-    } finally {
-      if (btn) btn.disabled = false;
+    if (currentCluster !== "devnet") {
+      showToast("Devnet only", "Bond burn/redemption is available only in the Devnet test console. No Mainnet transaction was sent.", "warning");
+      return;
     }
+    window.location.href = "./anchor.html";
   }
   window.executeBondRedemption = executeBondRedemption;
 
@@ -2403,29 +2383,14 @@ function initListeners() {
   async function executeVoteAction(choice) {
     const normalizedChoice = String(choice).toLowerCase();
     if (!["for", "against", "abstain"].includes(normalizedChoice)) {
-      showToast("Invalid vote intent", "Choose FOR, AGAINST, or ABSTAIN.", "error");
+      showToast("Invalid vote", "Choose FOR, AGAINST, or ABSTAIN.", "error");
       return;
     }
-    const buttonId = {
-      for: "btnVoteFor",
-      against: "btnVoteAgainst",
-      abstain: "btnVoteAbstain",
-    }[normalizedChoice];
-    const btn = document.getElementById(buttonId);
-    if (btn?.disabled) return;
-    if (btn) btn.disabled = true;
-    const cluster = CLUSTERS[currentCluster];
-    const referenceWeight = normalizedChoice === "for" ? "6,000" : normalizedChoice === "against" ? "1,200" : "800";
-    const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=DEMO_MEMO_ATTESTATION | REQUESTED_ACTION=GOVERNANCE_VOTE | PROPOSAL_ID=101 | VOTE_INTENT=${normalizedChoice.toUpperCase()} | WEIGHT_REFERENCE=${referenceWeight} | EXECUTION=NOT_PERFORMED`;
-
-    try {
-      await broadcastRealSolanaTransaction({
-        actionTitle: `Memo Attestation Only: Vote Intent ${normalizedChoice.toUpperCase()} Proposal #101 [${cluster.shortName}]`,
-        memoText,
-      });
-    } finally {
-      if (btn) btn.disabled = false;
+    if (currentCluster !== "devnet") {
+      showToast("Devnet only", "On-chain governance testing is restricted to Devnet. No Mainnet transaction was sent.", "warning");
+      return;
     }
+    window.location.href = "./anchor.html";
   }
   window.executeVoteAction = executeVoteAction;
 
@@ -2442,21 +2407,11 @@ function initListeners() {
   });
 
   document.getElementById("btnFinalizeVoting")?.addEventListener("click", () => {
-    dispatchActionWithSignerGuard(async () => {
-      const btn = document.getElementById("btnFinalizeVoting");
-      if (btn?.disabled) return;
-      if (btn) btn.disabled = true;
-      const cluster = CLUSTERS[currentCluster];
-      const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=DEMO_MEMO_ATTESTATION | REQUESTED_ACTION=FINALIZE_GOVERNANCE_PROPOSAL | PROPOSAL_ID=101 | OUTCOME_REFERENCE=UNVERIFIED | EXECUTION=NOT_PERFORMED`;
-      try {
-        await broadcastRealSolanaTransaction({
-          actionTitle: `Memo Attestation Only: Finalization Request for Proposal #101 [${cluster.shortName}]`,
-          memoText,
-        });
-      } finally {
-        if (btn) btn.disabled = false;
-      }
-    });
+    if (currentCluster !== "devnet") {
+      showToast("Devnet only", "On-chain governance finalization is restricted to Devnet. No Mainnet transaction was sent.", "warning");
+      return;
+    }
+    window.location.href = "./anchor.html";
   });
   window.btnFinalizeVoting = document.getElementById("btnFinalizeVoting");
 }
