@@ -106,7 +106,7 @@
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
             </svg>
           </button>
-          <span class="top-cluster-memo-pill font-mono" id="topClusterMemoPill" style="display: none;">Mainnet: Memo Program records only. KASE program: live on Devnet.</span>
+          <span class="top-cluster-memo-pill font-mono" id="topClusterMemoPill" style="display: none;">Mainnet: Memo records only. Anchor program deployment is separate; UI does not execute settlement.</span>
         </div>
         
         <!-- Signer Mode Selector: Phantom vs local demo signer -->
@@ -129,7 +129,7 @@
           <div class="status-col">
             <span class="status-title" id="clusterStatus">Solana Devnet</span>
             <span class="status-sub" id="clusterLatency">Ping: 120ms</span>
-            <span class="status-memo-pill font-mono" id="clusterStatusMemoPill" style="display: none;">Mainnet: Memo Program records only. KASE program: live on Devnet.</span>
+            <span class="status-memo-pill font-mono" id="clusterStatusMemoPill" style="display: none;">Mainnet: Memo records only. Anchor program deployment is separate; UI does not execute settlement.</span>
           </div>
         </div>
 
@@ -193,7 +193,7 @@
     <!-- Prominent Top Cluster Notification Bar when Mainnet is selected -->
     <div id="topClusterNotificationBar" class="top-cluster-notification-bar" style="display: none;">
       <span class="top-cluster-warn-badge">MAINNET RECORD NOTICE</span>
-      <span class="top-cluster-notice-text">Mainnet: Memo Program records only. KASE program: live on Devnet.</span>
+      <span class="top-cluster-notice-text">Mainnet: Memo records only. Anchor program deployment is separate; UI does not execute settlement.</span>
     </div>
   </header>
 
@@ -205,8 +205,8 @@
       <div class="mainnet-safety-left">
         <div class="mainnet-badge-icon" aria-hidden="true">⚠️</div>
         <div class="mainnet-safety-text">
-          <strong id="mainnetSafetyLabel">Mainnet: Memo Program records only. KASE program: live on Devnet.</strong>
-          <span>On Mainnet, corporate actions are recorded exclusively through the official Solana Memo Program (MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr). The KASE Anchor program is not yet deployed on Mainnet (it is live on Devnet). Network fees are paid in real SOL (~0.000005 SOL). The Airdrop faucet is disabled on Mainnet.</span>
+          <strong id="mainnetSafetyLabel">Mainnet: Memo records only. Anchor program deployment is separate; UI does not execute settlement.</strong>
+          <span>On Mainnet, corporate actions are recorded exclusively through the official Solana Memo Program (MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr). The browser UI writes Memo records only; it does not invoke the KASE Anchor settlement instructions on either cluster. Mainnet fees use real SOL. The Airdrop faucet is disabled on Mainnet.</span>
         </div>
       </div>
       <div class="mainnet-safety-right">
@@ -833,8 +833,8 @@
       <!-- Right Column: Live Math HUD, Audit Console & Math Sandbox -->
       <div class="right-col">
 
-        <!-- Live Financial Math Engine & Synchronization HUD (100% Rust-Frontend Math Sync) -->
-        <section class="math-hud-card" aria-label="Live Financial Math Engine">
+        <!-- Illustrative financial math calculator; no production ledger is connected -->
+        <section class="math-hud-card" aria-label="Illustrative financial calculator">
           <div class="math-hud-header">
             <div class="math-hud-title">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -874,7 +874,7 @@
         </section>
 
         <!-- Live On-Chain Audit Trail Console -->
-        <section class="terminal-console" aria-label="Solana Devnet Live Audit Stream">
+        <section class="terminal-console" aria-label="Solana transaction log">
           <div class="console-topbar">
             <div class="console-title-group">
               <span class="live-dot-green" aria-hidden="true"></span>
@@ -1124,7 +1124,7 @@
           </svg>
         </div>
         <h3 id="modalSuccessTitle">Transaction Confirmed on Solana!</h3>
-        <p class="modal-sub" id="modalSuccessDesc">Corporate action settled and permanently recorded on-chain.</p>
+        <p class="modal-sub" id="modalSuccessDesc">Memo attestation confirmed on-chain. No financial settlement was executed.</p>
 
         <div class="tx-details-box">
           <div class="tx-row">
@@ -1144,7 +1144,7 @@
           </div>
           <div class="tx-row">
             <span class="tx-lbl">Explorer Cluster:</span>
-            <span class="mono font-mono cyan" id="modalTxClusterText">Solana Devnet (100% Live)</span>
+            <span class="mono font-mono cyan" id="modalTxClusterText">Solana Devnet — Memo record only</span>
           </div>
         </div>
 
@@ -1224,7 +1224,7 @@
           <h4>Browser-local Demo Signer</h4>
           <p>Automatic signing with the KASE exchange's institutional private key, with no manual approval in the extension.</p>
           <div class="opt-features">
-            <span id="optOperatorTxText">✔ 100% real transaction on Solana Devnet</span>
+            <span id="optOperatorTxText">✔ Real Memo transaction only — no settlement</span>
             <span>✔ Autonomous batch execution</span>
             <span>✔ Visible in Solana Explorer</span>
           </div>
@@ -1365,7 +1365,7 @@
 
       <div class="oracle-grid">
         <!-- Oracle 1 -->
-        <div class="oracle-item-card verified">
+        <div class="oracle-item-card">
           <div class="oracle-avatar">🏛️</div>
           <div class="oracle-content">
             <div class="oracle-content-header">
@@ -1377,7 +1377,7 @@
         </div>
 
         <!-- Oracle 2 -->
-        <div class="oracle-item-card verified">
+        <div class="oracle-item-card">
           <div class="oracle-avatar">🧮</div>
           <div class="oracle-content">
             <div class="oracle-content-header">
@@ -1389,7 +1389,7 @@
         </div>
 
         <!-- Oracle 3 -->
-        <div class="oracle-item-card verified">
+        <div class="oracle-item-card">
           <div class="oracle-avatar">⚡</div>
           <div class="oracle-content">
             <div class="oracle-content-header">
