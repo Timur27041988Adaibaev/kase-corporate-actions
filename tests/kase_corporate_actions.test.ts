@@ -245,6 +245,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         settlementMint: settlementMint,
         bondSecurity: bondSecurityPda,
         systemProgram: anchor.web3.SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
         rent: anchor.web3.SYSVAR_RENT_PUBKEY,
       })
       .signers([authority])
@@ -870,6 +871,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         settlementMint: settlementMint,
         bondSecurity: maturedBondPda,
         systemProgram: anchor.web3.SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
         rent: anchor.web3.SYSVAR_RENT_PUBKEY,
       })
       .signers([authority])
