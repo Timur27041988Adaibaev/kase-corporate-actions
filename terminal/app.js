@@ -455,7 +455,7 @@ function switchToOperatorMode() {
   refreshWalletBalance();
   const cluster = CLUSTERS[currentCluster];
   appendLog("SIGNER", "tag-ok", `Active Signer: KASE CSD Institutional Authority (${cluster.shortName} Operator Keypair)`);
-  showToast("CSD Mode Active", `Switched to KASE CSD Institutional Authority keypair for autonomous ${cluster.shortName} execution.`, "info");
+  showToast("Local Operator Key Active", `A browser-local keypair is active on ${cluster.shortName}; it is not an institutional KCSD authority.`, "warning");
 }
 
 function switchToPhantomMode() {
@@ -1729,7 +1729,7 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
     });
 
     showToast(
-      `Success on ${cluster.shortName}!`,
+      `Memo record confirmed on ${cluster.shortName}`,
       `Memo attestation confirmed in slot #${slot.toLocaleString()} (Tx: ${truncateAddress(signature)}). No coupon payment, redemption, token burn, or program vote was executed.`,
       "success"
     );
@@ -1814,7 +1814,7 @@ function showModalSuccess({ signature, slot, memoText, actionTitle, signerName }
 
   const titleEl = document.getElementById("modalSuccessTitle");
   if (titleEl) {
-    titleEl.textContent = `Transaction Confirmed on ${cluster.name}!`;
+    titleEl.textContent = `Memo Transaction Confirmed on ${cluster.name}`;
   }
 
   const sigEl = document.getElementById("modalTxSigText");
