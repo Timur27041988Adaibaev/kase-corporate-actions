@@ -598,7 +598,7 @@ function updateWalletUI() {
   } else {
     // Operator authority
     if (roleLabel) {
-      roleLabel.textContent = "CSD Operator";
+      roleLabel.textContent = "Local Demo Signer";
       roleLabel.className = "role-badge";
     }
     if (addrDisplay) addrDisplay.textContent = truncateAddress(state.walletAddress);
@@ -1585,7 +1585,7 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
     if (isPhantom) {
       const provider = getPhantomProvider();
       if (!provider) {
-        throw new Error("Phantom extension not detected. Switch to CSD Operator mode.");
+        throw new Error("Phantom extension not detected. Switch to Local Demo Signer mode.");
       }
 
       const feeNotice = cluster.isMainnet ? " [Network fee: ~0.000005 SOL]" : "";
@@ -1634,13 +1634,13 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
         throw new Error(phantomErr.message || "Error signing the transaction in Phantom.");
       }
     } else {
-      updateModalStep(3, false, `Signing with the KASE CSD Operator institutional key (${cluster.shortName})...`);
+      updateModalStep(3, false, `Signing with the browser-local demo key (${cluster.shortName})...`);
       if (isVersionedTx) {
         txToSign.sign([state.operatorKeypair]);
       } else {
         txToSign.sign(state.operatorKeypair);
       }
-      updateModalStep(3, true, "Signed with the CSD Operator key!");
+      updateModalStep(3, true, "Signed with the local demo key.");
       updateModalStep(4, false, `Sending the raw transaction to the ${cluster.shortName} cluster RPC...`);
 
       appendLog("BROADCAST", "tag-broadcast", `Broadcasting the transaction to cluster ${cluster.name}...`);
@@ -1709,7 +1709,7 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
       slot,
       memoText,
       actionTitle,
-      signerName: isPhantom ? `Phantom Wallet (${cluster.shortName})` : `CSD Operator (${cluster.shortName})`,
+      signerName: isPhantom ? `Phantom Wallet (${cluster.shortName})` : `Local Demo Signer (${cluster.shortName})`,
     });
 
     showToast(
@@ -3046,7 +3046,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   connection = new web3.Connection(activeRpc, "confirmed");
   memoProgramId = new web3.PublicKey(MEMO_PROGRAM_ID_STR);
 
-  // 2. Setup Persistent CSD Operator Keypair
+  // 2. Setup browser-local demo signer (not an institutional authority)
   state.operatorKeypair = getOrCreateOperatorKeypair();
   if (state.operatorKeypair) {
     state.walletPubkey = state.operatorKeypair.publicKey;
@@ -3092,10 +3092,10 @@ window.addEventListener("DOMContentLoaded", async () => {
     // Eagerly connect without popup if trusted
     const eagerlyConnected = await connectPhantomWallet(true);
     if (!eagerlyConnected) {
-      appendLog("INFO", "tag-broadcast", "Default mode: CSD Authority. For personal signing, click 'Phantom' in the header.");
+      appendLog("INFO", "tag-broadcast", "Default mode: Local Demo Signer. Connect Phantom to sign with your own wallet.");
     }
   } else {
-    appendLog("INFO", "tag-broadcast", "Phantom not detected. KASE CSD Operator institutional mode is active.");
+    appendLog("INFO", "tag-broadcast", "Phantom not detected. Local Demo Signer mode is active; it is not a KCSD authority.");
   }
 
   // Poll cluster slot every 3 seconds
