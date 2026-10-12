@@ -1,4 +1,8 @@
-// KASE Corporate Actions — real Devnet scenario runner (coupon, governance, redemption + adversarial checks)
+// KASE Corporate Actions — Devnet scenario runner for the current source ABI.
+// SAFETY: Requires a program deployment upgraded from this source plus the local
+// keys/deployer.json authority key. Historical Devnet proof may reference an older
+// binary/ABI; verify the deployed program before running. This script creates
+// demo mints/accounts and submits real, irreversible Devnet transactions.
 const w = require('@solana/web3.js');
 const spl = require('@solana/spl-token');
 const fs = require('fs');
