@@ -6,7 +6,7 @@ import {
   SystemProgram,
   SYSVAR_RENT_PUBKEY,
 } from "@solana/web3.js";
-import { createMint, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { createMint, getOrCreateAssociatedTokenAccount, mintTo, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { KaseCorporateActions } from "../target/types/kase_corporate_actions";
 
 describe("kase_corporate_actions local-validator integration", () => {
@@ -26,13 +26,35 @@ describe("kase_corporate_actions local-validator integration", () => {
   let corporateAction: PublicKey;
   let actionVault: PublicKey;
   let proposal: PublicKey;
+  let holder: Keypair;
+  let holderBondAccount: PublicKey;
+  let holderSettlementAccount: PublicKey;
+  let funderSettlementAccount: PublicKey;
+  let holderEntitlement: PublicKey;
+  let settlementTimestamp: number;
 
   before(async () => {
     bondMint = await createMint(provider.connection, payer, authority, null, 0);
     settlementMint = await createMint(provider.connection, payer, authority, null, 6);
+    holder = Keypair.generate();
+    const holderAirdrop = await provider.connection.requestAirdrop(holder.publicKey, anchor.web3.LAMPORTS_PER_SOL);
+    await provider.connection.confirmTransaction(holderAirdrop, "confirmed");
+    const holderBondAta = await getOrCreateAssociatedTokenAccount(provider.connection, payer, bondMint, holder.publicKey);
+    const holderSettlementAta = await getOrCreateAssociatedTokenAccount(provider.connection, payer, settlementMint, holder.publicKey);
+    const funderSettlementAta = await getOrCreateAssociatedTokenAccount(provider.connection, payer, settlementMint, authority);
+    holderBondAccount = holderBondAta.address;
+    holderSettlementAccount = holderSettlementAta.address;
+    funderSettlementAccount = funderSettlementAta.address;
+    await mintTo(provider.connection, payer, bondMint, holderBondAccount, payer, 10);
+    await mintTo(provider.connection, payer, settlementMint, funderSettlementAccount, payer, 500_000_000);
 
     [bondSecurity] = PublicKey.findProgramAddressSync(
       [Buffer.from("bond"), Buffer.from(isin)],
+      program.programId,
+    );
+
+    [holderEntitlement] = PublicKey.findProgramAddressSync(
+      [Buffer.from("entitlement"), corporateAction.toBuffer(), holder.publicKey.toBuffer()],
       program.programId,
     );
 
@@ -109,6 +131,62 @@ describe("kase_corporate_actions local-validator integration", () => {
     expect(action.actionId.toString()).to.equal(actionId.toString());
     expect(action.bondSecurity.equals(bondSecurity)).to.equal(true);
     expect(action.vault.equals(actionVault)).to.equal(true);
+  });
+
+  it("snapshots a real token balance, funds the vault, and pays a coupon on-chain", async () => {
+    await program.methods
+      .recordHolderSnapshot(new anchor.BN(10))
+      .accounts({
+        authority,
+        bondSecurity,
+        corporateAction,
+        holder: holder.publicKey,
+        holderBondAccount,
+        holderEntitlement,
+        systemProgram: SystemProgram.programId,
+        rent: SYSVAR_RENT_PUBKEY,
+      })
+      .rpc();
+
+    const entitlement = await program.account.holderEntitlement.fetch(holderEntitlement);
+    expect(entitlement.bondsHeld.toString()).to.equal("10");
+    expect(entitlement.entitlementAmount.toString()).to.equal("500000000");
+
+    await program.methods
+      .depositActionVault(new anchor.BN(500_000_000))
+      .accounts({
+        funder: authority,
+        corporateAction,
+        actionVault,
+        funderTokenAccount: funderSettlementAccount,
+        settlementMint,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .rpc();
+
+    const delayMs = Math.max(0, settlementTimestamp * 1000 - Date.now() + 1500);
+    if (delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
+
+    await program.methods
+      .executeCouponPayment()
+      .accounts({
+        authority,
+        bondSecurity,
+        corporateAction,
+        actionVault,
+        holderEntitlement,
+        holderSettlementAccount,
+        settlementMint,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .rpc();
+
+    const paidEntitlement = await program.account.holderEntitlement.fetch(holderEntitlement);
+    const paidAction = await program.account.corporateAction.fetch(corporateAction);
+    const holderBalance = await provider.connection.getTokenAccountBalance(holderSettlementAccount);
+    expect(paidEntitlement.isSettled).to.equal(true);
+    expect(paidAction.totalSettledAmount.toString()).to.equal("500000000");
+    expect(holderBalance.value.amount).to.equal("500000000");
   });
 
   it("creates a governance proposal on-chain", async () => {
