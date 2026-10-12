@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 concurrency:
-  group: kase-quality-${{ github.ref }}
+  group: kase-quality-${{ github.ref }}-${{ github.sha }}
   cancel-in-progress: true
 
 jobs:
