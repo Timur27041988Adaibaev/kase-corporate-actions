@@ -32,6 +32,21 @@ class KaseServerSmokeTests(unittest.TestCase):
         self.assertEqual(payload.get("status"), "healthy")
         self.assertIn("service", payload)
 
+    def test_chain_status_checks_real_rpc_and_never_claims_settlement(self):
+        rpc_result = {"result": {"value": {"executable": True}}}
+        mock_response = type("MockResponse", (), {
+            "__enter__": lambda self: self,
+            "__exit__": lambda self, *args: False,
+            "read": lambda self: json.dumps(rpc_result).encode("utf-8"),
+        })()
+        with patch.object(kase_server.urllib.request, "urlopen", return_value=mock_response):
+            with urllib.request.urlopen(self.base_url + "/api/chain-status", timeout=2) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        self.assertEqual(payload.get("status"), "PROGRAM_DEPLOYED")
+        self.assertTrue(payload.get("rpc_verified"))
+        self.assertFalse(payload.get("settlement_executed"))
+        self.assertEqual(payload.get("settlement_integration"), "not-connected-to-browser-terminal")
+
     def test_oracle_endpoint_does_not_claim_fake_consensus(self):
         request = urllib.request.Request(self.base_url + "/api/oracle/consensus")
         with self.assertRaises(urllib.error.HTTPError) as ctx:
