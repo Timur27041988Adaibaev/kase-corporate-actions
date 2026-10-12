@@ -1,94 +1,111 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program, BN } from "@coral-xyz/anchor";
 import {
+  createAccount,
   createMint,
   getOrCreateAssociatedTokenAccount,
   mintTo,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import {
-  Keypair,
   PublicKey,
   SystemProgram,
   SYSVAR_RENT_PUBKEY,
 } from "@solana/web3.js";
 import { expect } from "chai";
 
-describe("KASE corporate actions — real local-validator settlement", () => {
+describe("KASE corporate actions — local-validator end-to-end", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const program = anchor.workspace.KaseCorporateActions as Program<any>;
   const authority = (provider.wallet as anchor.Wallet).payer;
 
-  it("initializes a bond, snapshots a holder, funds the PDA vault, and pays a coupon", async () => {
+  it("executes a real coupon transfer, governance vote/finalization, and redemption/burn", async () => {
     const connection = provider.connection;
-    const holder = Keypair.generate();
     const now = Math.floor(Date.now() / 1000);
     const isin = `KZTEST${now.toString().slice(-8)}`.slice(0, 16);
-    const actionId = new BN(now);
+    const couponActionId = new BN(now + 1);
+    const redemptionActionId = new BN(now + 2);
+    const governanceActionId = new BN(now + 3);
+    const proposalId = new BN(now + 101);
+    const couponSettlementAt = now + 45;
+    const voteEndsAt = now + 60;
+    const maturityAt = now + 90;
     const faceValue = new BN(1_000_000_000); // 1,000 settlement tokens at 6 decimals
-    const couponBps = 1_000;
-    const couponsPerYear = 2;
-    const supply = new BN(1);
-    const maturity = new BN(now + 86_400);
+    const couponAmount = new BN(50_000_000); // 10% annual coupon, paid semi-annually
+    const principalAmount = new BN(1_000_000_000);
 
     const bondMint = await createMint(
-      connection,
-      authority,
-      authority.publicKey,
-      null,
-      0,
-      undefined,
-      undefined,
-      TOKEN_PROGRAM_ID,
+      connection, authority, authority.publicKey, null, 0,
+      undefined, undefined, TOKEN_PROGRAM_ID,
     );
     const settlementMint = await createMint(
-      connection,
-      authority,
-      authority.publicKey,
-      null,
-      6,
-      undefined,
-      undefined,
-      TOKEN_PROGRAM_ID,
+      connection, authority, authority.publicKey, null, 6,
+      undefined, undefined, TOKEN_PROGRAM_ID,
     );
-
     const holderBond = await getOrCreateAssociatedTokenAccount(
-      connection, authority, bondMint, holder.publicKey,
-    );
-    const funderSettlement = await getOrCreateAssociatedTokenAccount(
-      connection, authority, settlementMint, authority.publicKey,
+      connection, authority, bondMint, authority.publicKey,
     );
     const holderSettlement = await getOrCreateAssociatedTokenAccount(
-      connection, authority, settlementMint, holder.publicKey,
+      connection, authority, settlementMint, authority.publicKey,
     );
-
+    // Separate funding account so the test proves a real transfer to the holder ATA.
+    const funderSettlement = await createAccount(
+      connection, authority, settlementMint, authority.publicKey,
+    );
     await mintTo(connection, authority, bondMint, holderBond.address, authority, 1);
-    const couponAmount = new BN(50_000_000); // 1 bond × 1,000 × 10% / 2, in 6-decimal units
     await mintTo(
-      connection, authority, settlementMint, funderSettlement.address, authority,
-      BigInt(couponAmount.toString()),
+      connection, authority, settlementMint, funderSettlement, authority,
+      BigInt(couponAmount.add(principalAmount).toString()),
     );
 
     const [bondSecurity] = PublicKey.findProgramAddressSync(
       [Buffer.from("bond"), Buffer.from(isin)],
       program.programId,
     );
-    const [corporateAction] = PublicKey.findProgramAddressSync(
-      [Buffer.from("action"), bondSecurity.toBuffer(), actionId.toArrayLike(Buffer, "le", 8)],
+    const [couponAction] = PublicKey.findProgramAddressSync(
+      [Buffer.from("action"), bondSecurity.toBuffer(), couponActionId.toArrayLike(Buffer, "le", 8)],
       program.programId,
     );
-    const [actionVault] = PublicKey.findProgramAddressSync(
-      [Buffer.from("action_vault"), corporateAction.toBuffer()],
+    const [redemptionAction] = PublicKey.findProgramAddressSync(
+      [Buffer.from("action"), bondSecurity.toBuffer(), redemptionActionId.toArrayLike(Buffer, "le", 8)],
       program.programId,
     );
-    const [holderEntitlement] = PublicKey.findProgramAddressSync(
-      [Buffer.from("entitlement"), corporateAction.toBuffer(), holder.publicKey.toBuffer()],
+    const [governanceAction] = PublicKey.findProgramAddressSync(
+      [Buffer.from("action"), bondSecurity.toBuffer(), governanceActionId.toArrayLike(Buffer, "le", 8)],
+      program.programId,
+    );
+    const [couponVault] = PublicKey.findProgramAddressSync(
+      [Buffer.from("action_vault"), couponAction.toBuffer()], program.programId,
+    );
+    const [redemptionVault] = PublicKey.findProgramAddressSync(
+      [Buffer.from("action_vault"), redemptionAction.toBuffer()], program.programId,
+    );
+    const [couponEntitlement] = PublicKey.findProgramAddressSync(
+      [Buffer.from("entitlement"), couponAction.toBuffer(), authority.publicKey.toBuffer()],
+      program.programId,
+    );
+    const [redemptionEntitlement] = PublicKey.findProgramAddressSync(
+      [Buffer.from("entitlement"), redemptionAction.toBuffer(), authority.publicKey.toBuffer()],
+      program.programId,
+    );
+    const [governanceEntitlement] = PublicKey.findProgramAddressSync(
+      [Buffer.from("entitlement"), governanceAction.toBuffer(), authority.publicKey.toBuffer()],
+      program.programId,
+    );
+    const [proposal] = PublicKey.findProgramAddressSync(
+      [Buffer.from("proposal"), bondSecurity.toBuffer(), proposalId.toArrayLike(Buffer, "le", 8)],
+      program.programId,
+    );
+    const [voterRecord] = PublicKey.findProgramAddressSync(
+      [Buffer.from("voter"), proposal.toBuffer(), authority.publicKey.toBuffer()],
       program.programId,
     );
 
     await program.methods
-      .initializeBondInstrument(isin, faceValue, couponBps, couponsPerYear, supply, maturity)
+      .initializeBondInstrument(
+        isin, faceValue, 1_000, 2, new BN(1), new BN(maturityAt),
+      )
       .accounts({
         authority: authority.publicKey,
         issuer: authority.publicKey,
@@ -102,79 +119,126 @@ describe("KASE corporate actions — real local-validator settlement", () => {
       .rpc();
 
     const recordDate = new BN(now - 5);
-    const settlementDate = new BN(now + 30);
     await program.methods
       .scheduleCorporateAction(
-        actionId,
-        { couponPayment: {} },
-        recordDate,
-        settlementDate,
+        couponActionId, { couponPayment: {} }, recordDate, new BN(couponSettlementAt),
       )
       .accounts({
-        authority: authority.publicKey,
-        bondSecurity,
-        corporateAction,
-        actionVault,
-        settlementMint,
-        systemProgram: SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        rent: SYSVAR_RENT_PUBKEY,
+        authority: authority.publicKey, bondSecurity, corporateAction: couponAction,
+        actionVault: couponVault, settlementMint, systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID, rent: SYSVAR_RENT_PUBKEY,
       })
       .rpc();
+    await program.methods.recordHolderSnapshot(new BN(1)).accounts({
+      authority: authority.publicKey, bondSecurity, corporateAction: couponAction,
+      holder: authority.publicKey, holderBondAccount: holderBond.address,
+      holderEntitlement: couponEntitlement, systemProgram: SystemProgram.programId,
+      rent: SYSVAR_RENT_PUBKEY,
+    }).rpc();
+    await program.methods.depositActionVault(couponAmount).accounts({
+      funder: authority.publicKey, corporateAction: couponAction, actionVault: couponVault,
+      funderTokenAccount: funderSettlement, settlementMint, tokenProgram: TOKEN_PROGRAM_ID,
+    }).rpc();
 
     await program.methods
-      .recordHolderSnapshot(new BN(1))
+      .scheduleCorporateAction(
+        redemptionActionId, { bondRedemption: {} }, recordDate, new BN(maturityAt),
+      )
       .accounts({
-        authority: authority.publicKey,
-        bondSecurity,
-        corporateAction,
-        holder: holder.publicKey,
-        holderBondAccount: holderBond.address,
-        holderEntitlement,
-        systemProgram: SystemProgram.programId,
-        rent: SYSVAR_RENT_PUBKEY,
+        authority: authority.publicKey, bondSecurity, corporateAction: redemptionAction,
+        actionVault: redemptionVault, settlementMint, systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID, rent: SYSVAR_RENT_PUBKEY,
       })
       .rpc();
+    await program.methods.recordHolderSnapshot(new BN(1)).accounts({
+      authority: authority.publicKey, bondSecurity, corporateAction: redemptionAction,
+      holder: authority.publicKey, holderBondAccount: holderBond.address,
+      holderEntitlement: redemptionEntitlement, systemProgram: SystemProgram.programId,
+      rent: SYSVAR_RENT_PUBKEY,
+    }).rpc();
+    await program.methods.depositActionVault(principalAmount).accounts({
+      funder: authority.publicKey, corporateAction: redemptionAction, actionVault: redemptionVault,
+      funderTokenAccount: funderSettlement, settlementMint, tokenProgram: TOKEN_PROGRAM_ID,
+    }).rpc();
 
     await program.methods
-      .depositActionVault(couponAmount)
+      .scheduleCorporateAction(
+        governanceActionId, { governanceVoting: {} }, recordDate, new BN(voteEndsAt),
+      )
       .accounts({
-        funder: authority.publicKey,
-        corporateAction,
-        actionVault,
-        funderTokenAccount: funderSettlement.address,
-        settlementMint,
-        tokenProgram: TOKEN_PROGRAM_ID,
+        authority: authority.publicKey, bondSecurity, corporateAction: governanceAction,
+        actionVault: PublicKey.findProgramAddressSync(
+          [Buffer.from("action_vault"), governanceAction.toBuffer()], program.programId,
+        )[0],
+        settlementMint, systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID, rent: SYSVAR_RENT_PUBKEY,
       })
       .rpc();
+    await program.methods.recordHolderSnapshot(new BN(1)).accounts({
+      authority: authority.publicKey, bondSecurity, corporateAction: governanceAction,
+      holder: authority.publicKey, holderBondAccount: holderBond.address,
+      holderEntitlement: governanceEntitlement, systemProgram: SystemProgram.programId,
+      rent: SYSVAR_RENT_PUBKEY,
+    }).rpc();
 
-    const before = await connection.getTokenAccountBalance(holderSettlement.address);
-    expect(before.value.amount).to.equal("0");
-
-    const waitMs = Math.max(0, (settlementDate.toNumber() - Math.floor(Date.now() / 1000) + 1) * 1000);
-    if (waitMs) await new Promise((resolve) => setTimeout(resolve, waitMs));
-
+    const descriptionHash = Array.from(new Uint8Array(32));
     await program.methods
-      .executeCouponPayment()
+      .createGovernanceProposal(
+        proposalId, "Increase coupon to 12.5%", descriptionHash,
+        new BN(now - 5), new BN(voteEndsAt), new BN(1), 1_250,
+      )
       .accounts({
-        authority: authority.publicKey,
-        bondSecurity,
-        corporateAction,
-        actionVault,
-        holderEntitlement,
-        holderSettlementAccount: holderSettlement.address,
-        settlementMint,
-        tokenProgram: TOKEN_PROGRAM_ID,
+        proposer: authority.publicKey, bondSecurity, proposal,
+        systemProgram: SystemProgram.programId, rent: SYSVAR_RENT_PUBKEY,
       })
       .rpc();
 
-    const after = await connection.getTokenAccountBalance(holderSettlement.address);
-    expect(after.value.amount).to.equal(couponAmount.toString());
+    await program.methods.castBondholderVote({ for: {} }).accounts({
+      voter: authority.publicKey, bondSecurity, proposal, corporateAction: governanceAction,
+      holderBondAccount: holderBond.address, holderEntitlement: governanceEntitlement,
+      voterRecord, systemProgram: SystemProgram.programId, rent: SYSVAR_RENT_PUBKEY,
+    }).rpc();
 
-    const entitlement = await program.account.holderEntitlement.fetch(holderEntitlement);
-    expect(entitlement.isSettled).to.equal(true);
-    const action = await program.account.corporateAction.fetch(corporateAction);
-    expect(action.settledHoldersCount.toNumber()).to.equal(1);
-    expect(action.totalSettledAmount.toString()).to.equal(couponAmount.toString());
+    const waitUntil = async (timestamp: number) => {
+      const waitMs = Math.max(0, (timestamp - Math.floor(Date.now() / 1000) + 1) * 1000);
+      if (waitMs) await new Promise((resolve) => setTimeout(resolve, waitMs));
+    };
+
+    await waitUntil(couponSettlementAt);
+    const beforeCoupon = await connection.getTokenAccountBalance(holderSettlement.address);
+    await program.methods.executeCouponPayment().accounts({
+      authority: authority.publicKey, bondSecurity, corporateAction: couponAction,
+      actionVault: couponVault, holderEntitlement: couponEntitlement,
+      holderSettlementAccount: holderSettlement.address, settlementMint,
+      tokenProgram: TOKEN_PROGRAM_ID,
+    }).rpc();
+    const afterCoupon = await connection.getTokenAccountBalance(holderSettlement.address);
+    expect(Number(afterCoupon.value.amount) - Number(beforeCoupon.value.amount))
+      .to.equal(Number(couponAmount.toString()));
+    expect((await program.account.holderEntitlement.fetch(couponEntitlement)).isSettled).to.equal(true);
+
+    await waitUntil(voteEndsAt);
+    await program.methods.finalizeGovernanceProposal().accounts({
+      authority: authority.publicKey, bondSecurity, proposal,
+    }).rpc();
+    const finalized = await program.account.governanceProposal.fetch(proposal);
+    expect(finalized.finalized).to.equal(true);
+    expect(finalized.passed).to.equal(true);
+    expect((await program.account.bondSecurity.fetch(bondSecurity)).annualCouponBps).to.equal(1_250);
+
+    await waitUntil(maturityAt);
+    const beforeRedemption = await connection.getTokenAccountBalance(holderSettlement.address);
+    await program.methods.executeBondRedemption().accounts({
+      holder: authority.publicKey, bondSecurity, corporateAction: redemptionAction,
+      actionVault: redemptionVault, holderEntitlement: redemptionEntitlement,
+      bondMint, holderBondAccount: holderBond.address,
+      holderSettlementAccount: holderSettlement.address, settlementMint,
+      tokenProgram: TOKEN_PROGRAM_ID,
+    }).rpc();
+    const afterRedemption = await connection.getTokenAccountBalance(holderSettlement.address);
+    expect(Number(afterRedemption.value.amount) - Number(beforeRedemption.value.amount))
+      .to.equal(Number(principalAmount.toString()));
+    expect((await connection.getTokenAccountBalance(holderBond.address)).value.amount).to.equal("0");
+    expect((await program.account.holderEntitlement.fetch(redemptionEntitlement)).isSettled).to.equal(true);
   });
 });
