@@ -638,7 +638,7 @@
                   <span class="step-status-pill">DEMO ONLY</span>
                 </div>
                 <h4>Demo Maturity Date</h4>
-                <p>Instrument maturity verified on-chain via Solana Clock sysvar (2026-12-31).</p>
+                <p>Anchor source checks maturity with Solana Clock; this illustrative instrument is not settled by the browser UI.</p>
               </div>
               <div class="step-card" id="stepRedeem2">
                 <div class="step-header">
@@ -993,7 +993,7 @@
             <p>An attacker intercepts the coupon payment transaction and tries to claim the $500,000 from the vault a second time.</p>
           </div>
           <div class="attack-defense-info">
-            <strong>Solana protection:</strong> PDA Account <code>CorporateAction.is_settled</code> blocks the repeat call with error code <code>KaseError::AlreadySettled</code>.
+            <strong>Anchor source protection:</strong> the program includes an <code>AlreadySettled</code> guard. The browser UI does not invoke that settlement instruction; coverage is verified through Anchor tests.
           </div>
           <button type="button" class="btn-execute-attack" id="btnTestAttackDoubleClaim">
             <span>⚡ Launch Double-Claim attack</span>
