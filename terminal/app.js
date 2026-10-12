@@ -830,8 +830,7 @@ async function ensureGasBalance(targetPubkey, minSol = 0.005) {
   let lastFaucetError = null;
   try {
     const signature = await connection.requestAirdrop(targetPubkey, 0.5 * (web3?.LAMPORTS_PER_SOL || 1e9));
-    const latest = await connection.getLatestBlockhash("confirmed");
-    await connection.confirmTransaction({ signature, ...latest }, "confirmed");
+    await connection.confirmTransaction(signature, "confirmed");
     appendLog("GAS-GUARD", "tag-ok", "Devnet faucet transfer confirmed.", signature);
   } catch (error) {
     lastFaucetError = error;
