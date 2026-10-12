@@ -109,16 +109,16 @@
           <span class="top-cluster-memo-pill font-mono" id="topClusterMemoPill" style="display: none;">Mainnet: Memo Program records only. KASE program: live on Devnet.</span>
         </div>
         
-        <!-- Signer Authority Mode Selector: Phantom vs CSD Operator -->
+        <!-- Signer Mode Selector: Phantom vs local demo signer -->
         <div class="signer-mode-selector" title="Choose on-chain signer authority on Solana">
           <button id="btnModePhantom" class="btn-signer-mode" title="Interactive browser extension signing via Phantom Wallet">
             <span>🦊</span>
             <span>Phantom</span>
             <span class="signer-pill" id="phantomBadgePill">Connect</span>
           </button>
-          <button id="btnModeOperator" class="btn-signer-mode operator-active" title="Autonomous KASE CSD Operator signing">
+          <button id="btnModeOperator" class="btn-signer-mode operator-active" title="Browser-local demo signer; not a KCSD authority">
             <span>🏛️</span>
-            <span>CSD Authority</span>
+            <span>Local Demo</span>
           </button>
           <span class="cluster-align-badge ok font-mono" id="phantomClusterAlignBadge" title="Phantom Wallet cluster alignment status">Aligned: Devnet</span>
         </div>
@@ -163,7 +163,7 @@
             </div>
             <div class="wallet-details">
               <div class="wallet-label-row">
-                <span id="walletRoleLabel" class="role-badge">CSD Operator</span>
+                <span id="walletRoleLabel" class="role-badge">Local Demo Signer</span>
                 <span id="walletAddressDisplay" class="wallet-address-text font-mono">KASEOp...8888</span>
               </div>
               <div class="wallet-balance-row">
@@ -179,7 +179,7 @@
           </div>
           
           <!-- Connect Phantom / Disconnect Button -->
-          <button id="btnConnectWallet" class="btn-wallet" title="Connect Phantom Wallet or toggle between Phantom and CSD Operator Authority">
+          <button id="btnConnectWallet" class="btn-wallet" title="Connect Phantom Wallet or use the browser-local demo signer">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <rect x="2" y="4" width="20" height="16" rx="4"></rect>
               <path d="M16 12h2"></path>
@@ -1221,7 +1221,7 @@
         <div class="signer-opt-card" id="optChooseOperator">
           <div class="opt-badge secondary">Exchange autonomous mode</div>
           <div class="opt-icon">🏛️</div>
-          <h4>CSD Operator Keypair (KASE Authority)</h4>
+          <h4>Browser-local Demo Signer</h4>
           <p>Automatic signing with the KASE exchange's institutional private key, with no manual approval in the extension.</p>
           <div class="opt-features">
             <span id="optOperatorTxText">✔ 100% real transaction on Solana Devnet</span>
@@ -1229,7 +1229,7 @@
             <span>✔ Visible in Solana Explorer</span>
           </div>
           <button class="btn-opt-select btn-opt-operator" id="btnConfirmChooseOperator">
-            <span>Execute as CSD Operator</span>
+            <span>Sign Memo as Local Demo Signer</span>
           </button>
         </div>
       </div>
