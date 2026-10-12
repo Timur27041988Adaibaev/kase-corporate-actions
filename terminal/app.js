@@ -2277,23 +2277,23 @@ function initListeners() {
 
   // Signer Choice Modal Actions
   document.getElementById("btnConfirmChoosePhantom")?.addEventListener("click", async () => {
+    // Capture the pending action before closing the modal, because the close
+    // handler clears state.pendingActionCallback.
+    const cb = state.pendingActionCallback;
     closeSignerChoiceModal();
     const connected = await connectPhantomWallet(false);
-    if (connected && typeof state.pendingActionCallback === "function") {
-      const cb = state.pendingActionCallback;
-      state.pendingActionCallback = null;
-      cb();
+    if (connected && typeof cb === "function") {
+      await cb();
     }
   });
 
-  document.getElementById("btnConfirmChooseOperator")?.addEventListener("click", () => {
+  document.getElementById("btnConfirmChooseOperator")?.addEventListener("click", async () => {
+    const cb = state.pendingActionCallback;
     closeSignerChoiceModal();
     state.userExplicitlySelectedSigner = true;
     switchToOperatorMode();
-    if (typeof state.pendingActionCallback === "function") {
-      const cb = state.pendingActionCallback;
-      state.pendingActionCallback = null;
-      cb();
+    if (typeof cb === "function") {
+      await cb();
     }
   });
 
