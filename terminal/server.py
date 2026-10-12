@@ -664,7 +664,7 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
 
         if path == "/api/actions/coupon":
             amount_str = query.get("amount", [str(payload.get("amount", "500000"))])[0]
-            memo_payload = f"KASE CSD: Semi-Annual Coupon ${amount_str} USDC | ISIN KZDEMO000001 | Recipient: {account}"
+            memo_payload = f"KASE_DEMO_MEMO_ONLY | REQUESTED_ACTION=COUPON | AMOUNT_REFERENCE={amount_str}_USDC | ISIN=KZDEMO000001 | RECIPIENT={account} | EXECUTION=NOT_PERFORMED"
             try:
                 tx_base64 = build_solana_memo_transaction(account, memo_payload, tx_version=tx_version)
             except (RuntimeError, ValueError) as err:
@@ -699,7 +699,7 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
 
         if path == "/api/actions/redemption":
             bonds_str = query.get("bonds", [str(payload.get("bonds", "10000"))])[0]
-            memo_payload = f"KASE CSD: Principal Redemption $10,000,000.00 USDC & Token Burn | ISIN KZDEMO000001 | Recipient: {account}"
+            memo_payload = f"KASE_DEMO_MEMO_ONLY | REQUESTED_ACTION=REDEMPTION_AND_BURN | AMOUNT_REFERENCE=10000000_USDC | ISIN=KZDEMO000001 | RECIPIENT={account} | EXECUTION=NOT_PERFORMED"
             tx_base64 = build_solana_memo_transaction(account, memo_payload, tx_version=tx_version)
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
@@ -733,7 +733,7 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
 
             rationale = query.get("rationale", [str(payload.get("rationale", ""))])[0]
             rationale_suffix = f" | Rationale: {rationale[:40]}" if rationale else ""
-            memo_payload = f"KASE Governance: Ballot ({choice.upper()}) on Proposal #101 | Restructuring Coupon 12.5% | Voter: {account}{rationale_suffix}"
+            memo_payload = f"KASE_DEMO_MEMO_ONLY | REQUESTED_ACTION=GOVERNANCE_VOTE | CHOICE_INTENT={choice.upper()} | PROPOSAL_ID=101 | VOTER={account}{rationale_suffix} | EXECUTION=NOT_PERFORMED"
             tx_base64 = build_solana_memo_transaction(account, memo_payload, tx_version=tx_version)
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
