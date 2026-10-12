@@ -3161,6 +3161,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   initListeners();
   setupExtendedListeners();
   updateCalculator();
+  updateQuorum();
   updateClusterUI();
   updateWalletUI();
   updateActionButtons();
