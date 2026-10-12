@@ -9,7 +9,7 @@ import {
 } from "@solana/spl-token";
 import { assert, expect } from "chai";
 import BN from "bn.js";
-import { sendAndConfirmTransaction, Transaction, TransactionInstruction } from "@solana/web3.js";
+import { PublicKey, sendAndConfirmTransaction, Transaction, TransactionInstruction } from "@solana/web3.js";
 
 describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", () => {
   const provider = anchor.AnchorProvider.env();
