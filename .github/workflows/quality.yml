@@ -89,4 +89,8 @@ jobs:
           cargo --version
           solana --version | grep -F "2.2.16"
           anchor --version | grep -F "0.31.1"
+          # Solana 2.2's SBF toolchain uses Cargo 1.84, which cannot parse
+          # zeroize_derive 1.5.0's edition2024 manifest. Resolve with the
+          # host Cargo and pin the compatible transitive version in Cargo.lock.
+          cargo update -p zeroize_derive --precise 1.4.3
           anchor test
