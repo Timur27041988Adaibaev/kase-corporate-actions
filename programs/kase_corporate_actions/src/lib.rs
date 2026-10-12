@@ -458,6 +458,11 @@ pub mod kase_corporate_actions {
         require!(title.len() <= 96 && !title.is_empty(), KaseError::InvalidProposalTitle);
         require!(voting_end > voting_start, KaseError::VotingPeriodClosed);
         require!(new_coupon_rate_bps <= 10_000, KaseError::InvalidCouponRate);
+        require!(
+            quorum_threshold_bonds > 0
+                && quorum_threshold_bonds <= ctx.accounts.bond_security.total_supply,
+            KaseError::InvalidQuorumThreshold
+        );
 
         let proposal = &mut ctx.accounts.proposal;
         proposal.proposal_id = proposal_id;
@@ -503,14 +508,14 @@ pub mod kase_corporate_actions {
         );
         require!(!proposal.finalized, KaseError::ProposalAlreadyExecuted);
         require!(
-            ctx.accounts.corporate_action.action_type == ActionType::GovernanceVoting,
+            ctx.accounts.corporate_action.action_type == ActionType::GovernanceVoting
+                && ctx.accounts.corporate_action.status == ActionStatus::SnapshotActive,
             KaseError::InvalidActionStatus
         );
 
-        // Governance Security: Anti-Vote-Recycling (Vote-and-Transfer Shield)
-        // If an audited HolderEntitlement snapshot is provided, voting weight is anchored strictly to the recorded snapshot balance.
-        // Invariant: The voter must maintain at least the snapshot balance in their token account at voting time
-        // to prevent transferring tokens after the snapshot (Vote Recycling / Empty Voting).
+        // Governance Security: voting weight is mandatory and bound to a holder
+        // entitlement created from this governance action's token-account snapshot.
+        // The holder must still own at least the snapshotted balance to prevent vote recycling.
         let current_balance = ctx.accounts.holder_bond_account.amount;
         require!(current_balance > 0, KaseError::ZeroHolderBalance);
 
