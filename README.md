@@ -43,7 +43,7 @@ The repository includes the Anchor program source and a browser terminal prototy
 ## 🚀 The 3 required scenarios
 
 ### Scenario 1: Coupon Payment Settlement
-1. **Record Date Snapshot:** On the record date, the on-chain program reads holder balances.
+1. **Record Date Snapshot:** The authority submits a holder balance snapshot. The program validates that the claimed amount does not exceed the holder's real SPL token-account balance; it does not read an external KCSD registry.
 2. **Entitlement calculation (Entitlement Engine):**  
    $$\text{Coupon} = \frac{\text{BondsHeld} \times \text{FaceValue} \times \text{RateBps}}{10000 \times \text{Frequency}} = \frac{\text{BondsHeld} \times \$1000 \times 1000}{10000 \times 2} = \text{BondsHeld} \times \$50.00$$
    - For an issue of 10,000 bonds, the total coupon pool is **$500,000.00 USDC**.
@@ -83,19 +83,19 @@ For transparency, the table below strictly separates functionality implemented d
 | **Funding the pool into the Escrow Vault** | ✅ **Implemented on-chain** | — | PDA vault, funded via SPL Token Transfer |
 | **Coupon payment (DvP)** | ✅ **Implemented on-chain** | — | Atomic CPI transfer from the Vault to the investor, sets `is_settled = true` |
 | **Double-Claim protection** | ✅ **Implemented on-chain** | — | Strict `require!(!entitlement.is_settled, KaseError::AlreadySettled)` |
-| **Principal redemption and Token Burn** | ✅ **Implemented on-chain** | — | Clock sysvar $\ge$ maturity check, CPI `token::burn`, principal transfer |
-| **Governance and voting (`GovernanceProposal`)** | ✅ **Implemented on-chain** | — | Proposal #101, FOR/AGAINST/ABSTAIN vote tally, quorum check |
+| **Principal redemption and Token Burn** | ⚠️ **Implemented in source; current deployed binary not verified** | — | Anchor source includes maturity check, token burn, and principal transfer; browser UI does not invoke it. |
+| **Governance and voting (`GovernanceProposal`)** | ⚠️ **Implemented in source; current deployed binary not verified** | — | Anchor source includes proposal and vote logic; browser UI records vote intent in Memo only. |
 | **Double-Vote protection** | ✅ **Implemented on-chain** | — | PDA collision on `[b"voter", proposal_key, voter_key]` in Sealevel |
-| **Dynamic recalculation of instrument terms** | ✅ **Implemented on-chain** | — | Writes the new rate (12.5%) to `BondSecurity.annual_coupon_bps` when approved |
+| **Dynamic recalculation of instrument terms** | ⚠️ **Implemented in source; current deployed binary not verified** | — | Anchor source updates the rate on finalization; browser UI does not invoke it. |
 | **Broadcasting transactions to Solana Devnet & Mainnet** | — | ✅ **Solana Memo Program** | Uses the official Solana Memo Program (`MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr`). Mainnet: Memo Program records only. Devnet program ID is configured in source; deployment/account status must be verified. |
-| **Mainnet Record Policy** | — | ✅ **Official Memo Program** | Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz). |
+| **Mainnet Record Policy** | — | ✅ **Official Memo Program** | Mainnet actions from the browser are Memo records only. No Anchor settlement is executed by the UI. |
 | **Initial register export from KCSD** | — | ⚙️ **Simulated** | KCSD snapshot format (5 institutional participants: Bank A-D, Retail Pool) |
 | **Fiat interbank settlement (Fiat Payments)** | — | ⚙️ **Simulated** | Traditional settlement through the National Bank of Kazakhstan payment system / KZT fiat clearing (simulated; on-chain settlement uses test USD / SPL stablecoin) |
 | **Dynamic Blinks builder (`server.py`)** | — | ⚙️ **Integration** | HTTP API following the Dialect Actions spec (`/actions.json`, `/api/actions/*`) |
 | **ISO 20022 regulatory message export** | — | ⚙️ **Integration** | XML/JSON generator (`seev.031`, `seev.036`, `seev.004`) for the KCSD back office |
 | **3-Agent Pre-Flight Oracle Consensus** | — | ⚙️ **Simulated** | Pre-flight checks of sanctions (AML), math invariants and liquidity |
 
-> ⚠️ **Important Mainnet Invariant:** Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).
+> ⚠️ **Important:** Mainnet actions from the browser are Memo records only. No Anchor settlement is executed by the UI.
 
 
 ---
@@ -111,14 +111,14 @@ For transparency, the table below strictly separates functionality implemented d
 2. **Solana Actions & Blinks (Dialect Specification):**
    - Full `/actions.json` spec and API endpoints `/api/actions/coupon`, `/api/actions/redemption`, `/api/actions/vote`.
    - CORS support and `X-Action-Version: 2.1.3`.
-   - Vote and receive payouts directly from Twitter/X, Telegram or Discord.
+   - The endpoints currently prepare Memo-only attestations; they do not execute payouts or governance votes from social platforms.
    - Interactive Blinks showcase in the terminal with a copy button for `dial.to` links.
 
 3. **3-Agent Pre-Flight Oracle Consensus:**
    - **Oracle 1 (AML & Sanctions):** Checks participants' BINs (business identification numbers) and screens sanctions lists.
    - **Oracle 2 (Formal Math Invariants):** Proof of balance conservation $\sum E_i \equiv \text{PoolAmount}$.
    - **Oracle 3 (Solvency & Velocity):** Checks PDA vault liquidity and Solana block speed.
-   - Cryptographic attestation with 3/3 APPROVED status before broadcasting to the network.
+   - Oracle consensus is unavailable until independent providers are configured; the UI does not assert 3/3 approval.
 
 4. **ISO 20022 Financial MX Regulatory Engine:**
    - Standardized SWIFT / Euroclear / KCSD banking formats.
@@ -128,11 +128,11 @@ For transparency, the table below strictly separates functionality implemented d
    - One-click export in `.xml` and `.json` formats.
 
 5. **Enterprise Chaos Engineering & Adversarial Shield:**
-   - Live smart-contract stress-test panel covering 4 attack vectors:
-     - Replay Double-Claim Attack $\rightarrow$ Blocked by `AlreadySettled`.
-     - Sybil Double-Voting $\rightarrow$ Blocked by a `VoterRecord PDA` collision.
+   - The UI shows illustrative security scenarios; actual contract tests run in the Anchor integration suite, not in the browser panel.
+     - Replay Double-Claim Attack $\rightarrow$ covered by Anchor test cases; browser UI does not execute the claim.
+     - Sybil Double-Voting $\rightarrow$ covered by Anchor test cases; browser UI does not execute the vote.
      - Arithmetic Overflow $\rightarrow$ Caught by `Checked Math`.
-     - RPC Failure $\rightarrow$ Circuit Breaker automatic failover.
+     - RPC Failure $\rightarrow$ API returns an unavailable response when it cannot build a Memo transaction; no automatic failover is claimed.
 
 6. **Priority Fee & Sealevel Compute Budget:**
    - Priority selector (Normal 0 µL / Fast +15k µL / Turbo +50k µL).
@@ -215,7 +215,9 @@ Built for the **KASE (Kazakhstan Stock Exchange)** and **Superteam Kazakhstan** 
 *Reliability and verification: working code and comprehensive tests.*
 
 
-## Live Devnet Deployment (verified)
+## Historical Devnet deployment evidence (re-verify against current source)
+
+The transaction links below are historical Devnet records from an earlier deployment/run. They show that those transactions were recorded on Devnet, but they do **not** prove that the currently committed source matches the deployed binary or that the browser UI invokes these Anchor instructions. The browser UI currently submits Memo-only attestations. Check the live program account and verify the deployed build before relying on the current deployment.
 
 - **Program ID:** [`5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz`](https://explorer.solana.com/address/5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz?cluster=devnet)
 - **Deploy tx:** [4u96WS31…](https://explorer.solana.com/tx/4u96WS31cUb7wozMADQhJMfej7gUN3jP3uoDGxkLFbPAGWZPhoKtKPcjr7kckPaarGhKLL4q5ADoe7RWC9ZWRVY8?cluster=devnet)
