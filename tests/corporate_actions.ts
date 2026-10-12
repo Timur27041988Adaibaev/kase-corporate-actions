@@ -20,9 +20,28 @@ describe("KASE corporate actions — local-validator end-to-end", () => {
   const program = anchor.workspace.KaseCorporateActions as Program<any>;
   const authority = (provider.wallet as anchor.Wallet).payer;
 
+  async function chainTimestamp(connection: any): Promise<number> {
+    let slot = await connection.getSlot("confirmed");
+    for (let offset = 0; offset < 10 && slot > offset; offset++) {
+      const timestamp = await connection.getBlockTime(slot - offset);
+      if (timestamp !== null) return timestamp;
+    }
+    return Math.floor(Date.now() / 1000);
+  }
+
+  async function warpToTimestamp(connection: any, targetTimestamp: number): Promise<void> {
+    const currentTimestamp = await chainTimestamp(connection);
+    if (targetTimestamp <= currentTimestamp) return;
+    const currentSlot = await connection.getSlot("confirmed");
+    const slotsToAdvance = Math.ceil((targetTimestamp - currentTimestamp) / 0.4) + 3;
+    const response = await connection._rpcRequest("warpSlot", [currentSlot + slotsToAdvance]);
+    if (response?.error) throw new Error("Local validator warpSlot failed: " + JSON.stringify(response.error));
+    await connection.getLatestBlockhash("confirmed");
+  }
+
   it("executes a real coupon transfer, governance vote/finalization, and redemption/burn", async () => {
     const connection = provider.connection;
-    const now = Math.floor(Date.now() / 1000);
+    const now = await chainTimestamp(connection);
     const isin = `KZTEST${now.toString().slice(-8)}`.slice(0, 16);
     const couponActionId = new BN(now + 1);
     const redemptionActionId = new BN(now + 2);
@@ -211,10 +230,7 @@ describe("KASE corporate actions — local-validator end-to-end", () => {
       expect(String(error?.message || error)).to.match(/already in use|custom program error|already voted|0x0/i);
     }
 
-    const waitUntil = async (timestamp: number) => {
-      const waitMs = Math.max(0, (timestamp - Math.floor(Date.now() / 1000) + 1) * 1000);
-      if (waitMs) await new Promise((resolve) => setTimeout(resolve, waitMs));
-    };
+    const waitUntil = async (timestamp: number) => warpToTimestamp(connection, timestamp);
 
     await waitUntil(couponSettlementAt);
     const beforeCoupon = await connection.getTokenAccountBalance(holderSettlement.address);
