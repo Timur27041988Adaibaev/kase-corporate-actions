@@ -78,7 +78,6 @@ jobs:
           npm install --no-audit --no-fund
           npm install --global yarn@1.22.22
       - name: Build and run Anchor integration tests on local validator
-        env:
         run: |
           set -euo pipefail
           export PATH="$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH"
