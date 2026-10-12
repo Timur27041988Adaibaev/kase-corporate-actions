@@ -1,5 +1,7 @@
 
-## Live Devnet Deployment (verified)
+## Historical Devnet transaction evidence (not a current-source verification)
+
+These transaction links document a prior successful Devnet run. They do not prove that the currently committed Anchor source matches the deployed binary. The current source has changed since this run, including governance account validation and snapshot guards. The deployed program must be rebuilt and upgraded with the authorized program-upgrade wallet before these results can be treated as verification of the current source.
 
 - **Program ID:** [`5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz`](https://explorer.solana.com/address/5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz?cluster=devnet)
 - **Deploy tx:** [4u96WS31…](https://explorer.solana.com/tx/4u96WS31cUb7wozMADQhJMfej7gUN3jP3uoDGxkLFbPAGWZPhoKtKPcjr7kckPaarGhKLL4q5ADoe7RWC9ZWRVY8?cluster=devnet)
