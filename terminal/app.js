@@ -3328,7 +3328,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const cluster = CLUSTERS[currentCluster];
   appendLog("BOOT", "tag-ok", "KASE Automated Corporate Actions Terminal initialized.");
   appendLog("NETWORK", cluster.isMainnet ? "tag-warn" : "tag-ok", `Connected to cluster ${cluster.name} (${activeRpc})`);
-  appendLog("SECURITY", "tag-ok", `Loaded issue ${BondMath.terms.isin} ${BondMath.terms.name}. 10,000 bonds held in custody at KCSD.`);
+  appendLog("DEMO", "tag-warn", `Loaded illustrative instrument ${BondMath.terms.isin} — displayed holder balances are demo data; no KCSD registry is connected.`);
 
   if (cluster.isMainnet) {
     appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
