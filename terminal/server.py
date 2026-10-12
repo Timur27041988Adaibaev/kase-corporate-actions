@@ -100,7 +100,7 @@ ISO20022_TEMPLATES = {
       <CorpActnEvtId>CA-KZDEMO000001-2026-01</CorpActnEvtId>
       <EvtTp><Cd>INTR</Cd></EvtTp>
       <SttlmDt>2026-10-06T06:15:00Z</SttlmDt>
-      <SttlmSts><Cd>SETT</Cd></SttlmSts>
+      <SttlmSts><Cd>PEND</Cd></SttlmSts>
     </MvmntGnlInf>
     <UndrlygScty>
       <ISIN>KZDEMO000001</ISIN>
@@ -111,7 +111,7 @@ ISO20022_TEMPLATES = {
       <OnChainVerification>
         <Network>Solana Blockchain</Network>
         <Program>MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr</Program>
-        <FinalityStatus>CONFIRMED_ROOT</FinalityStatus>
+        <FinalityStatus>NOT_VERIFIED</FinalityStatus>
       </OnChainVerification>
     </CshMvmntDtls>
   </CorpActnMvmntConf>
@@ -121,15 +121,15 @@ ISO20022_TEMPLATES = {
                 "eventId": "CA-KZDEMO000001-2026-01",
                 "eventType": "INTR",
                 "settlementDate": "2026-10-06T06:15:00Z",
-                "settlementStatus": "SETTLED"
+                "settlementStatus": "NOT_EXECUTED"
             },
             "security": { "isin": "KZDEMO000001" },
             "settlementDetails": {
-                "totalAmountSettled": "$500,000.00 USDC",
-                "holdersSettled": 5,
+                "totalAmountSettled": "Illustrative only — no transfer executed",
+                "holdersSettled": 0,
                 "blockchainNetwork": "Solana",
-                "settlementMechanism": "Real-Time DvP via Smart PDA Vault",
-                "zeroDoubleClaimGuaranteed": True
+                "settlementMechanism": "Not connected — no transfer executed",
+                "zeroDoubleClaimGuaranteed": False
             }
         }
     },
@@ -145,7 +145,7 @@ ISO20022_TEMPLATES = {
       <PrpslId>101</PrpslId>
       <Titl>Restructuring: Coupon Increase from 10.0% to 12.5% p.a.</Titl>
       <QrmReq>5000</QrmReq>
-      <Rslt>ADOPTED</Rslt>
+      <Rslt>PEND</Rslt>
       <VtsFor>6000</VtsFor>
       <VtsAgnst>1200</VtsAgnst>
       <VtsAbstn>800</VtsAbstn>
@@ -166,9 +166,9 @@ ISO20022_TEMPLATES = {
                 "votesFor": 6000,
                 "votesAgainst": 1200,
                 "votesAbstain": 800,
-                "status": "ADOPTED",
+                "status": "NOT_EXECUTED",
                 "newCouponRate": "12.50% p.a. (1250 bps)",
-                "onChainProof": "Solana VoterRecord PDA Collision Shield"
+                "onChainProof": "NOT_VERIFIED"
             }
         }
     }
