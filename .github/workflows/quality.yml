@@ -26,3 +26,28 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_server_*.py' -v
       - name: Check Anchor program Rust compilation
         run: cargo check --manifest-path programs/kase_corporate_actions/Cargo.toml
+  anchor-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/v1.18.26/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+      - name: Install Anchor CLI
+        run: |
+          cargo install --git https://github.com/coral-xyz/anchor avm --locked
+          echo "$HOME/.avm/bin" >> "$GITHUB_PATH"
+          "$HOME/.cargo/bin/avm" install 0.30.1
+          "$HOME/.cargo/bin/avm" use 0.30.1
+      - name: Install test dependencies
+        run: |
+          npm install --no-audit --no-fund
+          npm install --global yarn@1.22.22
+      - name: Build and run Anchor integration tests on local validator
+        run: anchor test
