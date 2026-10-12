@@ -1,5 +1,8 @@
 name: Quality checks
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: [main]
@@ -93,6 +96,24 @@ jobs:
           cargo update -p zeroize_derive --precise 1.4.3
           anchor test
 
+      - name: Publish generated IDL to the browser console
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test -s target/idl/kase_corporate_actions.json
+          mkdir -p terminal/idl
+          cp target/idl/kase_corporate_actions.json terminal/idl/kase_corporate_actions.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add terminal/idl/kase_corporate_actions.json
+          if git diff --cached --quiet; then
+            echo "Generated IDL unchanged."
+          else
+            git commit -m "build: publish generated Anchor IDL"
+            git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
+          fi
       - name: Upload generated Anchor IDL for browser integration
         if: always()
         uses: actions/upload-artifact@v4
