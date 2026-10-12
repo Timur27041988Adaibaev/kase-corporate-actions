@@ -222,38 +222,41 @@ def encode_compact_u16(val: int) -> bytes:
     return bytes(out)
 
 _RPC_CACHE = {
-    "blockhash": "4uhcVJyU9pJkvQyS88uRDiswHXSCkY3zQawwpjk2NsNY",
+    "blockhash": None,
     "blockhash_ts": 0.0,
     "fee": 15000,
     "fee_ts": 0.0,
 }
 
 def get_recent_blockhash(rpc_url="https://api.devnet.solana.com") -> str:
-    fallback = "4uhcVJyU9pJkvQyS88uRDiswHXSCkY3zQawwpjk2NsNY"
+    """Return a fresh RPC blockhash or fail closed; never build transactions with a fake/expired hash."""
     now = time.time()
-    if now - _RPC_CACHE["blockhash_ts"] < 15.0 and _RPC_CACHE["blockhash"] != fallback:
+    if _RPC_CACHE["blockhash"] and now - _RPC_CACHE["blockhash_ts"] < 10.0:
         return _RPC_CACHE["blockhash"]
+    req_body = json.dumps({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "getLatestBlockhash",
+        "params": [{"commitment": "confirmed"}]
+    }).encode("utf-8")
+    req = urllib.request.Request(
+        rpc_url,
+        data=req_body,
+        headers={"Content-Type": "application/json", "User-Agent": "KASE-Terminal/4.0"}
+    )
     try:
-        req_body = json.dumps({
-            "jsonrpc": "2.0",
-            "id": 1,
-            "method": "getLatestBlockhash",
-            "params": [{"commitment": "confirmed"}]
-        }).encode("utf-8")
-        req = urllib.request.Request(
-            rpc_url,
-            data=req_body,
-            headers={"Content-Type": "application/json", "User-Agent": "KASE-Terminal/4.0"}
-        )
-        with urllib.request.urlopen(req, timeout=0.8) as resp:
+        with urllib.request.urlopen(req, timeout=5.0) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-            bh = data["result"]["value"]["blockhash"]
-            _RPC_CACHE["blockhash"] = bh
-            _RPC_CACHE["blockhash_ts"] = now
-            return bh
-    except Exception:
+        if data.get("error"):
+            raise RuntimeError(data["error"].get("message", "Solana RPC returned an error"))
+        bh = data["result"]["value"]["blockhash"]
+        if not bh:
+            raise RuntimeError("Solana RPC returned no recent blockhash")
+        _RPC_CACHE["blockhash"] = bh
         _RPC_CACHE["blockhash_ts"] = now
-        return fallback
+        return bh
+    except Exception as exc:
+        raise RuntimeError(f"Unable to fetch a fresh Solana blockhash from {rpc_url}: {exc}") from exc
 
 def get_recent_prioritization_fees(rpc_url="https://api.devnet.solana.com") -> int:
     """
@@ -550,40 +553,18 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(b"Unknown ISO 20022 schema identifier.")
                 return
 
-        # 6. Multi-Oracle Consensus Verification Endpoint (/api/oracle/consensus)
+        # Oracle consensus is unavailable until independent, real data sources are configured.
         if path == "/api/oracle/consensus":
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
+            self.send_response(503)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
             self.end_headers()
-            now_ts = int(time.time())
-            digest = hashlib.sha256(f"KASE_ORACLE_3_AGENT_CONSENSUS_{now_ts}".encode("utf-8")).hexdigest()
-            consensus_data = {
-                "timestamp": now_ts,
-                "status": "APPROVED",
-                "quorum": "3/3",
-                "consensusFingerprint": digest,
-                "oracles": [
-                    {
-                        "agentId": "oracle-registry-aml",
-                        "title": "Oracle 1: CSD Registry & AML Gatekeeper",
-                        "status": "PASS",
-                        "details": "All 5 custodian banks whitelisted. BIN records verified with KCSD Central Registry. Zero sanctions matches (OFAC/FATF OK)."
-                    },
-                    {
-                        "agentId": "oracle-math-invariants",
-                        "title": "Oracle 2: Formal Math & Entitlement Prover",
-                        "status": "PASS",
-                        "details": "Invariant verified: Sum(Entitlements) == $500,000.00 USDC exact. Zero-division guards active. Fixed-point precision verified."
-                    },
-                    {
-                        "agentId": "oracle-solvency-cluster",
-                        "title": "Oracle 3: Vault Solvency & Cluster Velocity",
-                        "status": "PASS",
-                        "details": "Escrow PDA vault balance充足. Solana cluster slot confirmation velocity healthy (<400ms finality latency)."
-                    }
-                ]
-            }
-            self.wfile.write(json.dumps(consensus_data, indent=2).encode("utf-8"))
+            self.wfile.write(json.dumps({
+                "status": "UNAVAILABLE",
+                "quorum": None,
+                "consensusFingerprint": None,
+                "oracles": [],
+                "message": "Oracle consensus is not configured. No independent registry, AML, solvency, or entitlement providers are connected; approval must not be inferred."
+            }, indent=2).encode("utf-8"))
             return
 
         # 7. System Health Endpoint (/api/health)
@@ -689,15 +670,15 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             res = {
                 "transaction": tx_base64,
-                "message": f"KASE CSD: Semi-Annual Coupon of $500,000.00 USDC prepared for account {account[:8]}... on Solana.",
+                "message": f"Memo attestation prepared for {account[:8]}... only; no USDC transfer or coupon settlement is performed.",
                 "links": {
                     "next": {
                         "type": "inline",
                         "action": {
                             "title": "KASE CSD Coupon Settlement Receipt",
-                            "description": "Coupon distribution authorized on Solana. Real-time DvP settlement recorded in KCSD Central Depository ledger.",
+                            "description": "Memo attestation only. This transaction does not transfer USDC, settle a coupon, or write to a KCSD ledger.",
                             "icon": "https://raw.githubusercontent.com/solana-developers/brand-assets/main/assets/solanaLogoMark.svg",
-                            "label": "Settlement Confirmed"
+                            "label": "Memo Attestation Only"
                         }
                     }
                 }
@@ -714,15 +695,15 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             res = {
                 "transaction": tx_base64,
-                "message": f"KASE CSD: Principal Redemption of $10,000,000.00 USDC & token burn prepared for account {account[:8]}... on Solana.",
+                "message": f"Memo attestation prepared for {account[:8]}... only; no token burn or principal transfer is performed.",
                 "links": {
                     "next": {
                         "type": "inline",
                         "action": {
                             "title": "KASE CSD Maturity Redemption Receipt",
-                            "description": "Bonds burned atomically and nominal value disbursed under KCSD Central Depository authority.",
+                            "description": "Memo attestation only. This transaction does not burn bond tokens or transfer principal USDC.",
                             "icon": "https://raw.githubusercontent.com/solana-developers/brand-assets/main/assets/solanaLogoMark.svg",
-                            "label": "Redemption Recorded"
+                            "label": "Memo Attestation Only"
                         }
                     }
                 }
@@ -748,15 +729,15 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             res = {
                 "transaction": tx_base64,
-                "message": f"KASE Governance: Ballot ({choice.upper()}) on Proposal #101 prepared for voter {account[:8]}... on Solana.",
+                "message": f"Memo attestation prepared for voter {account[:8]}... only; the governance program does not count this as a vote.",
                 "links": {
                     "next": {
                         "type": "inline",
                         "action": {
                             "title": "KASE Governance Ballot Attestation",
-                            "description": f"Ballot {choice.upper()} recorded with VoterRecord PDA shield. Proposal #101 quorum tracking active.",
+                            "description": f"Memo attestation only for choice {choice.upper()}; no Anchor program instruction or on-chain vote tally is executed.",
                             "icon": "https://raw.githubusercontent.com/solana-developers/brand-assets/main/assets/solanaLogoMark.svg",
-                            "label": "Ballot Counted"
+                            "label": "Memo Attestation Only"
                         }
                     }
                 }
