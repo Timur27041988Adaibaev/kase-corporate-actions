@@ -837,15 +837,7 @@ async function ensureGasBalance(targetPubkey, minSol = 0.005) {
       // Attempt 1: Direct Faucet Request
       try {
         const sig = await connection.requestAirdrop(targetPubkey, 0.5 * web3.LAMPORTS_PER_SOL);
-        const latest = await connection.getLatestBlockhash("confirmed");
-        await connection.confirmTransaction(
-          {
-            signature: sig,
-            blockhash: latest.blockhash,
-            lastValidBlockHeight: latest.lastValidBlockHeight,
-          },
-          "confirmed"
-        );
+        await connection.confirmTransaction(sig, "confirmed");
         appendLog("GAS-GUARD", "tag-ok", `Successfully credited 0.5 SOL from the Devnet faucet!`, sig);
       } catch (faucetErr) {
         console.warn("Public airdrop faucet rate limit:", faucetErr);
@@ -854,7 +846,7 @@ async function ensureGasBalance(targetPubkey, minSol = 0.005) {
         if (state.operatorKeypair && state.operatorKeypair.publicKey.toString() !== targetPubkey.toString()) {
           const opBal = await connection.getBalance(state.operatorKeypair.publicKey);
           if (opBal > 0.05 * 1e9) {
-            appendLog("GAS-SUBSIDY", "tag-broadcast", "Subsidizing 0.05 SOL from the KASE CSD treasury...");
+            appendLog("GAS-SUBSIDY", "tag-broadcast", "Topping up 0.05 Devnet SOL from the temporary browser-local signer...");
             const { blockhash } = await connection.getLatestBlockhash("confirmed");
             const tx = new web3.Transaction().add(
               web3.SystemProgram.transfer({
@@ -916,15 +908,7 @@ async function handleAirdrop() {
     const airdropSig = await connection.requestAirdrop(state.walletPubkey, lamports);
     appendLog("AIRDROP", "tag-tx", `Airdrop transaction sent: ${airdropSig.slice(0, 16)}... Confirming...`);
 
-    const latest = await connection.getLatestBlockhash("confirmed");
-    await connection.confirmTransaction(
-      {
-        signature: airdropSig,
-        blockhash: latest.blockhash,
-        lastValidBlockHeight: latest.lastValidBlockHeight,
-      },
-      "confirmed"
-    );
+    await connection.confirmTransaction(airdropSig, "confirmed");
 
     await refreshWalletBalance();
     appendLog("CONFIRMED", "tag-ok", `1.0 SOL Airdrop confirmed on Devnet! New balance: ${state.solBalance.toFixed(3)} SOL`, airdropSig);
