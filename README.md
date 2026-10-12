@@ -66,7 +66,7 @@ The repository includes the Anchor program source and a browser terminal prototy
    - Retail Pool = **800 votes "ABSTAIN" (8%)**
    - Broker C (2,000) = **does not vote**
 3. **Double-voting protection:** The `VoterRecord` PDA derived from `[b"voter", proposal.key(), voter.key()]` blocks repeat votes.
-4. **Tally and quorum:** The quorum threshold (5,000 bonds = 50%) is checked. When "FOR" wins (6,000 FOR vs 1,200 AGAINST), the resolution is recorded on Solana and all coupons in the terminal are automatically recalculated from $50.00 to $62.50.
+4. **Tally and quorum:** The quorum threshold (5,000 bonds = 50%) is checked. When "FOR" wins (6,000 FOR vs 1,200 AGAINST), the resolution is intended to update the on-chain coupon rate when a real governance instruction passes. The current browser terminal does not execute that instruction or recalculate from on-chain state.
 
 ---
 
@@ -76,7 +76,7 @@ For transparency, the table below strictly separates functionality implemented d
 
 | Component / Operation | Implemented in Anchor program (code) | Simulated / Off-chain services | Implementation notes |
 | :--- | :---: | :---: | :--- |
-| **Devnet deployment of the program** | ✅ **Deployed & executed on Devnet** | — | Program ID `5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz`; all 3 scenarios + attack rejections run as real txs (see Live Devnet Deployment). Mainnet: not deployed. |
+| **Devnet deployment of the program** | ⚠️ **Requires live verification** | — | Program ID configured in source: `5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz`. The browser terminal currently submits Memo-only attestations and does not invoke the Anchor scenario instructions. Mainnet: not deployed. |
 | **Instrument registration (`BondSecurity`)** | ✅ **Implemented on-chain** | — | PDA `[b"bond", isin]`, ISIN validation (1–16 characters), face value, rate, dates |
 | **Corporate action scheduling (`CorporateAction`)** | ✅ **Implemented on-chain** | — | PDA `[b"action", bond_key, id]`, check that maturity has not passed |
 | **Holder balance snapshot (`HolderEntitlement`)** | ✅ **Implemented on-chain** | — | PDA `[b"entitlement", action_key, holder]`, records the entitlement |
@@ -87,7 +87,7 @@ For transparency, the table below strictly separates functionality implemented d
 | **Governance and voting (`GovernanceProposal`)** | ✅ **Implemented on-chain** | — | Proposal #101, FOR/AGAINST/ABSTAIN vote tally, quorum check |
 | **Double-Vote protection** | ✅ **Implemented on-chain** | — | PDA collision on `[b"voter", proposal_key, voter_key]` in Sealevel |
 | **Dynamic recalculation of instrument terms** | ✅ **Implemented on-chain** | — | Writes the new rate (12.5%) to `BondSecurity.annual_coupon_bps` when approved |
-| **Broadcasting transactions to Solana Devnet & Mainnet** | — | ✅ **Solana Memo Program** | Uses the official Solana Memo Program (`MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr`). Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz). |
+| **Broadcasting transactions to Solana Devnet & Mainnet** | — | ✅ **Solana Memo Program** | Uses the official Solana Memo Program (`MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr`). Mainnet: Memo Program records only. Devnet program ID is configured in source; deployment/account status must be verified. |
 | **Mainnet Record Policy** | — | ✅ **Official Memo Program** | Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz). |
 | **Initial register export from KCSD** | — | ⚙️ **Simulated** | KCSD snapshot format (5 institutional participants: Bank A-D, Retail Pool) |
 | **Fiat interbank settlement (Fiat Payments)** | — | ⚙️ **Simulated** | Traditional settlement through the National Bank of Kazakhstan payment system / KZT fiat clearing (simulated; on-chain settlement uses test USD / SPL stablecoin) |
