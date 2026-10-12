@@ -2902,16 +2902,21 @@ function closeBlinksModal() {
 function copyBlinkUrl() {
   playAudioCue("click");
   const input = document.getElementById("blinkDialtoInput");
-  if (input) {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(input.value).then(() => {
-        showToast("Blink Copied", "Dial.to link copied to clipboard!", "success");
-      });
-    } else {
+  if (!input) return;
+  const actionUrl = new URL("/api/actions/coupon", window.location.href).toString();
+  input.value = `https://dial.to/?action=solana-action:${actionUrl}`;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(input.value).then(() => {
+      showToast("Memo Action Link Copied", "Copied a link for this host. The action creates a Memo record only; it does not settle funds.", "info");
+    }).catch(() => {
       input.select();
       document.execCommand("copy");
-      showToast("Blink Copied", "Dial.to link copied to clipboard!", "success");
-    }
+      showToast("Memo Action Link Ready", "The link is in the field; copy it manually if needed.", "info");
+    });
+  } else {
+    input.select();
+    document.execCommand("copy");
+    showToast("Memo Action Link Ready", "The link is in the field; copy it manually if needed.", "info");
   }
 }
 
