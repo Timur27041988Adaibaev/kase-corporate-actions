@@ -49,7 +49,9 @@ jobs:
           "$HOME/.cargo/bin/avm" use 0.31.1
       - name: Install compatible Solana CLI after Anchor setup
         run: |
-          yes | sh -c "$(curl -sSfL https://release.anza.xyz/v2.2.16/install)"
+          installer="$(curl -sSfL https://release.anza.xyz/v2.2.16/install)"
+          set +o pipefail
+          yes | sh -c "$installer"
           echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$HOME/.avm/bin:$HOME/.cargo/bin:$PATH"
           solana --version
