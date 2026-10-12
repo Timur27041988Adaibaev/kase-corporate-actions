@@ -2918,65 +2918,28 @@ function downloadIsoFile(format) {
 // 6. Enterprise Chaos Engineering & Adversarial Shield Harness
 function runAttackDoubleClaim() {
   playAudioCue("alert");
-  appendLog("ATTACK", "tag-err", "⚡ ATTACK SIMULATION: repeat attempt to withdraw the $500,000 coupon (Replay Attack)...");
-  if (CLUSTERS[currentCluster].isMainnet) {
-    appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
-    appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
-  }
-  setTimeout(() => {
-    if (CLUSTERS[currentCluster].isMainnet) {
-      appendLog("SHIELD-PASS", "tag-ok", "🛡️ PROTECTION: On Mainnet, records are written only via the Memo Program. The [KaseError::AlreadySettled] invariant is implemented in the KASE program code (deployed and tested on Devnet).");
-      playAudioCue("success");
-      showToast("Mainnet Memo Invariant", "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).", "warning");
-    } else {
-      appendLog("SHIELD-PASS", "tag-ok", "🛡️ PROTECTION TRIGGERED: The on-chain check rejected the transaction with error [KaseError::AlreadySettled]. Double withdrawal prevented!");
-      playAudioCue("success");
-      showToast("Attack Repelled", "The Solana smart contract rejected the repeat coupon: AlreadySettled.", "success");
-    }
-  }, 400);
+  appendLog("ATTACK", "tag-err", "⚠️ UI-ONLY SCENARIO: repeat coupon claim requested for demonstration.");
+  appendLog("VERIFY", "tag-warn", "No Anchor transaction was sent. The deployed program's AlreadySettled protection was NOT tested by this button.");
+  showToast("Simulation only", "No transaction sent; on-chain replay protection has not been verified here.", "warning");
 }
-
 function runAttackDoubleVote() {
   playAudioCue("alert");
-  appendLog("ATTACK", "tag-err", "⚡ ATTACK SIMULATION: the same holder submits votes again (Sybil/Double-Vote Attack)...");
-  if (CLUSTERS[currentCluster].isMainnet) {
-    appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
-    appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
-  }
-  setTimeout(() => {
-    if (CLUSTERS[currentCluster].isMainnet) {
-      appendLog("SHIELD-PASS", "tag-ok", "🛡️ PROTECTION: On Mainnet, records are written only via the Memo Program. The VoterRecord PDA collision guard lives in the KASE program on Devnet.");
-      playAudioCue("success");
-      showToast("Mainnet Memo Invariant", "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).", "warning");
-    } else {
-      appendLog("SHIELD-PASS", "tag-ok", "🛡️ PROTECTION TRIGGERED: Sealevel rejected initialization of a duplicate VoterRecord PDA account. Repeat voting prevented!");
-      playAudioCue("success");
-      showToast("Attack Repelled", "A VoterRecord PDA collision blocked the repeat vote.", "success");
-    }
-  }, 400);
+  appendLog("ATTACK", "tag-err", "⚠️ UI-ONLY SCENARIO: duplicate vote attempt shown for demonstration.");
+  appendLog("VERIFY", "tag-warn", "No Anchor transaction was sent. The deployed program's duplicate-voter protection was NOT tested by this button.");
+  showToast("Simulation only", "No transaction sent; on-chain duplicate-vote protection has not been verified here.", "warning");
 }
-
 function runAttackMathOverflow() {
   playAudioCue("alert");
-  appendLog("ATTACK", "tag-err", "⚡ ATTACK SIMULATION: injecting u64::MAX edge values and zero frequency into math.rs...");
-  setTimeout(() => {
-    appendLog("SHIELD-PASS", "tag-ok", "🛡️ PROTECTION TRIGGERED: Rust Checked Math caught the operation: KaseError::InvalidCouponFrequency / MathOverflow. No overflow errors!");
-    playAudioCue("success");
-    showToast("Attack Repelled", "Checked Math in math.rs caught the edge-case values.", "success");
-  }, 400);
+  appendLog("ATTACK", "tag-err", "⚠️ LOCAL SCENARIO: displaying overflow and zero-frequency edge cases.");
+  appendLog("VERIFY", "tag-warn", "This button does not invoke Rust math.rs or an on-chain transaction; no contract protection was tested.");
+  showToast("Local scenario only", "No transaction sent; Rust checked-math behavior was not exercised by this button.", "warning");
 }
-
 function runAttackRpcDrop() {
   playAudioCue("alert");
-  appendLog("ATTACK", "tag-err", "⚡ FAILURE SIMULATION: simulating a dropped connection to the current RPC node...");
-  setTimeout(() => {
-    appendLog("SHIELD-PASS", "tag-ok", "🛡️ CIRCUIT BREAKER: automatic switch to the cluster's secondary RPC node. Session preserved with no data loss!");
-    playAudioCue("success");
-    showToast("Circuit Breaker", "Backup RPC activated. Session stable.", "success");
-  }, 400);
+  appendLog("ATTACK", "tag-err", "⚠️ UI-ONLY SCENARIO: RPC connection interruption displayed.");
+  appendLog("VERIFY", "tag-warn", "No real RPC failure was injected and no secondary endpoint was contacted. Automatic failover is not verified.");
+  showToast("Simulation only", "No RPC failure was injected; failover has not been verified.", "warning");
 }
-
-// 7. Shortcuts Modal Controller
 function openShortcutsModal() {
   playAudioCue("click");
   const modal = document.getElementById("shortcutsModal");
