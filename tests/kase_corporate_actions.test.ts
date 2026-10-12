@@ -17,6 +17,25 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
   // We load or mock-free declare program types
   const program = anchor.workspace.KaseCorporateActions as Program<any>;
 
+  async function chainTimestamp(connection: any): Promise<number> {
+    let slot = await connection.getSlot("confirmed");
+    for (let offset = 0; offset < 10 && slot > offset; offset++) {
+      const timestamp = await connection.getBlockTime(slot - offset);
+      if (timestamp !== null) return timestamp;
+    }
+    return Math.floor(Date.now() / 1000);
+  }
+
+  async function warpToTimestamp(connection: any, targetTimestamp: number): Promise<void> {
+    const currentTimestamp = await chainTimestamp(connection);
+    if (targetTimestamp <= currentTimestamp) return;
+    const currentSlot = await connection.getSlot("confirmed");
+    const slotsToAdvance = Math.ceil((targetTimestamp - currentTimestamp) / 0.4) + 3;
+    const response = await connection._rpcRequest("warpSlot", [currentSlot + slotsToAdvance]);
+    if (response?.error) throw new Error("Local validator warpSlot failed: " + JSON.stringify(response.error));
+    await connection.getLatestBlockhash("confirmed");
+  }
+
   let authority = anchor.web3.Keypair.generate(); // KASE CSD
   let issuer = anchor.web3.Keypair.generate();    // Demo Issuer JSC
   let bankA = anchor.web3.Keypair.generate();     // Institutional Holder 1 (Bank A)
@@ -227,7 +246,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
   });
 
   it("Step 1: KASE CSD registers bond instrument KZDEMO000001", async () => {
-    const maturity = new anchor.BN(Math.floor(Date.now() / 1000) + 60); // Leave enough time for the initialization transaction to confirm
+    const maturity = new anchor.BN((await chainTimestamp(provider.connection)) + 60); // Leave enough time for the initialization transaction to confirm
 
     await program.methods
       .initializeBondInstrument(
@@ -263,8 +282,9 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
   // ==========================================
 
   it("Step 2 [Scenario 1]: Schedule Coupon Corporate Action #202601", async () => {
-    const recordDate = new anchor.BN(Math.floor(Date.now() / 1000) - 100);
-    const settlementDate = new anchor.BN(Math.floor(Date.now() / 1000) + 60);
+    const chainNow = await chainTimestamp(provider.connection);
+    const recordDate = new anchor.BN(chainNow - 100);
+    const settlementDate = new anchor.BN(chainNow + 60);
 
     await program.methods
       .scheduleCorporateAction(
@@ -399,10 +419,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
 
   it("Step 5 [Scenario 1]: Execute Coupon Settlement to Bank A ($175,000 USDC transferred)", async () => {
     const couponActionState = await program.account.corporateAction.fetch(couponActionPda);
-    const couponWaitMs = couponActionState.settlementTimestamp.toNumber() * 1000 - Date.now() + 250;
-    if (couponWaitMs > 0) {
-      await new Promise((resolve) => setTimeout(resolve, couponWaitMs));
-    }
+    await warpToTimestamp(provider.connection, couponActionState.settlementTimestamp.toNumber());
     const balBefore = (await getAccount(provider.connection, bankASettlementAccount)).amount;
 
     await program.methods
@@ -473,7 +490,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
       program.programId
     );
 
-    const now = Math.floor(Date.now() / 1000);
+    const now = await chainTimestamp(provider.connection);
     await program.methods
       .scheduleCorporateAction(
         futureActionId,
@@ -548,8 +565,9 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
   // ==========================================
 
   it("Step 6 [Scenario 2]: Schedule Redemption Corporate Action #202699 & Deposit Principal", async () => {
-    const recordDate = new anchor.BN(Math.floor(Date.now() / 1000) - 100);
-    const settlementDate = new anchor.BN(Math.floor(Date.now() / 1000) + 60);
+    const chainNow = await chainTimestamp(provider.connection);
+    const recordDate = new anchor.BN(chainNow - 100);
+    const settlementDate = new anchor.BN(chainNow + 60);
 
     await program.methods
       .scheduleCorporateAction(
@@ -605,10 +623,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
       bondCheck.maturityTimestamp.toNumber(),
       redemptionActionState.settlementTimestamp.toNumber()
     );
-    const waitMs = earliestExecution * 1000 - Date.now() + 250;
-    if (waitMs > 0) {
-      await new Promise((resolve) => setTimeout(resolve, waitMs));
-    }
+    await warpToTimestamp(provider.connection, earliestExecution);
 
     const bondsBefore = (await getAccount(provider.connection, bankABondAccount)).amount;
     const usdcBefore = (await getAccount(provider.connection, bankASettlementAccount)).amount;
@@ -821,8 +836,8 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         .scheduleCorporateAction(
           fakeActionId,
           { couponPayment: {} },
-          new anchor.BN(Math.floor(Date.now() / 1000)),
-          new anchor.BN(Math.floor(Date.now() / 1000) + 86400)
+          new anchor.BN(await chainTimestamp(provider.connection)),
+          new anchor.BN((await chainTimestamp(provider.connection)) + 86400)
         )
         .accounts({
           authority: hacker.publicKey,
@@ -861,10 +876,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
 
   it("Step 10 [Scenario 3]: Finalize Proposal -> Quorum Met & Passed (2500 > 2000)", async () => {
     const currentProposal = await program.account.governanceProposal.fetch(proposalPda);
-    const waitMs = currentProposal.votingEnd.toNumber() * 1000 - Date.now() + 250;
-    if (waitMs > 0) {
-      await new Promise((resolve) => setTimeout(resolve, waitMs));
-    }
+    await warpToTimestamp(provider.connection, currentProposal.votingEnd.toNumber());
     await program.methods
       .finalizeGovernanceProposal()
       .accounts({
@@ -894,7 +906,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
     const testBondMint = await createMint(provider.connection, authority, authority.publicKey, null, 0);
     const holderAcc = await createAccount(provider.connection, bankA, testBondMint, bankA.publicKey);
     await mintTo(provider.connection, authority, testBondMint, holderAcc, authority.publicKey, 1);
-    testMaturityTimestamp = Math.floor(Date.now() / 1000) + 60;
+    testMaturityTimestamp = (await chainTimestamp(provider.connection)) + 60;
     testMaturity = new anchor.BN(testMaturityTimestamp);
 
     await program.methods
@@ -972,10 +984,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
     await mintTo(provider.connection, authority, settlementMint, testVaultPda, authority.publicKey, 1_000_000_000);
 
     // Wait until the valid future maturity timestamp before redemption.
-    const maturityWaitMs = testMaturityTimestamp * 1000 - Date.now() + 250;
-    if (maturityWaitMs > 0) {
-      await new Promise((resolve) => setTimeout(resolve, maturityWaitMs));
-    }
+    await warpToTimestamp(provider.connection, testMaturityTimestamp);
 
     // Redeem single bond so activeSupply reaches 0 and is_matured = true
     await program.methods
