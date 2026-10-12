@@ -837,7 +837,8 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
       [Buffer.from("bond"), Buffer.from(maturedIsin)],
       program.programId
     );
-    const testMaturity = new anchor.BN(Math.floor(Date.now() / 1000) - 10);
+    const testMaturityTimestamp = Math.floor(Date.now() / 1000) + 3;
+    const testMaturity = new anchor.BN(testMaturityTimestamp);
     const testBondMint = await createMint(provider.connection, authority, authority.publicKey, null, 0);
     const holderAcc = await createAccount(provider.connection, bankA, testBondMint, bankA.publicKey);
     await mintTo(provider.connection, authority, testBondMint, holderAcc, authority.publicKey, 1);
@@ -914,6 +915,12 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
       .rpc();
 
     await mintTo(provider.connection, authority, settlementMint, testVaultPda, authority.publicKey, 1_000_000_000);
+
+    // Wait until the valid future maturity timestamp before redemption.
+    const maturityWaitMs = testMaturityTimestamp * 1000 - Date.now() + 250;
+    if (maturityWaitMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, maturityWaitMs));
+    }
 
     // Redeem single bond so activeSupply reaches 0 and is_matured = true
     await program.methods
