@@ -2,7 +2,7 @@
  * ==============================================================================
  * KASE AUTOMATED CORPORATE ACTIONS TERMINAL - PRODUCTION CLIENT CONTROLLER
  * Kazakhstan Stock Exchange (KASE) & Central Securities Depository (KCSD)
- * 100% Real Solana Devnet Broadcasting Engine via Official Memo Program
+ * Solana Devnet Memo Attestation Client — settlement requires Anchor program calls
  * Bulletproof Mathematical Synchronization Engine & Phantom Web3 Architecture
  * ==============================================================================
  */
@@ -1238,7 +1238,7 @@ function updateClusterUI() {
       supplyStatusEl.textContent = "Matured & Permanently Retired from Circulation";
     }
     if (redStatEl) {
-      redStatEl.textContent = `100% Burned & Principal Disbursed on ${cluster.shortName}`;
+      redStatEl.textContent = `Memo record confirmed; no bond tokens were burned and no principal was transferred.`;
       redStatEl.style.color = "var(--danger)";
     }
   } else {
@@ -1415,7 +1415,7 @@ async function checkPhantomClusterAlignment() {
             `💡 Sync info: You have ${oppositeSol.toFixed(4)} SOL on Mainnet, but the Devnet test cluster is active. Your transactions are free. For Devnet gas, click 'Airdrop +1 SOL'.`
           );
         } else {
-          appendLog("SYNC", "tag-ok", "Cluster: Solana Devnet. Synced.");
+          appendLog("SYNC", "tag-ok", "Cluster: Solana Devnet. Wallet/RPC reachable; this does not verify settlement-program execution.");
         }
         if (alignBadge) {
           alignBadge.textContent = "Aligned: Devnet";
@@ -1730,14 +1730,17 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
 
     showToast(
       `Success on ${cluster.shortName}!`,
-      `Transaction confirmed in slot #${slot.toLocaleString()} (Tx: ${truncateAddress(signature)})`,
+      `Memo attestation confirmed in slot #${slot.toLocaleString()} (Tx: ${truncateAddress(signature)}). No coupon payment, redemption, token burn, or program vote was executed.`,
       "success"
     );
 
-    // 8. Execute UI state update
-    if (typeof onSuccess === "function") {
-      onSuccess(signature, slot);
-    }
+    // A Memo instruction proves only that a text record was written. It is not a
+    // coupon transfer, redemption, SPL-token burn, or Anchor governance vote.
+    appendLog("LIMITATION", "tag-warn", "Memo attestation confirmed. No financial settlement, token burn, or Anchor-program vote was executed.");
+    showToast("Memo recorded only", "The transaction contains a Memo instruction; no coupon/redemption/vote state was changed.", "warning");
+    // Deliberately do not call the settlement callbacks: they mutate local UI state
+    // as though the actual Anchor instructions had executed.
+
   } catch (error) {
     if (phantomCallout) phantomCallout.style.display = "none";
     console.error("Broadcast failed:", error);
@@ -1827,7 +1830,7 @@ function showModalSuccess({ signature, slot, memoText, actionTitle, signerName }
   if (clusterEl) {
     clusterEl.textContent = cluster.isMainnet
       ? "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)."
-      : `${cluster.name} (100% Live)`;
+      : `${cluster.name} — Memo record only; financial actions are not executed`;
     clusterEl.className = cluster.isMainnet ? "mono font-mono gold" : "mono font-mono cyan";
   }
 
@@ -2361,10 +2364,10 @@ function initListeners() {
         appendLog(
           "HALTED",
           "tag-err",
-          "ERROR 0x1783 (AlreadySettled): Payout already made! Instruction rejected by the Solana runtime."
+          "UI demonstration only: this button does not submit an on-chain claim."
         );
-        appendLog("SECURITY", "tag-ok", "On-chain invariant confirmed: repeat claims are strictly blocked.");
-        showToast("Security Invariant Passed", "Double-claim exploit rejected by on-chain state machine.", "warning");
+        appendLog("SECURITY", "tag-ok", "UI demonstration only: no on-chain double-claim test was executed.");
+        showToast("Security Invariant Passed", "UI demonstration only; no on-chain claim was attempted.", "warning");
       }
     }, 500);
   });
@@ -2395,10 +2398,10 @@ function initListeners() {
         appendLog(
           "HALTED",
           "tag-err",
-          "ERROR 0x0: Custom program error (Account already initialized): VoterRecord PDA exists. Repeat vote blocked."
+          "UI demonstration only: this button does not call the Anchor program or test duplicate-vote protection."
         );
-        appendLog("SECURITY", "tag-ok", "On-chain invariant confirmed: 1 Bond = 1 Vote is strictly enforced.");
-        showToast("Security Invariant Passed", "Duplicate vote prevented via VoterRecord PDA collision.", "warning");
+        appendLog("SECURITY", "tag-ok", "UI demonstration only: no on-chain double-vote test was executed.");
+        showToast("Security Invariant Passed", "UI demonstration only; the Anchor instruction was not called.", "warning");
       }
     }, 500);
   });
@@ -2440,13 +2443,13 @@ function initListeners() {
         if (statusEl) {
           statusEl.textContent = cluster.isMainnet
             ? `100% Settled (${totalCouponFormatted} USDC Memo Record on Mainnet-Beta in Slot #${slot}. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).)`
-            : `100% Settled (${totalCouponFormatted} USDC Distributed on ${cluster.shortName} in Slot #${slot})`;
+            : `Memo record confirmed in Slot #${slot}; no USDC was transferred. Coupon settlement is NOT executed.`;
           statusEl.style.color = "var(--kase-green)";
         }
 
         if (btn) btn.innerHTML = cluster.isMainnet
           ? "<span>✔ Scenario 1 Recorded via Memo Program (Mainnet)</span>"
-          : `<span>✔ Scenario 1 Fully Settled on ${cluster.shortName}</span>`;
+          : `<span>✔ Memo Record Confirmed — No Payment Executed</span>`;
         renderTable();
         updateActionButtons();
       },
@@ -2515,7 +2518,7 @@ function initListeners() {
 
         if (btn) btn.innerHTML = cluster.isMainnet
           ? "<span>✔ Scenario 2 Recorded via Memo Program (Mainnet)</span>"
-          : `<span>✔ Scenario 2 Fully Redeemed & Burned on ${cluster.shortName}</span>`;
+          : `<span>✔ Memo Record Confirmed — No Redemption Executed</span>`;
         renderTable();
         updateActionButtons();
       },
@@ -2555,7 +2558,7 @@ function initListeners() {
             appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
             appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
           }
-          appendLog("VOTE-FOR", "tag-ok", cluster.isMainnet ? "Mainnet Memo Record: 6,000 Votes 'FOR' recorded via Solana Memo Program. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)." : `Cast 6,000 Votes 'FOR' on ${cluster.shortName}! (Bank A 3,500 + Bank B 2,500)`, signature);
+          appendLog("VOTE-FOR", "tag-ok", cluster.isMainnet ? "Mainnet Memo Record: 6,000 Votes 'FOR' recorded via Solana Memo Program. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)." : `Memo record confirmed for FOR; no Anchor governance vote or tally was executed.`, signature);
           if (btn) btn.innerHTML = cluster.isMainnet ? "<span>✔ 6,000 Votes FOR Recorded in Memo (Mainnet)</span>" : `<span>✔ 6,000 Votes FOR Cast (${cluster.shortName})</span>`;
           updateActionButtons();
         },
@@ -2578,7 +2581,7 @@ function initListeners() {
             appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
             appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
           }
-          appendLog("VOTE-AGAINST", "tag-warn", cluster.isMainnet ? "Mainnet Memo Record: 1,200 Votes 'AGAINST' recorded via Solana Memo Program. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)." : `Cast 1,200 Votes 'AGAINST' on ${cluster.shortName} (Bank D Treasury)`, signature);
+          appendLog("VOTE-AGAINST", "tag-warn", cluster.isMainnet ? "Mainnet Memo Record: 1,200 Votes 'AGAINST' recorded via Solana Memo Program. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)." : `Memo record confirmed for AGAINST; no Anchor governance vote or tally was executed.`, signature);
           if (btn) btn.innerHTML = cluster.isMainnet ? "<span>✔ 1,200 Votes AGAINST Recorded in Memo (Mainnet)</span>" : `<span>✔ 1,200 Votes AGAINST Cast (${cluster.shortName})</span>`;
           updateActionButtons();
         },
@@ -2601,7 +2604,7 @@ function initListeners() {
             appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
             appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
           }
-          appendLog("VOTE-ABSTAIN", "tag-ok", cluster.isMainnet ? "Mainnet Memo Record: 800 Votes 'ABSTAIN' recorded via Solana Memo Program. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)." : `Cast 800 Votes 'ABSTAIN' on ${cluster.shortName} (Retail Investors Pool: 800 votes)`, signature);
+          appendLog("VOTE-ABSTAIN", "tag-ok", cluster.isMainnet ? "Mainnet Memo Record: 800 Votes 'ABSTAIN' recorded via Solana Memo Program. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)." : `Memo record confirmed for ABSTAIN; no Anchor governance vote or tally was executed.`, signature);
           if (btn) btn.innerHTML = cluster.isMainnet ? "<span>✔ 800 Votes ABSTAIN Recorded in Memo (Mainnet)</span>" : `<span>✔ 800 Votes ABSTAIN Cast (${cluster.shortName})</span>`;
           updateActionButtons();
         },
