@@ -413,6 +413,45 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
             }).encode("utf-8"))
             return
 
+        if path == "/api/chain-status":
+            program_id = "5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz"
+            request_body = json.dumps({
+                "jsonrpc": "2.0", "id": 1, "method": "getAccountInfo",
+                "params": [program_id, {"encoding": "base64", "commitment": "confirmed"}],
+            }).encode("utf-8")
+            request = urllib.request.Request(
+                "https://api.devnet.solana.com", data=request_body,
+                headers={"Content-Type": "application/json", "User-Agent": "KASE-Terminal/4.0"},
+            )
+            try:
+                with urllib.request.urlopen(request, timeout=5.0) as response:
+                    rpc_payload = json.loads(response.read().decode("utf-8"))
+                if rpc_payload.get("error"):
+                    raise RuntimeError(rpc_payload["error"].get("message", "Solana RPC error"))
+                account = rpc_payload.get("result", {}).get("value")
+                payload = {
+                    "network": "devnet", "program_id": program_id,
+                    "program_account_exists": account is not None,
+                    "program_executable": bool(account and account.get("executable")),
+                    "rpc_verified": True,
+                    "settlement_integration": "not-connected-to-browser-terminal",
+                    "settlement_executed": False,
+                }
+                payload["status"] = "PROGRAM_DEPLOYED" if payload["program_executable"] else "PROGRAM_NOT_EXECUTABLE"
+                status_code = 200 if payload["program_executable"] else 503
+            except Exception as exc:
+                payload = {
+                    "status": "RPC_UNAVAILABLE", "network": "devnet", "program_id": program_id,
+                    "rpc_verified": False, "settlement_executed": False,
+                    "message": str(exc),
+                }
+                status_code = 503
+            self.send_response(status_code)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(json.dumps(payload).encode("utf-8"))
+            return
+
         # 1. Solana Actions Specification: /actions.json and /.well-known/actions.json
         if path in ["/actions.json", "/.well-known/actions.json"]:
             self.send_response(200)
