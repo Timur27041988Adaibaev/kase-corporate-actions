@@ -502,6 +502,10 @@ pub mod kase_corporate_actions {
             KaseError::VotingPeriodClosed
         );
         require!(!proposal.finalized, KaseError::ProposalAlreadyExecuted);
+        require!(
+            ctx.accounts.corporate_action.action_type == ActionType::GovernanceVoting,
+            KaseError::InvalidActionStatus
+        );
 
         // Governance Security: Anti-Vote-Recycling (Vote-and-Transfer Shield)
         // If an audited HolderEntitlement snapshot is provided, voting weight is anchored strictly to the recorded snapshot balance.
@@ -514,6 +518,10 @@ pub mod kase_corporate_actions {
             .as_ref()
             .ok_or(error!(KaseError::VoteRecyclingForbidden))?;
         require!(entitlement.holder == ctx.accounts.voter.key(), KaseError::InvalidHolderTokenAccount);
+        require!(
+            entitlement.corporate_action == ctx.accounts.corporate_action.key(),
+            KaseError::InvalidHolderTokenAccount
+        );
         require!(entitlement.bonds_held > 0, KaseError::ZeroHolderBalance);
         require!(current_balance >= entitlement.bonds_held, KaseError::VoteRecyclingForbidden);
         let vote_weight = entitlement.bonds_held;
@@ -878,6 +886,11 @@ pub struct CastBondholderVote<'info> {
         has_one = bond_security
     )]
     pub proposal: Account<'info, GovernanceProposal>,
+
+    #[account(
+        has_one = bond_security
+    )]
+    pub corporate_action: Account<'info, CorporateAction>,
 
     #[account(
         constraint = holder_bond_account.owner == voter.key() @ KaseError::InvalidHolderTokenAccount,
