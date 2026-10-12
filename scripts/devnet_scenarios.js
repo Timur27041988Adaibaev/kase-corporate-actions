@@ -95,10 +95,19 @@ async function send(label, ixs, signers, expectFail = false) {
   const entPda = (a, h) => pda([Buffer.from('entitlement'), a.toBuffer(), h.toBuffer()]);
   const now = () => Math.floor(Date.now() / 1000);
   async function schedule(id, type, label) {
-    const a = actionPda(id), v = vaultPda(a); const t = now() - 60;
-    await send(label, [ix('schedule_corporate_action', [u64(id), u8(type), i64(t), i64(t)],
+    const a = actionPda(id), v = vaultPda(a);
+    const recordDate = now() - 60;
+    const settlementDate = now() + 45;
+    await send(label, [ix('schedule_corporate_action', [u64(id), u8(type), i64(recordDate), i64(settlementDate)],
       [m(payer.publicKey, true, true), m(bond), m(a, true), m(v, true), m(usdc), m(SystemProgram.programId), m(TOKEN), m(SYSVAR_RENT_PUBKEY)])], [payer]);
-    return [a, v];
+    return [a, v, settlementDate];
+  }
+  async function waitUntil(timestamp, label) {
+    const waitSeconds = timestamp - now() + 2;
+    if (waitSeconds > 0) {
+      console.log(`waiting for ${label}: ${waitSeconds}s`);
+      await sleep(waitSeconds * 1000);
+    }
   }
   async function snapshot(a, k, tag) {
     const h = holders[k].publicKey;
@@ -111,9 +120,10 @@ async function send(label, ixs, signers, expectFail = false) {
   }
 
   // --- Scenario 1: coupon ---
-  const [ca, cv] = await schedule(1, 0, '2.1 schedule_corporate_action #1 CouponPayment');
+  const [ca, cv, couponSettlement] = await schedule(1, 0, '2.1 schedule_corporate_action #1 CouponPayment');
   for (let k = 0; k < 3; k++) await snapshot(ca, k, '2.2');
   await deposit(ca, cv, 5_000_000_000n, '2.3');
+  await waitUntil(couponSettlement, 'coupon settlement date');
   const couponIx = k => { const h = holders[k].publicKey; return ix('execute_coupon_payment', [],
     [m(payer.publicKey, true, true), m(bond), m(ca, true), m(cv, true), m(entPda(ca, h), true), m(ata(usdc, h), true), m(usdc), m(TOKEN)]); };
   for (let k = 0; k < 3; k++) await send(`2.4 execute_coupon_payment holder ${k + 1}: ${bondsHeld[k] * 50} USDC`, [couponIx(k)], [payer]);
@@ -129,23 +139,25 @@ async function send(label, ixs, signers, expectFail = false) {
   log.accounts.proposal = prop.toBase58();
   const descHash = crypto.createHash('sha256').update('KASE restructuring: raise coupon to 12.5%').digest();
   await send('3.3 create_governance_proposal #101: raise coupon 10% -> 12.5%, quorum 51', [ix('create_governance_proposal',
-    [u64(101), str('Restructuring: raise coupon rate to 12.5%'), descHash, i64(now() - 60), i64(now() + 3600), u64(51), u16(1250)],
+    [u64(101), str('Restructuring: raise coupon rate to 12.5%'), descHash, i64(now() - 60), i64(now() + 45), u64(51), u16(1250)],
     [m(payer.publicKey, true, true), m(bond), m(prop, true), m(SystemProgram.programId), m(SYSVAR_RENT_PUBKEY)])], [payer]);
   const voteIx = (k, choice) => { const h = holders[k].publicKey; return ix('cast_bondholder_vote', [u8(choice)],
-    [m(h, true, true), m(bond), m(prop, true), m(ata(bondMint, h)), m(entPda(ga, h)), m(pda([Buffer.from('voter'), prop.toBuffer(), h.toBuffer()]), true), m(SystemProgram.programId), m(SYSVAR_RENT_PUBKEY)]); };
+    [m(h, true, true), m(bond), m(prop, true), m(ga, true), m(ata(bondMint, h)), m(entPda(ga, h)), m(pda([Buffer.from('voter'), prop.toBuffer(), h.toBuffer()]), true), m(SystemProgram.programId), m(SYSVAR_RENT_PUBKEY)]); };
   const names = ['For', 'Against', 'Abstain'];
   for (let k = 0; k < 3; k++) await send(`3.4 cast_bondholder_vote holder ${k + 1}: ${names[k]} (weight ${bondsHeld[k]})`, [voteIx(k, k)], [holders[k]]);
   await send('ATTACK: holder 1 votes twice (must be rejected: voter record exists)', [voteIx(0, 0)], [holders[0]], true);
+  const proposalEnd = now() + 45;
+  await waitUntil(proposalEnd, 'governance voting end');
   await send('3.5 finalize_governance_proposal #101 (60 for / 30 against / 10 abstain)', [ix('finalize_governance_proposal', [],
     [m(payer.publicKey, true, true), m(bond, true), m(prop, true)])], [payer]);
 
   // --- Scenario 2: redemption ---
-  const [ra, rv] = await schedule(2, 1, '4.1 schedule_corporate_action #2 BondRedemption');
+  const [ra, rv, redemptionSettlement] = await schedule(2, 1, '4.1 schedule_corporate_action #2 BondRedemption');
   for (let k = 0; k < 3; k++) await snapshot(ra, k, '4.2');
   await deposit(ra, rv, 100_000_000_000n, '4.3');
   const redIx = k => { const h = holders[k].publicKey; return ix('execute_bond_redemption', [],
     [m(h, false, true), m(bond, true), m(ra, true), m(rv, true), m(entPda(ra, h), true), m(bondMint, true), m(ata(bondMint, h), true), m(ata(usdc, h), true), m(usdc), m(TOKEN)]); };
-  const wait = maturity - now() + 5; if (wait > 0) { console.log('waiting for maturity', wait, 's'); await sleep(wait * 1000); }
+  await waitUntil(Math.max(maturity, redemptionSettlement), 'bond maturity and redemption settlement date');
   for (let k = 0; k < 3; k++) await send(`4.4 execute_bond_redemption holder ${k + 1}: burn ${bondsHeld[k]} bonds, pay ${bondsHeld[k] * 1000} USDC`, [redIx(k)], [holders[k]]);
   await send('ATTACK: holder 1 redeems twice (must be rejected)', [redIx(0)], [holders[0]], true);
 
