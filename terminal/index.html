@@ -530,11 +530,11 @@
                 </div>
                 <div>
                   <h3>Semi-Annual Coupon Distribution Flow</h3>
-                  <div class="scenario-sub">Automated Record Date Snapshot &bull; Fixed-Point Entitlement &bull; Atomic Batch Disbursement</div>
+                  <div class="scenario-sub">Illustrative flow only &bull; Memo attestation only &bull; No settlement executed</div>
                 </div>
               </div>
               <p class="scenario-desc">
-                Locks on-chain snapshot of eligible bondholders on Record Date, computes exact fixed-point entitlement ($50.00/bond), escrows USDC into the CorporateAction PDA Vault, and broadcasts atomic batch settlement instructions to the Solana Devnet cluster via the official Memo program.
+                Shows an illustrative coupon calculation. This UI does not snapshot holder balances, fund a vault, or transfer USDC; clicking the button writes a Memo record only.
               </p>
             </div>
 
@@ -546,7 +546,7 @@
                   <span class="step-status-pill completed">COMPLETED</span>
                 </div>
                 <h4>Record-Date Snapshot</h4>
-                <p>CSD on-chain registry frozen. 10,000 bonds locked across 5 institutions.</p>
+                <p>Illustrative balances only; no CSD registry is connected.</p>
               </div>
               <div class="step-card completed" id="stepCoupon2">
                 <div class="step-header">
@@ -570,7 +570,7 @@
                   <span class="step-status-pill" id="pillCouponSettled">PENDING</span>
                 </div>
                 <h4>Settlement Dispatched</h4>
-                <p id="stepCouponSettledDesc">PDA transfers coupon funds directly to 5 holder accounts. Zero double-claims.</p>
+                <p id="stepCouponSettledDesc">Not executed by this UI; no holder payments occur.</p>
               </div>
             </div>
 
@@ -591,7 +591,7 @@
                 </div>
                 <div class="metric-row">
                   <span class="metric-label" id="lblCouponMemoFormat">On-Chain Memo Format:</span>
-                  <span class="metric-val mono font-mono truncate-memo" id="metricCouponMemoPreview">KASE_CORP_ACT: ISIN=KZDEMO000001 | TYPE=COUPON_DISTRIBUTION | AMOUNT=$500,000.00_USDC | CSD=CONFIRMED</span>
+                  <span class="metric-val mono font-mono truncate-memo" id="metricCouponMemoPreview">KASE_CORP_ACT: ISIN=KZDEMO000001 | TYPE=DEMO_MEMO_ATTESTATION | EXECUTION=NOT_PERFORMED</span>
                 </div>
                 <div class="metric-row">
                   <span class="metric-label">Current Settlement Status:</span>
