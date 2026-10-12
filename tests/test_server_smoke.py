@@ -39,8 +39,14 @@ class KaseServerSmokeTests(unittest.TestCase):
             "__exit__": lambda self, *args: False,
             "read": lambda self: json.dumps(rpc_result).encode("utf-8"),
         })()
-        with patch.object(kase_server.urllib.request, "urlopen", return_value=mock_response):
-            with urllib.request.urlopen(self.base_url + "/api/chain-status", timeout=2) as response:
+        real_urlopen = urllib.request.urlopen
+        def mocked_urlopen(request, *args, **kwargs):
+            url = request if isinstance(request, str) else request.full_url
+            if url == "https://api.devnet.solana.com":
+                return mock_response
+            return real_urlopen(request, *args, **kwargs)
+        with patch.object(kase_server.urllib.request, "urlopen", side_effect=mocked_urlopen):
+            with real_urlopen(self.base_url + "/api/chain-status", timeout=2) as response:
                 payload = json.loads(response.read().decode("utf-8"))
         self.assertEqual(payload.get("status"), "PROGRAM_DEPLOYED")
         self.assertTrue(payload.get("rpc_verified"))
