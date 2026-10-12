@@ -73,4 +73,7 @@ pub enum KaseError {
 
     #[msg("Governance quorum threshold must be positive and cannot exceed total bond supply.")]
     InvalidQuorumThreshold,
+
+    #[msg("Aggregate holder snapshots cannot exceed the instrument's active bond supply.")]
+    SnapshotExceedsActiveSupply,
 }
