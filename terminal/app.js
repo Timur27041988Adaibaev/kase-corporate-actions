@@ -7,7 +7,7 @@
  * ==============================================================================
  */
 
-// Official Institutional Participants Registry in KCSD Custody
+// Illustrative demo holder register; no KCSD registry is connected
 const HOLDERS = [
   {
     name: "Bank A Treasury",
@@ -249,7 +249,7 @@ const BondMath = {
     return { totalVotes, quorumReached, quorumPercentage, issuePercentage, passed };
   },
 
-  // Aggregate totals across all CSD registered holders
+  // Aggregate totals across illustrative demo holders only
   getAggregateTotals(holdersList) {
     let totalBonds = 0;
     let totalNominal = 0;
@@ -604,7 +604,7 @@ function updateWalletUI() {
     if (addrDisplay) addrDisplay.textContent = truncateAddress(state.walletAddress);
     if (btnWallet) btnWallet.classList.remove("connected");
     if (walletBtnText) walletBtnText.textContent = state.phantomConnected ? "Switch to Phantom" : "Connect Phantom";
-    if (avatarInitials) avatarInitials.textContent = "CSD";
+    if (avatarInitials) avatarInitials.textContent = "DEMO";
     if (walletAvatar) walletAvatar.style.background = "linear-gradient(135deg, #2563EB 0%, #10B981 100%)";
 
     if (btnModePhantom) btnModePhantom.className = "btn-signer-mode";
@@ -1228,7 +1228,7 @@ function updateClusterUI() {
       supplyEl.style.color = "var(--kase-green)";
     }
     if (supplyStatusEl) {
-      supplyStatusEl.textContent = "Fully Subscribed (100%)";
+      supplyStatusEl.textContent = "Demo supply: 100% (illustrative)";
     }
     if (redStatEl) {
       redStatEl.textContent = "Active in Circulation";
@@ -1915,9 +1915,9 @@ function openDossier(h, idx) {
     appendLog(
       "CSD-AUDIT",
       "tag-ok",
-      `Dossier Export: ${h.name} | Sub-Account: ${h.subAccount} | Holdings: ${h.bonds.toLocaleString()} bonds (${formatUSD(nominal)} nominal) | CSD Signoff: OK`
+      `Demo dossier export: ${h.name} | Demo sub-account: ${h.subAccount} | Illustrative holdings: ${h.bonds.toLocaleString()} bonds (${formatUSD(nominal)} nominal) | CSD verification: NOT CONNECTED`
     );
-    showToast("Audit Logged", `CSD Dossier audit exported for ${h.name}`, "info");
+    showToast("Demo export created", `Illustrative holder dossier exported for ${h.name}; no KCSD record was checked.`, "info");
     modal.style.display = "none";
   };
 
@@ -1949,7 +1949,7 @@ function renderTable() {
 
     const tr = document.createElement("tr");
     tr.id = `rowHolder${idx}`;
-    tr.title = `Click to inspect institutional CSD dossier for ${h.name}`;
+    tr.title = `Click to inspect illustrative demo holder details for ${h.name}`;
     tr.innerHTML = `
       <td>
         <div class="bank-badge-cell">
@@ -1971,7 +1971,7 @@ function renderTable() {
 
   // Render Table Summary Footer Row
   if (tfoot) {
-    let footerStatus = "100% CSD CUSTODY";
+    let footerStatus = "ILLUSTRATIVE DEMO DATA";
     if (state.couponSettled && !state.redemptionSettled) footerStatus = "MEMO RECORD ONLY — NO PAYMENT";
     if (state.redemptionSettled) footerStatus = "NO BURN OR REDEMPTION EXECUTED";
 
@@ -2032,7 +2032,7 @@ function updateFinancialMathHud() {
   if (totalReqMetric) totalReqMetric.textContent = `${formatUSD(totalCoupon)} USDC`;
   const memoPreview = document.getElementById("metricCouponMemoPreview");
   if (memoPreview) {
-    memoPreview.textContent = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=COUPON_DISTRIBUTION | AMOUNT=${formatUSD(totalCoupon)}_USDC | CSD=CONFIRMED`;
+    memoPreview.textContent = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=DEMO_MEMO_ATTESTATION | REQUESTED_ACTION=COUPON_DISTRIBUTION | AMOUNT_REFERENCE=${formatUSD(totalCoupon)}_USDC | CSD=NOT_CONNECTED | EXECUTION=NOT_PERFORMED`;
   }
 }
 
@@ -2161,7 +2161,7 @@ function resetSimulation() {
   document.getElementById("redemptionStatusText").textContent = "Active in Circulation";
   document.getElementById("statActiveSupply").textContent = "10,000 Bonds";
   document.getElementById("statActiveSupply").style.color = "var(--kase-green)";
-  document.getElementById("statSupplyStatus").textContent = "Fully Subscribed (100%)";
+  document.getElementById("statSupplyStatus").textContent = "Demo supply: 100% (illustrative)";
 
   // Reset Voting UI
   const btnVoteFor = document.getElementById("btnVoteFor");
