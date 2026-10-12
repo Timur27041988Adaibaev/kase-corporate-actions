@@ -166,7 +166,7 @@ kase_corporate_actions/
 ├── tests/
 │   └── kase_corporate_actions.test.ts       # Integration and adversarial tests
 ├── scripts/
-│   └── verify_settlement_flow.ts            # E2E script verifying all 3 scenarios with Explorer links
+│   └── verify_settlement_flow.ts            # Live RPC preflight only; does not execute settlement
 ├── terminal/                                # KASE institutional trading terminal
 │   ├── index.html                           # Bloomberg/Refinitiv-style web terminal
 │   ├── style.css                            # KASE Emerald / Kazakhstan Gold / Dark Slate UI
@@ -188,11 +188,25 @@ python verify.py
 ```
 *(`verify.py` is a static checklist over the source tree. It currently reports `[FAIL] SPL Token-2022 Interface Support`: the deployed program uses the classic SPL Token program, and Token-2022 is roadmap. The authoritative proof is the real Devnet run in [DEVNET_PROOF.md](DEVNET_PROOF.md).)*
 
-### 2. Start the terminal server:
+### 2. Run the real Anchor integration tests on a local validator:
+```bash
+npm install
+npm install --global yarn@1.22.22
+anchor test
+```
+The Anchor suite deploys the program to a local validator and exercises the on-chain instructions with test SPL tokens. It does not move real USDC or use KASE/KCSD production accounts.
+
+### 3. Check the deployed Devnet program account:
+```bash
+npm run verify
+```
+This performs a live RPC preflight only. It verifies that the configured program account exists and is executable; it does not prove that the deployed binary matches this repository or execute a settlement.
+
+### 4. Start the terminal server:
 ```bash
 python terminal/server.py
 ```
-Open in a browser: **`http://localhost:8088`** *(press `Ctrl + F5`)*.
+Open in a browser: **`http://localhost:8088`** *(press `Ctrl + F5`)*. The browser's corporate-action buttons currently create Memo attestations only; they are not connected to the Anchor settlement instructions.
 
 ---
 
