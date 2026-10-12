@@ -25,7 +25,9 @@ jobs:
       - name: Check Python syntax
         run: python -m py_compile terminal/server.py
       - name: Check browser JavaScript syntax
-        run: node --check terminal/app.js
+        run: |
+          node --check terminal/app.js
+          node --check terminal/anchor-console.js
       - name: Run server smoke tests
         run: python -m unittest discover -s tests -p 'test_server_*.py' -v
       - name: Check Anchor program Rust compilation
