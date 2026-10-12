@@ -70,4 +70,7 @@ pub enum KaseError {
 
     #[msg("Attempt to reuse a vote or register mismatch (vote recycling prevented).")]
     VoteRecyclingForbidden,
+
+    #[msg("Governance quorum threshold must be positive and cannot exceed total bond supply.")]
+    InvalidQuorumThreshold,
 }
