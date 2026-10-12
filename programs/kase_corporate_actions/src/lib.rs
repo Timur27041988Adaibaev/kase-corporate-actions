@@ -133,7 +133,7 @@ pub mod kase_corporate_actions {
         // Never trust an operator-supplied balance without checking the holder's
         // real SPL token account. This prevents creating inflated entitlements.
         require!(
-            bonds_held == ctx.accounts.holder_bond_account.amount,
+            bonds_held <= ctx.accounts.holder_bond_account.amount,
             KaseError::InvalidHolderTokenAccount
         );
 
