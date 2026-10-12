@@ -1,11 +1,11 @@
-import * as anchor from "https://esm.sh/@coral-xyz/anchor@0.32.1?bundle&external=@solana/web3.js";
-import * as web3 from "https://esm.sh/@solana/web3.js@1.95.4";
+import * as anchor from "https://esm.sh/@coral-xyz/anchor@0.32.1?bundle";
+import * as web3 from "https://esm.sh/@solana/web3.js@1.98.4?bundle";
 import { Buffer } from "https://esm.sh/buffer@6.0.3";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID, MINT_SIZE, TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountInstruction, createInitializeMintInstruction,
   createMintToInstruction, getAssociatedTokenAddressSync
-} from "https://esm.sh/@solana/spl-token@0.4.14?bundle&external=@solana/web3.js";
+} from "https://esm.sh/@solana/spl-token@0.4.14?bundle";
 if (!window.Buffer) window.Buffer = Buffer;
 const {PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY, Keypair, Transaction, Connection} = web3;
 const DEVNET = "https://api.devnet.solana.com";
@@ -100,7 +100,7 @@ async function setup() {
     const m=await createTestMints();
     const now=Math.floor(Date.now()/1000);
     const couponId=Date.now(), redemptionId=couponId+1, governanceId=couponId+2, proposalId=couponId+3;
-    const record=now-1,couponAt=now+8,voteEnd=now+12,maturity=now+22;
+    const record=now-1,couponAt=now+45,voteEnd=now+45,maturity=now+75;
     const isin="KZTEST"+String(couponId).slice(-8);
     const bondSecurity=pda([Buffer.from("bond"),Buffer.from(isin)]);
     const couponAction=actionPda(couponId),redemptionAction=actionPda(redemptionId),governanceAction=actionPda(governanceId);
@@ -130,27 +130,20 @@ async function setup() {
       funder:wallet.publicKey,corporateAction:action,actionVault:vault,funderTokenAccount:m.settlementAta,
       settlementMint:m.settlementMint,tokenProgram:TOKEN_PROGRAM_ID
     });
-    log("Recording holder snapshots and funding both settlement vaults…");
-    await sendWalletTx([
-      await ix(snapshot(couponAction,couponEntitlement)),
-      await ix(snapshot(redemptionAction,redemptionEntitlement)),
-      await ix(snapshot(governanceAction,governanceEntitlement)),
-      await ix(deposit(couponAction,couponVault,50_000_000)),
-      await ix(deposit(redemptionAction,redemptionVault,1_000_000_000))
-    ]);
-    log("Creating governance proposal and casting a token-weighted FOR vote…");
+    log("Recording coupon snapshot and funding its settlement vault…");
+    await sendWalletTx([await ix(snapshot(couponAction,couponEntitlement)),await ix(deposit(couponAction,couponVault,50_000_000))]);
+    log("Recording redemption snapshot and funding its principal vault…");
+    await sendWalletTx([await ix(snapshot(redemptionAction,redemptionEntitlement)),await ix(deposit(redemptionAction,redemptionVault,1_000_000_000))]);
+    log("Recording the governance snapshot…");
+    await sendWalletTx([await ix(snapshot(governanceAction,governanceEntitlement))]);
+    log("Creating governance proposal. Cast the vote separately using the vote button…");
     const descriptionHash=Array(32).fill(0);
     const createProposal=program.methods.createGovernanceProposal(bn(proposalId),"Test proposal: raise coupon to 12.5%",descriptionHash,bn(now),bn(voteEnd),bn(1),1250).accounts({
       proposer:wallet.publicKey,bondSecurity,proposal:state.proposal,systemProgram:SystemProgram.programId,rent:SYSVAR_RENT_PUBKEY
     });
-    const vote=program.methods.castBondholderVote({for:{}}).accounts({
-      voter:wallet.publicKey,bondSecurity,proposal:state.proposal,corporateAction:governanceAction,
-      holderBondAccount:m.bondAta,holderEntitlement:governanceEntitlement,voterRecord:voterPda(state.proposal),
-      systemProgram:SystemProgram.programId,rent:SYSVAR_RENT_PUBKEY
-    });
-    await sendWalletTx([await ix(createProposal),await ix(vote)]);
+    await sendWalletTx([await ix(createProposal)]);
     saveState();renderState();
-    log("Setup completed: on-chain test accounts and instructions confirmed. Test tokens have no cash value.");
+    log("Setup completed: on-chain test accounts and instructions confirmed. Cast the FOR vote before the deadline. Test tokens have no cash value.");
   } catch(e) {
     log("SETUP ERROR: "+(e.message||e),"bad");
     setStatus("programStatus",String(e.message||e));
@@ -210,7 +203,10 @@ async function castVote() {
     holderBondAccount:state.bondAta,holderEntitlement:state.governanceEntitlement,voterRecord:voterPda(state.proposal),
     systemProgram:SystemProgram.programId,rent:SYSVAR_RENT_PUBKEY
   }).instruction();
-  const sig=await sendWalletTx([ix]);log("Vote recorded on-chain (the setup already casts the initial FOR vote; duplicate-vote protection may reject this).");
+  const sig=await sendWalletTx([ix]);
+  const proposal=await program.account.governanceProposal.fetch(state.proposal);
+  setStatus("voteState","VOTE RECORDED on-chain\\nFOR: "+fmt(proposal.votesFor.toNumber())+" · AGAINST: "+fmt(proposal.votesAgainst.toNumber())+" · ABSTAIN: "+fmt(proposal.votesAbstain.toNumber())+"\\nVoting ends: "+new Date(state.voteEnd*1000).toLocaleTimeString()+"\\nTransaction: "+sig);
+  log("Vote recorded on-chain and tally read back from the proposal account.");
 }
 async function finalizeVote() {
   if(!state)throw new Error("Initialize the test instrument first.");
