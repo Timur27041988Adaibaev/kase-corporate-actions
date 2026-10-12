@@ -264,7 +264,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
 
   it("Step 2 [Scenario 1]: Schedule Coupon Corporate Action #202601", async () => {
     const recordDate = new anchor.BN(Math.floor(Date.now() / 1000) - 100);
-    const settlementDate = new anchor.BN(Math.floor(Date.now() / 1000) + 10);
+    const settlementDate = new anchor.BN(Math.floor(Date.now() / 1000) + 60);
 
     await program.methods
       .scheduleCorporateAction(
@@ -544,7 +544,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
 
   it("Step 6 [Scenario 2]: Schedule Redemption Corporate Action #202699 & Deposit Principal", async () => {
     const recordDate = new anchor.BN(Math.floor(Date.now() / 1000) - 100);
-    const settlementDate = new anchor.BN(Math.floor(Date.now() / 1000) + 10);
+    const settlementDate = new anchor.BN(Math.floor(Date.now() / 1000) + 60);
 
     await program.methods
       .scheduleCorporateAction(
