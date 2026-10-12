@@ -2495,78 +2495,32 @@ function initListeners() {
   window.executeVoteAction = executeVoteAction;
 
   document.getElementById("btnVoteFor")?.addEventListener("click", () => {
-    if (state.votesFor > 0) return;
-    dispatchActionWithSignerGuard(async () => {
-      await executeVoteAction("for");
-    });
+    dispatchActionWithSignerGuard(async () => executeVoteAction("for"));
   });
 
   document.getElementById("btnVoteAgainst")?.addEventListener("click", () => {
-    if (state.votesAgainst > 0) return;
-    dispatchActionWithSignerGuard(async () => {
-      await executeVoteAction("against");
-    });
+    dispatchActionWithSignerGuard(async () => executeVoteAction("against"));
   });
 
   document.getElementById("btnVoteAbstain")?.addEventListener("click", () => {
-    if (state.votesAbstain > 0) return;
-    dispatchActionWithSignerGuard(async () => {
-      state.votesAbstain = (state.votesAbstain || 0) + 800;
-      clusterStates[currentCluster].votesAbstain = state.votesAbstain;
-      updateQuorum();
-      await executeVoteAction("abstain");
-    });
+    dispatchActionWithSignerGuard(async () => executeVoteAction("abstain"));
   });
 
   document.getElementById("btnFinalizeVoting")?.addEventListener("click", () => {
-    const totalVotes = state.votesFor + state.votesAgainst + (state.votesAbstain || 0);
-    if (totalVotes < 5000) {
-      showToast("Quorum Needed", "Quorum not reached (5,000 votes required). Cast votes first.", "warning");
-      return;
-    }
-
     dispatchActionWithSignerGuard(async () => {
       const btn = document.getElementById("btnFinalizeVoting");
-      btn.disabled = true;
-
+      if (btn?.disabled) return;
+      if (btn) btn.disabled = true;
       const cluster = CLUSTERS[currentCluster];
-      const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=PROPOSAL_RATIFIED | PROPOSAL_ID=101 | OUTCOME=PASSED | FOR=${state.votesFor.toLocaleString()} | AGAINST=${state.votesAgainst.toLocaleString()} | ABSTAIN=${state.votesAbstain.toLocaleString()} | NEW_COUPON_RATE=12.5% | CSD=COMMITTED`;
-
-      await broadcastRealSolanaTransaction({
-        actionTitle: `Finalize & Record Proposal #101 Ratification On-Chain [${cluster.shortName}]`,
-        memoText,
-        onSuccess: (signature, slot) => {
-          const cs = clusterStates[currentCluster];
-          cs.proposalFinalized = true;
-          cs.proposalTx = signature;
-          cs.couponRateBps = 1250;
-          state.proposalFinalized = true;
-
-          // ==================================================================
-          // DYNAMIC MATHEMATICAL RE-CALCULATION & FULL UI SYNCHRONIZATION!
-          // ==================================================================
-          BondMath.terms.couponRateBps = 1250; // Restructured from 10.0% to 12.5% p.a.
-
-          if (cluster.isMainnet) {
-            appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
-            appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
-          }
-
-          appendLog("PROPOSAL", "tag-ok", cluster.isMainnet ? `Proposal #101 recorded in Memo on ${cluster.shortName.toUpperCase()}: PASSED (FOR: ${state.votesFor.toLocaleString()} | AGAINST: ${state.votesAgainst.toLocaleString()} | ABSTAINED: ${state.votesAbstain.toLocaleString()}). KASE program is deployed on Devnet; Mainnet mode records via Memo only.` : `Proposal #101 APPROVED ON ${cluster.shortName.toUpperCase()}: PASSED (FOR: ${state.votesFor.toLocaleString()} | AGAINST: ${state.votesAgainst.toLocaleString()} | ABSTAINED: ${state.votesAbstain.toLocaleString()})`, signature);
-          appendLog("PARAM-UPDATE", "tag-ok", cluster.isMainnet ? "Mainnet Memo Record: the vote record is stored in the Memo Program (the KASE Anchor program is deployed on Devnet, not on Mainnet)." : "Coupon rate successfully updated in on-chain parameters to 12.5% per annum (1,250 bps)!");
-          appendLog("MATH-SYNC", "tag-ok", "All coupon calculations automatically recalculated to the cent!");
-
-          btn.innerHTML = cluster.isMainnet ? "<span>✔ Restructuring recorded in Memo (Mainnet)</span>" : `<span>✔ Restructuring approved on ${cluster.shortName}</span>`;
-
-          // Re-render table and HUD with the new 12.5% calculations
-          renderTable();
-          updateActionButtons();
-
-          showToast("Proposal Passed", cluster.isMainnet ? "Proposal #101 approval record sent to the Memo Program on Mainnet-Beta (KASE program is deployed on Devnet; Mainnet mode records via Memo only)." : `Coupon rate successfully restructured to 12.5% per annum on ${cluster.shortName}! Table recalculated.`, "success");
-        },
-      });
-
-      btn.disabled = state.proposalFinalized;
+      const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=DEMO_MEMO_ATTESTATION | REQUESTED_ACTION=FINALIZE_GOVERNANCE_PROPOSAL | PROPOSAL_ID=101 | OUTCOME_REFERENCE=UNVERIFIED | EXECUTION=NOT_PERFORMED`;
+      try {
+        await broadcastRealSolanaTransaction({
+          actionTitle: `Memo Attestation Only: Finalization Request for Proposal #101 [${cluster.shortName}]`,
+          memoText,
+        });
+      } finally {
+        if (btn) btn.disabled = false;
+      }
     });
   });
   window.btnFinalizeVoting = document.getElementById("btnFinalizeVoting");
