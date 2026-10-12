@@ -796,85 +796,88 @@ async function refreshWalletBalance() {
 // PRE-FLIGHT GAS CHECK & AUTOMATIC SUBSIDY ENGINE
 // ==============================================================================
 async function ensureGasBalance(targetPubkey, minSol = 0.005) {
-  if (!connection || !targetPubkey) return;
+  if (!connection || !targetPubkey) {
+    throw new Error("Solana connection or signing wallet is not initialized. Refresh the page and connect Phantom again.");
+  }
 
   const web3 = window.solanaWeb3;
   const cluster = CLUSTERS[currentCluster];
+  const minLamports = Math.ceil(minSol * (web3?.LAMPORTS_PER_SOL || 1e9));
+  let lamports;
 
   try {
-    const lamports = await connection.getBalance(targetPubkey);
-    const sol = lamports / (web3?.LAMPORTS_PER_SOL || 1e9);
+    lamports = await connection.getBalance(targetPubkey, "confirmed");
+  } catch (error) {
+    const detail = error?.message || String(error);
+    throw new Error(`Could not read the wallet balance from ${cluster.shortName}: ${detail}`);
+  }
 
-    if (cluster.isMainnet) {
-      // Mainnet: Strict fee check (~0.000005 SOL fee), do not run faucet!
-      const minMainnetFee = 0.000005;
-      if (sol < minMainnetFee) {
-        appendLog(
-          "GAS-GUARD",
-          "tag-err",
-          `INSUFFICIENT FUNDS: Balance of ${truncateAddress(targetPubkey.toString())} is ${sol.toFixed(7)} SOL (< ${minMainnetFee} SOL).`
-        );
-        throw new Error(
-          `Not enough real SOL in the wallet to pay the Solana Mainnet-Beta network fee (~0.000005 SOL). Current balance: ${sol.toFixed(7)} SOL. Top up the wallet before the transaction.`
-        );
-      }
-      return;
+  let sol = lamports / (web3?.LAMPORTS_PER_SOL || 1e9);
+  if (cluster.isMainnet) {
+    // Never request test SOL or silently switch networks for a Mainnet wallet.
+    const minMainnetLamports = 5000;
+    if (lamports < minMainnetLamports) {
+      throw new Error(`Insufficient real SOL for Mainnet fees. Balance: ${sol.toFixed(7)} SOL; add SOL to this wallet before retrying.`);
     }
+    return;
+  }
 
-    if (sol < minSol) {
-      appendLog(
-        "GAS-GUARD",
-        "tag-broadcast",
-        `Balance of ${truncateAddress(targetPubkey.toString())} is ${sol.toFixed(4)} SOL (< ${minSol} SOL). Topping up gas automatically...`
-      );
-      showToast(
-        "Devnet gas top-up",
-        `Crediting test SOL to ${truncateAddress(targetPubkey.toString())} to pay fees...`,
-        "info",
-        4000
-      );
+  if (lamports >= minLamports) return;
 
-      // Attempt 1: Direct Faucet Request
+  appendLog("GAS-GUARD", "tag-warn", `Devnet balance is ${sol.toFixed(4)} SOL; attempting a test-SOL faucet request.`);
+  showToast("Devnet gas needed", "Requesting test SOL from the Devnet faucet before sending the transaction.", "info", 4000);
+
+  let lastFaucetError = null;
+  try {
+    const signature = await connection.requestAirdrop(targetPubkey, 0.5 * (web3?.LAMPORTS_PER_SOL || 1e9));
+    const latest = await connection.getLatestBlockhash("confirmed");
+    await connection.confirmTransaction({ signature, ...latest }, "confirmed");
+    appendLog("GAS-GUARD", "tag-ok", "Devnet faucet transfer confirmed.", signature);
+  } catch (error) {
+    lastFaucetError = error;
+    console.warn("Devnet faucet request failed:", error);
+
+    // Optional fallback: use the temporary local demo signer only if it is already funded.
+    const operator = state.operatorKeypair;
+    if (operator && operator.publicKey.toString() !== targetPubkey.toString()) {
       try {
-        const sig = await connection.requestAirdrop(targetPubkey, 0.5 * web3.LAMPORTS_PER_SOL);
-        await connection.confirmTransaction(sig, "confirmed");
-        appendLog("GAS-GUARD", "tag-ok", `Successfully credited 0.5 SOL from the Devnet faucet!`, sig);
-      } catch (faucetErr) {
-        console.warn("Public airdrop faucet rate limit:", faucetErr);
-
-        // Attempt 2: Transfer from funded CSD Operator Keypair if available
-        if (state.operatorKeypair && state.operatorKeypair.publicKey.toString() !== targetPubkey.toString()) {
-          const opBal = await connection.getBalance(state.operatorKeypair.publicKey);
-          if (opBal > 0.05 * 1e9) {
-            appendLog("GAS-SUBSIDY", "tag-broadcast", "Topping up 0.05 Devnet SOL from the temporary browser-local signer...");
-            const { blockhash } = await connection.getLatestBlockhash("confirmed");
-            const tx = new web3.Transaction().add(
-              web3.SystemProgram.transfer({
-                fromPubkey: state.operatorKeypair.publicKey,
-                toPubkey: targetPubkey,
-                lamports: 0.05 * web3.LAMPORTS_PER_SOL,
-              })
-            );
-            tx.recentBlockhash = blockhash;
-            tx.feePayer = state.operatorKeypair.publicKey;
-            tx.sign(state.operatorKeypair);
-            const sig = await connection.sendRawTransaction(tx.serialize());
-            await connection.confirmTransaction(sig, "confirmed");
-            appendLog("GAS-SUBSIDY", "tag-ok", `0.05 SOL transferred to the user's wallet for gas!`, sig);
-          }
+        const operatorBalance = await connection.getBalance(operator.publicKey, "confirmed");
+        const subsidy = 0.05 * (web3?.LAMPORTS_PER_SOL || 1e9);
+        if (operatorBalance > subsidy + 5000) {
+          const latest = await connection.getLatestBlockhash("confirmed");
+          const transaction = new web3.Transaction().add(
+            web3.SystemProgram.transfer({
+              fromPubkey: operator.publicKey,
+              toPubkey: targetPubkey,
+              lamports: subsidy,
+            })
+          );
+          transaction.recentBlockhash = latest.blockhash;
+          transaction.feePayer = operator.publicKey;
+          transaction.sign(operator);
+          const signature = await connection.sendRawTransaction(transaction.serialize());
+          await connection.confirmTransaction({ signature, ...latest }, "confirmed");
+          appendLog("GAS-SUBSIDY", "tag-ok", "Devnet gas subsidy confirmed from the temporary local demo signer.", signature);
+          lastFaucetError = null;
         }
+      } catch (subsidyError) {
+        console.warn("Local demo signer subsidy unavailable:", subsidyError);
+        lastFaucetError = subsidyError;
       }
+    }
+  }
 
-      await refreshWalletBalance();
-    }
-  } catch (err) {
-    if (cluster.isMainnet) {
-      if (err.message && err.message.includes("429")) {
-        throw new Error("The public Solana Mainnet-Beta RPC is temporarily overloaded (429 Rate Limit). Set a private RPC (Helius/QuickNode) in RPC settings.");
-      }
-      throw err;
-    }
-    console.warn("Pre-flight gas guard exception:", err);
+  try {
+    lamports = await connection.getBalance(targetPubkey, "confirmed");
+  } catch (error) {
+    throw new Error(`Devnet balance recheck failed: ${error?.message || String(error)}`);
+  }
+  sol = lamports / (web3?.LAMPORTS_PER_SOL || 1e9);
+  await refreshWalletBalance();
+
+  if (lamports < minLamports) {
+    const detail = lastFaucetError?.message ? ` Faucet response: ${lastFaucetError.message}` : "";
+    throw new Error(`Wallet still has only ${sol.toFixed(4)} Devnet SOL. No transaction was sent. Click “Airdrop +1 SOL” or retry later when the public faucet is available.${detail}`);
   }
 }
 
