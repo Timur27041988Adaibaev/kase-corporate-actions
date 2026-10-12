@@ -439,7 +439,7 @@ function switchToOperatorMode() {
   updateActionButtons();
   refreshWalletBalance();
   const cluster = CLUSTERS[currentCluster];
-  appendLog("SIGNER", "tag-ok", `Active Signer: KASE CSD Institutional Authority (${cluster.shortName} Operator Keypair)`);
+  appendLog("SIGNER", "tag-warn", `Active signer: ephemeral browser-local demo keypair on ${cluster.shortName}; not an institutional KCSD authority.`);
   showToast("Local Operator Key Active", `A browser-local keypair is active on ${cluster.shortName}; it is not an institutional KCSD authority.`, "warning");
 }
 
@@ -1094,13 +1094,13 @@ function updateClusterUI() {
   const s1SettledDesc = document.getElementById("stepCouponSettledDesc");
   if (s1SettledDesc) {
     s1SettledDesc.textContent = isMainnet
-      ? "PDA transfers coupon funds on Devnet (Mainnet: Memo Program records only. KASE program: live on Devnet)."
+      ? "Memo record only. The browser UI does not execute coupon transfers on either cluster."
       : `PDA transfers coupon funds directly to 5 holder accounts on ${cluster.name}. Zero double-claims.`;
   }
   const s2SettledDesc = document.getElementById("stepRedeemSettledDesc");
   if (s2SettledDesc) {
     s2SettledDesc.textContent = isMainnet
-      ? "Vault PDA releases $10,000,000 USDC on Devnet (Mainnet: Memo Program records only. KASE program: live on Devnet)."
+      ? "Memo record only. The browser UI does not burn bond tokens or transfer principal on either cluster."
       : `Vault PDA releases $10,000,000 USDC directly to holder wallets on ${cluster.name}.`;
   }
 
@@ -1175,7 +1175,7 @@ function updateClusterUI() {
     }
     if (s1StatusText) {
       s1StatusText.textContent = isMainnet
-        ? "Ready for Mainnet Memo Broadcast (KASE program: live on Devnet)"
+        ? "Ready for Mainnet Memo broadcast only; no Anchor settlement"
         : `Ready for Real ${cluster.name} Broadcast`;
       s1StatusText.style.color = "var(--kase-green)";
     }
