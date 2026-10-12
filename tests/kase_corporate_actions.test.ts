@@ -660,7 +660,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
   // ==========================================
 
   it("Step 8 [Scenario 3]: Create Restructuring Proposal #101", async () => {
-    const now = Math.floor(Date.now() / 1000);
+    const now = await chainTimestamp(provider.connection);
     const votingStart = new anchor.BN(now - 100);
     const votingEnd = new anchor.BN(now + 180);
     const quorumThreshold = new anchor.BN(2000); // 2,000 bonds quorum
@@ -945,7 +945,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
       program.programId
     );
 
-    const now = Math.floor(Date.now() / 1000);
+    const now = await chainTimestamp(provider.connection);
     await program.methods
       .scheduleCorporateAction(
         testActionId,
