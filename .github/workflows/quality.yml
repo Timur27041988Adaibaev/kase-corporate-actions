@@ -41,11 +41,12 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Install Solana CLI
         run: |
-          sh -c "$(curl -sSfL https://release.anza.xyz/v1.18.26/install)"
+          # Solana 2.1.5 provides platform-tools with a newer SBF Rust compiler
+          # compatible with this project's Borsh dependency graph.
+          sh -c "$(curl -sSfL https://release.anza.xyz/v2.1.5/install)"
           echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
       - name: Install Anchor CLI
         run: |
-          # Keep rustup's stable compiler ahead of Solana's bundled rustc shim.
           export PATH="$HOME/.cargo/bin:$PATH"
           rustc --version
           cargo install --git https://github.com/coral-xyz/anchor avm --locked
@@ -68,4 +69,6 @@ jobs:
           export PATH="$HOME/.cargo/bin:$PATH"
           rustc --version
           cargo --version
+          solana --version
+          anchor --version
           anchor test
