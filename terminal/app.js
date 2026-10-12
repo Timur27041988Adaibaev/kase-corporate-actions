@@ -2411,51 +2411,20 @@ function initListeners() {
   // ============================================================================
   async function executeCouponDistribution() {
     const btn = document.getElementById("btnExecuteCoupon");
+    if (btn?.disabled) return;
     if (btn) btn.disabled = true;
-
     const cluster = CLUSTERS[currentCluster];
     const totalCouponFormatted = formatUSD(BondMath.calculateCoupon(BondMath.terms.totalSupply));
     const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=DEMO_MEMO_ATTESTATION | REQUESTED_ACTION=COUPON_DISTRIBUTION | AMOUNT_REFERENCE=${totalCouponFormatted}_USDC | EXECUTION=NOT_PERFORMED`;
 
-    await broadcastRealSolanaTransaction({
-      actionTitle: `Memo Attestation Only: Coupon Request (${totalCouponFormatted} USDC reference) [${cluster.shortName}]`,
-      memoText,
-      onSuccess: (signature, slot) => {
-        const cs = clusterStates[currentCluster];
-        cs.couponSettled = true;
-        cs.couponTx = signature;
-        cs.couponSlot = slot;
-        state.couponSettled = true;
-
-        if (cluster.isMainnet) {
-          appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
-          appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
-        }
-
-        document.getElementById("stepCouponFunded")?.classList.add("completed");
-        document.getElementById("stepCouponSettled")?.classList.add("completed");
-        const pillF = document.getElementById("pillCouponFunded");
-        if (pillF) { pillF.textContent = "CONFIRMED"; pillF.className = "step-status-pill completed"; }
-        const pillS = document.getElementById("pillCouponSettled");
-        if (pillS) { pillS.textContent = "100% SETTLED"; pillS.className = "step-status-pill completed"; }
-
-        const statusEl = document.getElementById("couponStatusText");
-        if (statusEl) {
-          statusEl.textContent = cluster.isMainnet
-            ? `100% Settled (${totalCouponFormatted} USDC Memo Record on Mainnet-Beta in Slot #${slot}. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).)`
-            : `Memo record confirmed in Slot #${slot}; no USDC was transferred. Coupon settlement is NOT executed.`;
-          statusEl.style.color = "var(--kase-green)";
-        }
-
-        if (btn) btn.innerHTML = cluster.isMainnet
-          ? "<span>✔ Scenario 1 Recorded via Memo Program (Mainnet)</span>"
-          : `<span>✔ Memo Record Confirmed — No Payment Executed</span>`;
-        renderTable();
-        updateActionButtons();
-      },
-    });
-
-    if (btn) btn.disabled = state.couponSettled;
+    try {
+      await broadcastRealSolanaTransaction({
+        actionTitle: `Memo Attestation Only: Coupon Request (${totalCouponFormatted} USDC reference) [${cluster.shortName}]`,
+        memoText,
+      });
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   }
   window.executeCouponDistribution = executeCouponDistribution;
 
@@ -2470,61 +2439,20 @@ function initListeners() {
   // ============================================================================
   async function executeBondRedemption() {
     const btn = document.getElementById("btnExecuteRedemption");
+    if (btn?.disabled) return;
     if (btn) btn.disabled = true;
-
     const cluster = CLUSTERS[currentCluster];
     const totalPrincipalFormatted = formatUSD(BondMath.calculateRedemption(BondMath.terms.totalSupply));
     const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=DEMO_MEMO_ATTESTATION | REQUESTED_ACTION=REDEMPTION_AND_BURN | UNITS_REFERENCE=10,000 | AMOUNT_REFERENCE=${totalPrincipalFormatted}_USDC | EXECUTION=NOT_PERFORMED`;
 
-    await broadcastRealSolanaTransaction({
-      actionTitle: `Memo Attestation Only: Redemption Request (${totalPrincipalFormatted} reference) [${cluster.shortName}]`,
-      memoText,
-      onSuccess: (signature, slot) => {
-        const cs = clusterStates[currentCluster];
-        cs.redemptionSettled = true;
-        cs.activeSupply = 0;
-        cs.redemptionTx = signature;
-        cs.redemptionSlot = slot;
-        state.redemptionSettled = true;
-        state.activeSupply = 0;
-
-        if (cluster.isMainnet) {
-          appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
-          appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
-        }
-
-        document.getElementById("stepRedeemBurned")?.classList.add("completed");
-        document.getElementById("stepRedeemSettled")?.classList.add("completed");
-        const pillB = document.getElementById("pillRedeemBurned");
-        if (pillB) { pillB.textContent = "BURNED"; pillB.className = "step-status-pill completed"; }
-        const pillS = document.getElementById("pillRedeemSettled");
-        if (pillS) { pillS.textContent = "DISPATCHED"; pillS.className = "step-status-pill completed"; }
-
-        const supplyEl = document.getElementById("statActiveSupply");
-        if (supplyEl) {
-          supplyEl.textContent = "0 Bonds (Burned & Retired)";
-          supplyEl.style.color = "var(--danger)";
-        }
-        const statSup = document.getElementById("statSupplyStatus");
-        if (statSup) statSup.textContent = "Matured & Permanently Retired from Circulation";
-
-        const redStatEl = document.getElementById("redemptionStatusText");
-        if (redStatEl) {
-          redStatEl.textContent = cluster.isMainnet
-            ? "100% Redemption Memo Record on Mainnet-Beta. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)."
-            : `100% Burned & Principal Disbursed on ${cluster.shortName}`;
-          redStatEl.style.color = "var(--danger)";
-        }
-
-        if (btn) btn.innerHTML = cluster.isMainnet
-          ? "<span>✔ Scenario 2 Recorded via Memo Program (Mainnet)</span>"
-          : `<span>✔ Memo Record Confirmed — No Redemption Executed</span>`;
-        renderTable();
-        updateActionButtons();
-      },
-    });
-
-    if (btn) btn.disabled = state.redemptionSettled;
+    try {
+      await broadcastRealSolanaTransaction({
+        actionTitle: `Memo Attestation Only: Redemption Request (${totalPrincipalFormatted} reference) [${cluster.shortName}]`,
+        memoText,
+      });
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   }
   window.executeBondRedemption = executeBondRedemption;
 
@@ -2538,86 +2466,30 @@ function initListeners() {
   // SCENARIO 3: BONDHOLDER GOVERNANCE VOTING & ABSTAIN SUPPORT
   // ============================================================================
   async function executeVoteAction(choice) {
-    const c = String(choice).toLowerCase();
+    const normalizedChoice = String(choice).toLowerCase();
+    if (!["for", "against", "abstain"].includes(normalizedChoice)) {
+      showToast("Invalid vote intent", "Choose FOR, AGAINST, or ABSTAIN.", "error");
+      return;
+    }
+    const buttonId = {
+      for: "btnVoteFor",
+      against: "btnVoteAgainst",
+      abstain: "btnVoteAbstain",
+    }[normalizedChoice];
+    const btn = document.getElementById(buttonId);
+    if (btn?.disabled) return;
+    if (btn) btn.disabled = true;
     const cluster = CLUSTERS[currentCluster];
+    const referenceWeight = normalizedChoice === "for" ? "6,000" : normalizedChoice === "against" ? "1,200" : "800";
+    const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=DEMO_MEMO_ATTESTATION | REQUESTED_ACTION=GOVERNANCE_VOTE | PROPOSAL_ID=101 | VOTE_INTENT=${normalizedChoice.toUpperCase()} | WEIGHT_REFERENCE=${referenceWeight} | EXECUTION=NOT_PERFORMED`;
 
-    if (c === "for") {
-      const btn = document.getElementById("btnVoteFor");
-      if (btn) btn.disabled = true;
-      const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=DEMO_MEMO_ATTESTATION | REQUESTED_ACTION=GOVERNANCE_VOTE | PROPOSAL_ID=101 | VOTE_INTENT=FOR | WEIGHT_REFERENCE=6,000 | EXECUTION=NOT_PERFORMED`;
+    try {
       await broadcastRealSolanaTransaction({
-        actionTitle: `Memo Attestation Only: Vote Intent FOR Proposal #101 [${cluster.shortName}]`,
+        actionTitle: `Memo Attestation Only: Vote Intent ${normalizedChoice.toUpperCase()} Proposal #101 [${cluster.shortName}]`,
         memoText,
-        onSuccess: (signature, slot) => {
-          const cs = clusterStates[currentCluster];
-          cs.votesFor = 6000;
-          cs.voteForTx = signature;
-          state.votesFor = 6000;
-          updateQuorum();
-          if (cluster.isMainnet) {
-            appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
-            appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
-          }
-          appendLog("VOTE-FOR", "tag-ok", cluster.isMainnet ? "Mainnet Memo Record: 6,000 Votes 'FOR' recorded via Solana Memo Program. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)." : `Memo record confirmed for FOR; no Anchor governance vote or tally was executed.`, signature);
-          if (btn) btn.innerHTML = cluster.isMainnet ? "<span>✔ 6,000 Votes FOR Recorded in Memo (Mainnet)</span>" : `<span>✔ 6,000 Votes FOR Cast (${cluster.shortName})</span>`;
-          updateActionButtons();
-        },
       });
-      if (btn) btn.disabled = state.votesFor > 0;
-    } else if (c === "against") {
-      const btn = document.getElementById("btnVoteAgainst");
-      if (btn) btn.disabled = true;
-      const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=DEMO_MEMO_ATTESTATION | REQUESTED_ACTION=GOVERNANCE_VOTE | PROPOSAL_ID=101 | VOTE_INTENT=AGAINST | WEIGHT_REFERENCE=1,200 | EXECUTION=NOT_PERFORMED`;
-      await broadcastRealSolanaTransaction({
-        actionTitle: `Memo Attestation Only: Vote Intent AGAINST Proposal #101 [${cluster.shortName}]`,
-        memoText,
-        onSuccess: (signature, slot) => {
-          const cs = clusterStates[currentCluster];
-          cs.votesAgainst = 1200;
-          cs.voteAgainstTx = signature;
-          state.votesAgainst = 1200;
-          updateQuorum();
-          if (cluster.isMainnet) {
-            appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
-            appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
-          }
-          appendLog("VOTE-AGAINST", "tag-warn", cluster.isMainnet ? "Mainnet Memo Record: 1,200 Votes 'AGAINST' recorded via Solana Memo Program. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)." : `Memo record confirmed for AGAINST; no Anchor governance vote or tally was executed.`, signature);
-          if (btn) btn.innerHTML = cluster.isMainnet ? "<span>✔ 1,200 Votes AGAINST Recorded in Memo (Mainnet)</span>" : `<span>✔ 1,200 Votes AGAINST Cast (${cluster.shortName})</span>`;
-          updateActionButtons();
-        },
-      });
-      if (btn) btn.disabled = state.votesAgainst > 0;
-    } else if (c === "abstain") {
-      const btn = document.getElementById("btnVoteAbstain");
-      if (btn) btn.disabled = true;
-      const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=DEMO_MEMO_ATTESTATION | REQUESTED_ACTION=GOVERNANCE_VOTE | PROPOSAL_ID=101 | VOTE_INTENT=ABSTAIN | WEIGHT_REFERENCE=800 | EXECUTION=NOT_PERFORMED`;
-      await broadcastRealSolanaTransaction({
-        actionTitle: `Memo Attestation Only: Vote Intent ABSTAIN Proposal #101 [${cluster.shortName}]`,
-        memoText,
-        onSuccess: (signature, slot) => {
-          const cs = clusterStates[currentCluster];
-          cs.votesAbstain = 800;
-          cs.voteAbstainTx = signature;
-          state.votesAbstain = 800;
-          updateQuorum();
-          if (cluster.isMainnet) {
-            appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
-            appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
-          }
-          appendLog("VOTE-ABSTAIN", "tag-ok", cluster.isMainnet ? "Mainnet Memo Record: 800 Votes 'ABSTAIN' recorded via Solana Memo Program. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)." : `Memo record confirmed for ABSTAIN; no Anchor governance vote or tally was executed.`, signature);
-          if (btn) btn.innerHTML = cluster.isMainnet ? "<span>✔ 800 Votes ABSTAIN Recorded in Memo (Mainnet)</span>" : `<span>✔ 800 Votes ABSTAIN Cast (${cluster.shortName})</span>`;
-          updateActionButtons();
-        },
-        onError: () => {
-          const cs = clusterStates[currentCluster];
-          cs.votesAbstain = 0;
-          state.votesAbstain = 0;
-          updateQuorum();
-          updateActionButtons();
-          if (btn) btn.disabled = false;
-        },
-      });
-      if (btn) btn.disabled = state.votesAbstain > 0;
+    } finally {
+      if (btn) btn.disabled = false;
     }
   }
   window.executeVoteAction = executeVoteAction;
