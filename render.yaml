@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: kase-corporate-actions
+    runtime: python
+    plan: free
+    rootDir: terminal
+    buildCommand: echo "No third-party Python dependencies required"
+    startCommand: python server.py
+    healthCheckPath: /api/health
+    autoDeploy: true
