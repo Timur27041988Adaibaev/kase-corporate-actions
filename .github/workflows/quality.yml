@@ -27,7 +27,7 @@ jobs:
       - name: Check browser JavaScript syntax
         run: |
           node --check terminal/app.js
-          node --check terminal/anchor-console.js
+          node --input-type=module --check < terminal/anchor-console.js
       - name: Run server smoke tests
         run: python -m unittest discover -s tests -p 'test_server_*.py' -v
       - name: Check Anchor program Rust compilation
