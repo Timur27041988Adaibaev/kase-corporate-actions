@@ -1,0 +1,1931 @@
+{
+  "address": "5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz",
+  "metadata": {
+    "name": "kase_corporate_actions",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Solana Anchor Program for KASE Automated Corporate Actions (Coupon, Redemption, Governance)"
+  },
+  "instructions": [
+    {
+      "name": "cast_bondholder_vote",
+      "docs": [
+        "8. SCENARIO 3 (Part B): Bondholder vote weighted by position size (Cast Vote)"
+      ],
+      "discriminator": [
+        13,
+        130,
+        55,
+        91,
+        25,
+        173,
+        111,
+        95
+      ],
+      "accounts": [
+        {
+          "name": "voter",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "bond_security",
+          "relations": [
+            "proposal",
+            "corporate_action"
+          ]
+        },
+        {
+          "name": "proposal",
+          "writable": true
+        },
+        {
+          "name": "corporate_action"
+        },
+        {
+          "name": "holder_bond_account"
+        },
+        {
+          "name": "holder_entitlement",
+          "docs": [
+            "Verified snapshot entitlement guard against Vote-and-Transfer (Vote Recycling) exploits"
+          ],
+          "optional": true
+        },
+        {
+          "name": "voter_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  111,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "proposal"
+              },
+              {
+                "kind": "account",
+                "path": "voter"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "choice",
+          "type": {
+            "defined": {
+              "name": "VoteChoice"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "create_governance_proposal",
+      "docs": [
+        "7. SCENARIO 3 (Part A): Create a proposal for bondholder voting (Bondholder Voting)"
+      ],
+      "discriminator": [
+        102,
+        90,
+        114,
+        133,
+        147,
+        63,
+        113,
+        168
+      ],
+      "accounts": [
+        {
+          "name": "proposer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "bond_security"
+        },
+        {
+          "name": "proposal",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  112,
+                  111,
+                  115,
+                  97,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "bond_security"
+              },
+              {
+                "kind": "arg",
+                "path": "proposal_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "proposal_id",
+          "type": "u64"
+        },
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "description_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "voting_start",
+          "type": "i64"
+        },
+        {
+          "name": "voting_end",
+          "type": "i64"
+        },
+        {
+          "name": "quorum_threshold_bonds",
+          "type": "u64"
+        },
+        {
+          "name": "new_coupon_rate_bps",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "deposit_action_vault",
+      "docs": [
+        "4. Fund the PDA vault with settlement funds (the issuer deposits USDC for payouts)"
+      ],
+      "discriminator": [
+        21,
+        2,
+        125,
+        46,
+        133,
+        189,
+        152,
+        181
+      ],
+      "accounts": [
+        {
+          "name": "funder",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "corporate_action",
+          "writable": true
+        },
+        {
+          "name": "action_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  99,
+                  116,
+                  105,
+                  111,
+                  110,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "corporate_action"
+              }
+            ]
+          }
+        },
+        {
+          "name": "funder_token_account",
+          "writable": true
+        },
+        {
+          "name": "settlement_mint",
+          "optional": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "execute_bond_redemption",
+      "docs": [
+        "6. SCENARIO 2: Principal redemption at maturity (Bond Redemption & Token Burn)",
+        "Burn the investor's bond tokens + pay $1,000 face value per bond"
+      ],
+      "discriminator": [
+        136,
+        81,
+        243,
+        122,
+        233,
+        44,
+        113,
+        59
+      ],
+      "accounts": [
+        {
+          "name": "holder",
+          "signer": true
+        },
+        {
+          "name": "bond_security",
+          "writable": true,
+          "relations": [
+            "corporate_action"
+          ]
+        },
+        {
+          "name": "corporate_action",
+          "writable": true
+        },
+        {
+          "name": "action_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  99,
+                  116,
+                  105,
+                  111,
+                  110,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "corporate_action"
+              }
+            ]
+          }
+        },
+        {
+          "name": "holder_entitlement",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  110,
+                  116,
+                  105,
+                  116,
+                  108,
+                  101,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "corporate_action"
+              },
+              {
+                "kind": "account",
+                "path": "holder"
+              }
+            ]
+          }
+        },
+        {
+          "name": "bond_mint",
+          "writable": true
+        },
+        {
+          "name": "holder_bond_account",
+          "writable": true
+        },
+        {
+          "name": "holder_settlement_account",
+          "writable": true
+        },
+        {
+          "name": "settlement_mint",
+          "optional": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "execute_coupon_payment",
+      "docs": [
+        "5. SCENARIO 1: Coupon Payment Settlement",
+        "Transfer the coupon due from the PDA vault to the investor"
+      ],
+      "discriminator": [
+        25,
+        56,
+        34,
+        57,
+        68,
+        104,
+        25,
+        101
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "bond_security",
+          "relations": [
+            "corporate_action"
+          ]
+        },
+        {
+          "name": "corporate_action",
+          "writable": true
+        },
+        {
+          "name": "action_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  99,
+                  116,
+                  105,
+                  111,
+                  110,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "corporate_action"
+              }
+            ]
+          }
+        },
+        {
+          "name": "holder_entitlement",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  110,
+                  116,
+                  105,
+                  116,
+                  108,
+                  101,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "corporate_action"
+              },
+              {
+                "kind": "account",
+                "path": "holder_entitlement.holder",
+                "account": "HolderEntitlement"
+              }
+            ]
+          }
+        },
+        {
+          "name": "holder_settlement_account",
+          "writable": true
+        },
+        {
+          "name": "settlement_mint",
+          "optional": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "finalize_governance_proposal",
+      "docs": [
+        "9. SCENARIO 3 (Part C): Tally the vote (Finalize & Apply Proposal)"
+      ],
+      "discriminator": [
+        77,
+        75,
+        216,
+        164,
+        189,
+        3,
+        219,
+        194
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "bond_security"
+          ]
+        },
+        {
+          "name": "bond_security",
+          "writable": true,
+          "relations": [
+            "proposal"
+          ]
+        },
+        {
+          "name": "proposal",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_bond_instrument",
+      "docs": [
+        "1. Register a tokenized KASE financial instrument (bond)"
+      ],
+      "discriminator": [
+        182,
+        49,
+        121,
+        137,
+        121,
+        251,
+        220,
+        103
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "issuer"
+        },
+        {
+          "name": "bond_mint"
+        },
+        {
+          "name": "settlement_mint"
+        },
+        {
+          "name": "bond_security",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  110,
+                  100
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "isin"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "isin",
+          "type": "string"
+        },
+        {
+          "name": "face_value",
+          "type": "u64"
+        },
+        {
+          "name": "annual_coupon_bps",
+          "type": "u16"
+        },
+        {
+          "name": "coupons_per_year",
+          "type": "u8"
+        },
+        {
+          "name": "total_supply",
+          "type": "u64"
+        },
+        {
+          "name": "maturity_timestamp",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "record_holder_snapshot",
+      "docs": [
+        "3. Snapshot the holder register on the Record Date and calculate entitlements (Entitlement Calculation Engine)"
+      ],
+      "discriminator": [
+        64,
+        14,
+        162,
+        145,
+        59,
+        211,
+        171,
+        157
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "bond_security"
+          ]
+        },
+        {
+          "name": "bond_security",
+          "relations": [
+            "corporate_action"
+          ]
+        },
+        {
+          "name": "corporate_action",
+          "writable": true
+        },
+        {
+          "name": "holder"
+        },
+        {
+          "name": "holder_bond_account"
+        },
+        {
+          "name": "holder_entitlement",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  110,
+                  116,
+                  105,
+                  116,
+                  108,
+                  101,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "corporate_action"
+              },
+              {
+                "kind": "account",
+                "path": "holder"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "bonds_held",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "schedule_corporate_action",
+      "docs": [
+        "2. Schedule a corporate action (Coupon / Redemption / Vote)"
+      ],
+      "discriminator": [
+        75,
+        211,
+        62,
+        120,
+        194,
+        169,
+        203,
+        165
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "bond_security"
+          ]
+        },
+        {
+          "name": "bond_security"
+        },
+        {
+          "name": "corporate_action",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  99,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "bond_security"
+              },
+              {
+                "kind": "arg",
+                "path": "action_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "action_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  99,
+                  116,
+                  105,
+                  111,
+                  110,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "corporate_action"
+              }
+            ]
+          }
+        },
+        {
+          "name": "settlement_mint"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "action_id",
+          "type": "u64"
+        },
+        {
+          "name": "action_type",
+          "type": {
+            "defined": {
+              "name": "ActionType"
+            }
+          }
+        },
+        {
+          "name": "record_date_timestamp",
+          "type": "i64"
+        },
+        {
+          "name": "settlement_timestamp",
+          "type": "i64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "BondSecurity",
+      "discriminator": [
+        250,
+        247,
+        153,
+        198,
+        17,
+        246,
+        99,
+        33
+      ]
+    },
+    {
+      "name": "CorporateAction",
+      "discriminator": [
+        144,
+        225,
+        182,
+        199,
+        4,
+        234,
+        12,
+        32
+      ]
+    },
+    {
+      "name": "GovernanceProposal",
+      "discriminator": [
+        53,
+        107,
+        240,
+        190,
+        43,
+        73,
+        65,
+        143
+      ]
+    },
+    {
+      "name": "HolderEntitlement",
+      "discriminator": [
+        37,
+        168,
+        67,
+        193,
+        233,
+        220,
+        208,
+        241
+      ]
+    },
+    {
+      "name": "VoterRecord",
+      "discriminator": [
+        178,
+        96,
+        138,
+        116,
+        143,
+        202,
+        115,
+        33
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "BondInstrumentRegisteredEvent",
+      "discriminator": [
+        77,
+        232,
+        11,
+        21,
+        98,
+        104,
+        100,
+        136
+      ]
+    },
+    {
+      "name": "BondRedeemedEvent",
+      "discriminator": [
+        200,
+        192,
+        152,
+        168,
+        79,
+        16,
+        133,
+        70
+      ]
+    },
+    {
+      "name": "CorporateActionScheduledEvent",
+      "discriminator": [
+        115,
+        201,
+        67,
+        249,
+        73,
+        57,
+        228,
+        82
+      ]
+    },
+    {
+      "name": "CouponSettledEvent",
+      "discriminator": [
+        25,
+        139,
+        159,
+        138,
+        4,
+        225,
+        246,
+        90
+      ]
+    },
+    {
+      "name": "HolderSnapshotRecordedEvent",
+      "discriminator": [
+        72,
+        225,
+        228,
+        200,
+        100,
+        25,
+        1,
+        144
+      ]
+    },
+    {
+      "name": "ProposalCreatedEvent",
+      "discriminator": [
+        154,
+        240,
+        33,
+        66,
+        194,
+        233,
+        203,
+        209
+      ]
+    },
+    {
+      "name": "ProposalFinalizedEvent",
+      "discriminator": [
+        228,
+        151,
+        231,
+        28,
+        58,
+        215,
+        17,
+        130
+      ]
+    },
+    {
+      "name": "VaultFundedEvent",
+      "discriminator": [
+        185,
+        227,
+        254,
+        36,
+        214,
+        99,
+        199,
+        77
+      ]
+    },
+    {
+      "name": "VoteCastEvent",
+      "discriminator": [
+        241,
+        151,
+        159,
+        134,
+        250,
+        234,
+        71,
+        234
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidFaceValue",
+      "msg": "Bond face value must be greater than zero."
+    },
+    {
+      "code": 6001,
+      "name": "InvalidCouponRate",
+      "msg": "Annual coupon rate cannot exceed 100% (10000 bps)."
+    },
+    {
+      "code": 6002,
+      "name": "InvalidBondMintDecimals",
+      "msg": "Bond security mint must use zero decimals so each token represents one whole bond."
+    },
+    {
+      "code": 6003,
+      "name": "InvalidCouponFrequency",
+      "msg": "Coupon payment frequency must be 1, 2, 4 or 12 times per year."
+    },
+    {
+      "code": 6004,
+      "name": "InvalidMaturityDate",
+      "msg": "Instrument maturity date must be in the future."
+    },
+    {
+      "code": 6005,
+      "name": "RecordDateNotReached",
+      "msg": "The corporate action date has not been reached yet."
+    },
+    {
+      "code": 6006,
+      "name": "BondAlreadyMatured",
+      "msg": "Bond is already matured/redeemed."
+    },
+    {
+      "code": 6007,
+      "name": "MaturityNotReached",
+      "msg": "Bond maturity date has not been reached yet."
+    },
+    {
+      "code": 6008,
+      "name": "InsufficientVaultFunds",
+      "msg": "Insufficient funds in the corporate action vault."
+    },
+    {
+      "code": 6009,
+      "name": "ZeroHolderBalance",
+      "msg": "Investor balance on the record date is zero."
+    },
+    {
+      "code": 6010,
+      "name": "AlreadySettled",
+      "msg": "Entitlement already claimed/settled."
+    },
+    {
+      "code": 6011,
+      "name": "InvalidHolderTokenAccount",
+      "msg": "Investor token account does not match the expected owner."
+    },
+    {
+      "code": 6012,
+      "name": "InvalidTokenMint",
+      "msg": "Token account does not match the settlement currency mint or the bond mint."
+    },
+    {
+      "code": 6013,
+      "name": "UnauthorizedAuthority",
+      "msg": "Unauthorized to perform this action (KASE / Issuer / CSD only)."
+    },
+    {
+      "code": 6014,
+      "name": "VotingPeriodClosed",
+      "msg": "Voting on this proposal has already ended or has not started yet."
+    },
+    {
+      "code": 6015,
+      "name": "AlreadyVoted",
+      "msg": "Investor has already voted on this proposal (double voting prevented)."
+    },
+    {
+      "code": 6016,
+      "name": "QuorumNotMet",
+      "msg": "Quorum for the decision has not been reached."
+    },
+    {
+      "code": 6017,
+      "name": "ProposalAlreadyExecuted",
+      "msg": "Proposal has already been executed on the exchange."
+    },
+    {
+      "code": 6018,
+      "name": "MathOverflow",
+      "msg": "Math overflow while computing financial parameters."
+    },
+    {
+      "code": 6019,
+      "name": "InvalidActionStatus",
+      "msg": "Invalid corporate action status."
+    },
+    {
+      "code": 6020,
+      "name": "InvalidIsin",
+      "msg": "Invalid ISIN: bond ISIN code cannot be empty or longer than 16 characters."
+    },
+    {
+      "code": 6021,
+      "name": "InvalidProposalTitle",
+      "msg": "Proposal title cannot be empty or exceed 96 characters."
+    },
+    {
+      "code": 6022,
+      "name": "InvalidSettlementDate",
+      "msg": "Settlement date cannot precede the record date."
+    },
+    {
+      "code": 6023,
+      "name": "VoteRecyclingForbidden",
+      "msg": "Attempt to reuse a vote or register mismatch (vote recycling prevented)."
+    },
+    {
+      "code": 6024,
+      "name": "InvalidQuorumThreshold",
+      "msg": "Governance quorum threshold must be positive and cannot exceed total bond supply."
+    },
+    {
+      "code": 6025,
+      "name": "SnapshotExceedsActiveSupply",
+      "msg": "Aggregate holder snapshots cannot exceed the instrument's active bond supply."
+    }
+  ],
+  "types": [
+    {
+      "name": "ActionStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Scheduled"
+          },
+          {
+            "name": "SnapshotActive"
+          },
+          {
+            "name": "Funded"
+          },
+          {
+            "name": "Completed"
+          },
+          {
+            "name": "Cancelled"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ActionType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "CouponPayment"
+          },
+          {
+            "name": "BondRedemption"
+          },
+          {
+            "name": "GovernanceVoting"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BondInstrumentRegisteredEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "isin",
+            "type": "string"
+          },
+          {
+            "name": "issuer",
+            "type": "pubkey"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "bond_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "settlement_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "face_value",
+            "type": "u64"
+          },
+          {
+            "name": "annual_coupon_bps",
+            "type": "u16"
+          },
+          {
+            "name": "coupons_per_year",
+            "type": "u8"
+          },
+          {
+            "name": "total_supply",
+            "type": "u64"
+          },
+          {
+            "name": "maturity_timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BondRedeemedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "action_id",
+            "type": "u64"
+          },
+          {
+            "name": "holder",
+            "type": "pubkey"
+          },
+          {
+            "name": "bonds_burned",
+            "type": "u64"
+          },
+          {
+            "name": "principal_payout",
+            "type": "u64"
+          },
+          {
+            "name": "remaining_active_supply",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BondSecurity",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "isin",
+            "docs": [
+              "International Securities Identification Number (ISIN, e.g. \"KZDEMO000001\")"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "issuer",
+            "docs": [
+              "Bond issuer (Demo Issuer JSC)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "Exchange regulator / Central Securities Depository (KASE CSD / KCSD)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "bond_mint",
+            "docs": [
+              "SPL Mint of the bond token"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "settlement_mint",
+            "docs": [
+              "SPL Mint of the settlement currency (USDC / Digital Tenge)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "face_value",
+            "docs": [
+              "Face value of one bond (e.g. 1,000 USDC = 1_000_000_000 micro-units)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "annual_coupon_bps",
+            "docs": [
+              "Annual coupon rate in basis points (1000 bps = 10.00%)"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "coupons_per_year",
+            "docs": [
+              "Coupon payments per year (2 = semi-annual)"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "total_supply",
+            "docs": [
+              "Total issue size (number of bonds)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "active_supply",
+            "docs": [
+              "Current outstanding supply (decreases on redemption/burn)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "maturity_timestamp",
+            "docs": [
+              "Bond maturity date (Unix timestamp)"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "is_matured",
+            "docs": [
+              "Flag: instrument fully redeemed"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed for the PDA"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CorporateAction",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "action_id",
+            "docs": [
+              "Unique corporate action number in the KASE register"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "bond_security",
+            "docs": [
+              "Reference to the bond master account"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "action_type",
+            "docs": [
+              "Action type (Coupon, Redemption, Vote)"
+            ],
+            "type": {
+              "defined": {
+                "name": "ActionType"
+              }
+            }
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Current execution status"
+            ],
+            "type": {
+              "defined": {
+                "name": "ActionStatus"
+              }
+            }
+          },
+          {
+            "name": "record_date_timestamp",
+            "docs": [
+              "Holder register record date (Record Date)"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "settlement_timestamp",
+            "docs": [
+              "Settlement execution date (Payment / Settlement Date)"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "total_entitlement_required",
+            "docs": [
+              "Total funds required to pay the holder pool (in settlement token units)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "total_settled_amount",
+            "docs": [
+              "Total funds actually paid out"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "snapshot_bonds_count",
+            "docs": [
+              "Total bonds included in the register snapshot"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "settled_holders_count",
+            "docs": [
+              "Number of investors processed"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "vault",
+            "docs": [
+              "Corporate action funds vault (PDA token account)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed of the action account"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "vault_bump",
+            "docs": [
+              "Bump seed of the token vault"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CorporateActionScheduledEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bond_isin",
+            "type": "string"
+          },
+          {
+            "name": "action_id",
+            "type": "u64"
+          },
+          {
+            "name": "action_type",
+            "type": "u8"
+          },
+          {
+            "name": "record_date_timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "total_entitlement_required",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CouponSettledEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "action_id",
+            "type": "u64"
+          },
+          {
+            "name": "holder",
+            "type": "pubkey"
+          },
+          {
+            "name": "bonds_held",
+            "type": "u64"
+          },
+          {
+            "name": "coupon_amount_paid",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GovernanceProposal",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "proposal_id",
+            "docs": [
+              "Proposal identifier"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "bond_security",
+            "docs": [
+              "Bond instrument"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "proposer",
+            "docs": [
+              "Proposal initiator (issuer or a major holder)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "title",
+            "docs": [
+              "Title of the corporate resolution (e.g. \"Restructuring: raise the coupon rate to 12.5%\")"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "description_hash",
+            "docs": [
+              "Hash of the description and the KASE audit opinion"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "voting_start",
+            "docs": [
+              "Voting start"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "voting_end",
+            "docs": [
+              "Voting end"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "votes_for",
+            "docs": [
+              "Total weight of \"FOR\" votes"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "votes_against",
+            "docs": [
+              "Total weight of \"AGAINST\" votes"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "votes_abstain",
+            "docs": [
+              "Total weight of \"ABSTAIN\" votes"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "quorum_threshold_bonds",
+            "docs": [
+              "Quorum threshold in number of bonds (e.g. 50% of the issue)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "new_coupon_rate_bps",
+            "docs": [
+              "New annual coupon rate if the restructuring is approved (in bps, e.g. 1250 = 12.50%)"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "finalized",
+            "docs": [
+              "Flag: vote finalized"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "passed",
+            "docs": [
+              "Flag: resolution passed"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HolderEntitlement",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "corporate_action",
+            "docs": [
+              "Corporate action"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "holder",
+            "docs": [
+              "Holder wallet address"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "bonds_held",
+            "docs": [
+              "Bond balance on the cut-off date (Record Date)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "entitlement_amount",
+            "docs": [
+              "Calculated entitlement (coupon in USDC or principal to redeem)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "is_settled",
+            "docs": [
+              "Flag: payment / redemption executed"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "settled_timestamp",
+            "docs": [
+              "Execution timestamp"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed of the entitlement PDA"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HolderSnapshotRecordedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "action_id",
+            "type": "u64"
+          },
+          {
+            "name": "holder",
+            "type": "pubkey"
+          },
+          {
+            "name": "bonds_held",
+            "type": "u64"
+          },
+          {
+            "name": "entitlement_amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProposalCreatedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "proposal_id",
+            "type": "u64"
+          },
+          {
+            "name": "proposer",
+            "type": "pubkey"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "voting_start",
+            "type": "i64"
+          },
+          {
+            "name": "voting_end",
+            "type": "i64"
+          },
+          {
+            "name": "quorum_bonds",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProposalFinalizedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "proposal_id",
+            "type": "u64"
+          },
+          {
+            "name": "passed",
+            "type": "bool"
+          },
+          {
+            "name": "total_votes",
+            "type": "u64"
+          },
+          {
+            "name": "quorum_met",
+            "type": "bool"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VaultFundedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "action_id",
+            "type": "u64"
+          },
+          {
+            "name": "funder",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "total_vault_balance",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VoteCastEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "proposal_id",
+            "type": "u64"
+          },
+          {
+            "name": "voter",
+            "type": "pubkey"
+          },
+          {
+            "name": "vote_weight",
+            "type": "u64"
+          },
+          {
+            "name": "choice",
+            "type": {
+              "defined": {
+                "name": "VoteChoice"
+              }
+            }
+          },
+          {
+            "name": "total_for",
+            "type": "u64"
+          },
+          {
+            "name": "total_against",
+            "type": "u64"
+          },
+          {
+            "name": "total_abstain",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VoteChoice",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "For"
+          },
+          {
+            "name": "Against"
+          },
+          {
+            "name": "Abstain"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VoterRecord",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "proposal",
+            "type": "pubkey"
+          },
+          {
+            "name": "voter",
+            "type": "pubkey"
+          },
+          {
+            "name": "vote_weight",
+            "type": "u64"
+          },
+          {
+            "name": "choice",
+            "type": {
+              "defined": {
+                "name": "VoteChoice"
+              }
+            }
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}
