@@ -85,8 +85,8 @@ const CLUSTERS = {
     solscanClusterParam: "",
     isMainnet: true,
     faucetAvailable: false,
-    badgeText: "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).",
-    tickerText: "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).",
+    badgeText: "Mainnet: Memo Program records only. KASE Anchor Devnet status is checked separately; current binary/source match is unverified.",
+    tickerText: "Mainnet: Memo Program records only. KASE Anchor Devnet status is checked separately; current binary/source match is unverified.",
     genesisHash: "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9v",
   },
 };
@@ -329,13 +329,13 @@ function appendLog(tag, tagClass, message, txHash = null) {
   if (isMainnet && typeof message === "string") {
     if (message.includes("5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz")) {
       appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
-      appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).", txHash);
+      appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE Anchor Devnet status is checked separately; current binary/source match is unverified.", txHash);
       return;
     }
     if (/(?:kase[_\s]corporate[_\s]actions|anchor\s+program|anchor\s+contract)/i.test(message) &&
         !message.includes("live on Devnet")) {
       appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
-      appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).", txHash);
+      appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE Anchor Devnet status is checked separately; current binary/source match is unverified.", txHash);
       return;
     }
   }
@@ -1003,24 +1003,24 @@ function updateClusterUI() {
   const topClusterMemoPill = document.getElementById("topClusterMemoPill");
   if (topClusterMemoPill) {
     topClusterMemoPill.style.display = isMainnet ? "inline-flex" : "none";
-    topClusterMemoPill.textContent = "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).";
+    topClusterMemoPill.textContent = "Mainnet: Memo Program records only. KASE Anchor Devnet status is checked separately; current binary/source match is unverified.";
   }
 
   // 2. Status Box
   const statusTitle = document.getElementById("clusterStatus");
   if (statusTitle) {
-    statusTitle.textContent = isMainnet ? "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)." : cluster.name;
+    statusTitle.textContent = isMainnet ? "Mainnet: Memo Program records only. KASE Anchor Devnet status is checked separately; current binary/source match is unverified." : cluster.name;
   }
   const clusterStatusMemoPill = document.getElementById("clusterStatusMemoPill");
   if (clusterStatusMemoPill) {
     clusterStatusMemoPill.style.display = isMainnet ? "block" : "none";
-    clusterStatusMemoPill.textContent = "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).";
+    clusterStatusMemoPill.textContent = "Mainnet: Memo Program records only. KASE Anchor Devnet status is checked separately; current binary/source match is unverified.";
   }
 
   // 3. Ticker Bar
   const tickerCluster = document.getElementById("tickerCluster");
   if (tickerCluster) {
-    tickerCluster.textContent = isMainnet ? "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)." : cluster.tickerText;
+    tickerCluster.textContent = isMainnet ? "Mainnet: Memo Program records only. KASE Anchor Devnet status is checked separately; current binary/source match is unverified." : cluster.tickerText;
     tickerCluster.className = isMainnet ? "ticker-val-gold font-mono" : "ticker-val-cyan font-mono";
   }
 
@@ -1041,7 +1041,7 @@ function updateClusterUI() {
   const workflowTag = document.getElementById("panelTagWorkflow");
   if (workflowTag) {
     workflowTag.textContent = isMainnet
-      ? "KASE CORPORATE ACTIONS WORKFLOW • MAINNET: MEMO PROGRAM RECORDS ONLY. KASE PROGRAM: LIVE ON DEVNET."
+      ? "MAINNET: MEMO RECORDS ONLY • ANCHOR SETTLEMENT NOT CONNECTED"
       : `KASE CORPORATE ACTIONS WORKFLOW • REAL ${cluster.name.toUpperCase()} BROADCAST`;
   }
 
@@ -1069,7 +1069,7 @@ function updateClusterUI() {
   }
   const mainnetSafetyLabel = document.getElementById("mainnetSafetyLabel");
   if (mainnetSafetyLabel) {
-    mainnetSafetyLabel.textContent = "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).";
+    mainnetSafetyLabel.textContent = "Mainnet: Memo Program records only. KASE Anchor Devnet status is checked separately; current binary/source match is unverified.";
   }
   const mainnetBalEl = document.getElementById("mainnetSignerBalance");
   if (mainnetBalEl) {
@@ -1119,7 +1119,7 @@ function updateClusterUI() {
 
   const optOperatorTxText = document.getElementById("optOperatorTxText");
   if (optOperatorTxText) optOperatorTxText.textContent = isMainnet
-    ? "✔ Transaction recorded via the Memo Program on Solana Mainnet-Beta (KASE program is deployed on Devnet; Mainnet mode records via Memo only)"
+    ? "✔ Memo record confirmed on Solana Mainnet-Beta; no Anchor settlement is executed by this UI"
     : `✔ 100% real transaction on ${cluster.name}`;
 
   const optPhantomDesc = document.getElementById("optPhantomTxDesc");
@@ -1273,16 +1273,16 @@ async function switchCluster(clusterId, customRpc = null) {
     appendLog(
       "MAINNET",
       "tag-warn",
-      "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)."
+      "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE Anchor Devnet status is checked separately; current binary/source match is unverified."
     );
     appendLog(
       "MEMO-NOTICE",
       "tag-warn",
-      "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)."
+      "Mainnet: Memo Program records only. KASE Anchor Devnet status is checked separately; current binary/source match is unverified."
     );
     showToast(
       "Mainnet (Memo Only)",
-      "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz). Fee: ~0.000005 SOL.",
+      "Mainnet: Memo Program records only. KASE Anchor Devnet status is checked separately; current binary/source match is unverified. Fee: ~0.000005 SOL.",
       "warning",
       7000
     );
@@ -1520,7 +1520,7 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
     appendLog("MEMO", "tag-broadcast", `Memo data: "${memoText}"`);
     if (cluster.isMainnet) {
       appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
-      appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
+      appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE Anchor Devnet status is checked separately; current binary/source match is unverified.");
     }
 
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
@@ -1703,7 +1703,7 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
     );
     if (cluster.isMainnet) {
       appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
-      appendLog("MAINNET", "tag-ok", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).", signature);
+      appendLog("MAINNET", "tag-ok", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE Anchor Devnet status is checked separately; current binary/source match is unverified.", signature);
     }
 
     // 7. Show Modal Success View
@@ -1816,7 +1816,7 @@ function showModalSuccess({ signature, slot, memoText, actionTitle, signerName }
   const clusterEl = document.getElementById("modalTxClusterText");
   if (clusterEl) {
     clusterEl.textContent = cluster.isMainnet
-      ? "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz)."
+      ? "Mainnet: Memo Program records only. KASE Anchor Devnet status is checked separately; current binary/source match is unverified."
       : `${cluster.name} — Memo record only; financial actions are not executed`;
     clusterEl.className = cluster.isMainnet ? "mono font-mono gold" : "mono font-mono cyan";
   }
@@ -3104,8 +3104,8 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   if (cluster.isMainnet) {
     appendLog("PROGRAM", "tag-cpi", "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]");
-    appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
-    appendLog("MEMO-NOTICE", "tag-warn", "Mainnet: Memo Program records only. KASE program: deployed on Devnet (5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz).");
+    appendLog("MAINNET", "tag-warn", "[MAINNET MEMO RECORD] Official Solana Memo Program only. KASE Anchor Devnet status is checked separately; current binary/source match is unverified.");
+    appendLog("MEMO-NOTICE", "tag-warn", "Mainnet: Memo Program records only. KASE Anchor Devnet status is checked separately; current binary/source match is unverified.");
   }
 
   await pollClusterStats();
