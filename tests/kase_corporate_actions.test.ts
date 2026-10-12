@@ -624,16 +624,65 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
     const prop = await program.account.governanceProposal.fetch(proposalPda);
     assert.equal(prop.title, title);
     assert.equal(prop.quorumThresholdBonds.toString(), "2000");
+
+    // Create a dedicated on-chain governance action and a real token-backed
+    // snapshot for Bank B; coupon entitlements must not be reusable as votes.
+    const governanceActionId = new BN(202603);
+    const [governanceActionPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("action"), bondSecurityPda.toBuffer(), governanceActionId.toArrayLike(Buffer, "le", 8)],
+      program.programId
+    );
+    const [governanceVaultPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("action_vault"), governanceActionPda.toBuffer()],
+      program.programId
+    );
+    const [bankBGovernanceEntitlementPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("entitlement"), governanceActionPda.toBuffer(), bankB.publicKey.toBuffer()],
+      program.programId
+    );
+    await program.methods
+      .scheduleCorporateAction(
+        governanceActionId,
+        { governanceVoting: {} },
+        new anchor.BN(now - 100),
+        new anchor.BN(now - 50)
+      )
+      .accounts({
+        authority: authority.publicKey,
+        bondSecurity: bondSecurityPda,
+        corporateAction: governanceActionPda,
+        actionVault: governanceVaultPda,
+        settlementMint,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+      })
+      .signers([authority])
+      .rpc();
+    await program.methods
+      .recordHolderSnapshot(new BN(2500))
+      .accounts({
+        authority: authority.publicKey,
+        bondSecurity: bondSecurityPda,
+        corporateAction: governanceActionPda,
+        holder: bankB.publicKey,
+        holderBondAccount: bankBBondAccount,
+        holderEntitlement: bankBGovernanceEntitlementPda,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+      })
+      .signers([authority])
+      .rpc();
   });
 
   it("Step 9 [Scenario 3]: Bank B votes 'FOR' with 2,500 bonds weight", async () => {
-    const futureActionId = new BN(202602);
-    const [futureActionPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("action"), bondSecurityPda.toBuffer(), futureActionId.toArrayLike(Buffer, "le", 8)],
+    const governanceActionId = new BN(202603);
+    const [governanceActionPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("action"), bondSecurityPda.toBuffer(), governanceActionId.toArrayLike(Buffer, "le", 8)],
       program.programId
     );
-    const [bankBEntitlementPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("entitlement"), futureActionPda.toBuffer(), bankB.publicKey.toBuffer()],
+    const [bankBGovernanceEntitlementPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("entitlement"), governanceActionPda.toBuffer(), bankB.publicKey.toBuffer()],
       program.programId
     );
     const [bankBVoterPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -647,8 +696,9 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         voter: bankB.publicKey,
         bondSecurity: bondSecurityPda,
         proposal: proposalPda,
+        corporateAction: governanceActionPda,
         holderBondAccount: bankBBondAccount,
-        holderEntitlement: bankBEntitlementPda,
+        holderEntitlement: bankBGovernanceEntitlementPda,
         voterRecord: bankBVoterPda,
         systemProgram: anchor.web3.SystemProgram.programId,
         rent: anchor.web3.SYSVAR_RENT_PUBKEY,
@@ -661,13 +711,13 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
   });
 
   it("Pass [Adversarial Attack]: Double Voting attempt blocked", async () => {
-    const futureActionId = new BN(202602);
-    const [futureActionPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("action"), bondSecurityPda.toBuffer(), futureActionId.toArrayLike(Buffer, "le", 8)],
+    const governanceActionId = new BN(202603);
+    const [governanceActionPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("action"), bondSecurityPda.toBuffer(), governanceActionId.toArrayLike(Buffer, "le", 8)],
       program.programId
     );
-    const [bankBEntitlementPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("entitlement"), futureActionPda.toBuffer(), bankB.publicKey.toBuffer()],
+    const [bankBGovernanceEntitlementPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("entitlement"), governanceActionPda.toBuffer(), bankB.publicKey.toBuffer()],
       program.programId
     );
     const [bankBVoterPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -682,8 +732,9 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
           voter: bankB.publicKey,
           bondSecurity: bondSecurityPda,
           proposal: proposalPda,
+          corporateAction: governanceActionPda,
           holderBondAccount: bankBBondAccount,
-          holderEntitlement: bankBEntitlementPda,
+          holderEntitlement: bankBGovernanceEntitlementPda,
           voterRecord: bankBVoterPda,
           systemProgram: anchor.web3.SystemProgram.programId,
           rent: anchor.web3.SYSVAR_RENT_PUBKEY,
