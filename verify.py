@@ -96,13 +96,6 @@ class OnChainProposal:
 
 def run_system_audit() -> bool:
     project_root = os.path.dirname(os.path.abspath(__file__))
-    devnet_tx_doc = os.path.join(project_root, "DEVNET_TRANSACTIONS.md")
-    if os.path.exists(devnet_tx_doc):
-        try:
-            os.remove(devnet_tx_doc)
-        except Exception:
-            pass
-
     print("\n" + "=" * 86)
     print("   KASE AUTOMATED CORPORATE ACTIONS ON SOLANA - SYSTEM AUDIT & TEST RUNNER")
     print("   Kazakhstan Stock Exchange (KASE) & Superteam Kazakhstan Hackathon 2026")
@@ -747,93 +740,17 @@ def run_system_audit() -> bool:
         return False
 
     # ------------------------------------------------------------------------
-    # 8. Final Certification
+    # 8. Static Source Audit Summary
     # ------------------------------------------------------------------------
-    print("\n[8/8] Hackathon Deliverable Checks:")
-    print("  [PASS] Functional code in Rust, TypeScript, and Python")
-    print("  [PASS] Full Scenario Coverage: Coupon Payment, Bond Redemption, Bondholder Voting")
-    print("  [PASS] Verifiable Solana Records: Anchor Program, Events, PDAs, Explorer Links")
-    print("  [PASS] Solana Mainnet-Beta & Devnet: Dual-Cluster Engine with RPC Router")
-    print("  [PASS] Solana Actions & Blinks: Official Dialect-compliant actions.json and metadata")
-    print("  [PASS] Institutional Interoperability: ISO 20022 MX messages (seev.031, seev.036, seev.004)")
-    print("  [PASS] Superteam Security: 3-Agent Pre-Flight Oracle Consensus & Chaos Shield Harness")
-    print("  [PASS] Web Terminal UI: Production-grade institutional terminal with Audio & Hotkeys")
-
+    print("\n[8/8] Static Source Audit Summary:")
+    print("  [INFO] Source-tree checks above inspect files and code patterns only.")
+    print("  [INFO] They do not execute Anchor instructions or verify real settlement.")
+    print("  [INFO] The browser UI currently writes Memo attestations only.")
+    print("  [INFO] This audit does not delete, rewrite, or package project files.")
     print("\n" + "=" * 86)
-    print("   >>> ALL 8/8 VERIFICATION & AUDIT SUITES PASSED SUCCESSFULLY <<<")
+    print("   >>> STATIC SOURCE AUDIT COMPLETED <<<")
     print(f"   Target Directory: {project_root}")
     print("=" * 86 + "\n")
-
-    # ------------------------------------------------------------------------
-    # Bundle Delivery ZIP Packages
-    # ------------------------------------------------------------------------
-    scratch_zip = os.path.abspath(os.path.join(project_root, "..", "kase_corporate_actions.zip"))
-    brain_zip = r"C:\Users\<user>\.gemini\antigravity\brain\ae8d2edf-8368-40a4-a7ef-2fd587fef421\kase_corporate_actions.zip"
-
-    # Remove temporary scripts if present
-    for temp_f in ["make_zip.py", "check_zip.py"]:
-        p = os.path.join(project_root, temp_f)
-        if os.path.exists(p):
-            try:
-                os.remove(p)
-            except Exception:
-                pass
-
-    # Check whether existing zip used a root directory prefix
-    has_root_prefix = False
-    if os.path.exists(scratch_zip):
-        try:
-            import zipfile
-            with zipfile.ZipFile(scratch_zip, "r") as z_check:
-                names = z_check.namelist()
-                if names and names[0].startswith("kase_corporate_actions/"):
-                    has_root_prefix = True
-        except Exception:
-            pass
-
-    import zipfile
-    import shutil
-    temp_zip = os.path.join(project_root, "_package_temp.zip")
-    exclude_exts = {".pyc", ".pyo"}
-    exclude_dirs = {"__pycache__", ".git", "node_modules", "target", ".anchor"}
-    exclude_files = {"_package_temp.zip", "make_zip.py", "check_zip.py", "DEVNET_TRANSACTIONS.md"}
-
-    def is_keypair_file(filename: str) -> bool:
-        fn = filename.lower()
-        return "keypair" in fn or fn == "id.json" or fn.endswith("-keypair.json")
-
-    with zipfile.ZipFile(temp_zip, "w", zipfile.ZIP_DEFLATED) as zf:
-        for root, dirs, files in os.walk(project_root):
-            dirs[:] = [d for d in dirs if d not in exclude_dirs]
-            for f in files:
-                if f in exclude_files or any(f.endswith(ext) for ext in exclude_exts) or is_keypair_file(f):
-                    continue
-                abs_f = os.path.join(root, f)
-                rel_f = os.path.relpath(abs_f, os.path.dirname(project_root) if has_root_prefix else project_root)
-                rel_f_zip = rel_f.replace("\\", "/")
-                zf.write(abs_f, rel_f_zip)
-
-    try:
-        shutil.copyfile(temp_zip, scratch_zip)
-        print(f"  [ZIP] Updated scratch package: {scratch_zip} ({os.path.getsize(scratch_zip):,} bytes)")
-    except Exception as e:
-        print(f"  [WARN] Failed to write scratch zip: {e}")
-
-    brain_paths = [
-        r"C:\Users\<user>\.gemini\antigravity\brain\c8eb27ae-8348-4886-a33a-c48c4da9a631\kase_corporate_actions.zip",
-        r"C:\Users\<user>\.gemini\antigravity\brain\ae8d2edf-8368-40a4-a7ef-2fd587fef421\kase_corporate_actions.zip",
-    ]
-
-    for b_zip in brain_paths:
-        try:
-            if os.path.isdir(os.path.dirname(b_zip)):
-                shutil.copyfile(temp_zip, b_zip)
-                print(f"  [ZIP] Updated brain package:   {b_zip} ({os.path.getsize(b_zip):,} bytes)")
-        except Exception as e:
-            print(f"  [WARN] Failed to write brain zip {b_zip}: {e}")
-
-    if os.path.exists(temp_zip):
-        os.remove(temp_zip)
 
     return True
 
