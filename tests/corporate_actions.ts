@@ -199,6 +199,18 @@ describe("KASE corporate actions — local-validator end-to-end", () => {
       voterRecord, systemProgram: SystemProgram.programId, rent: SYSVAR_RENT_PUBKEY,
     }).rpc();
 
+    // The same wallet cannot cast a second vote for the same proposal.
+    try {
+      await program.methods.castBondholderVote({ against: {} }).accounts({
+        voter: authority.publicKey, bondSecurity, proposal, corporateAction: governanceAction,
+        holderBondAccount: holderBond.address, holderEntitlement: governanceEntitlement,
+        voterRecord, systemProgram: SystemProgram.programId, rent: SYSVAR_RENT_PUBKEY,
+      }).rpc();
+      expect.fail("A duplicate vote should have been rejected by the voter-record PDA.");
+    } catch (error: any) {
+      expect(String(error?.message || error)).to.match(/already in use|custom program error|already voted|0x0/i);
+    }
+
     const waitUntil = async (timestamp: number) => {
       const waitMs = Math.max(0, (timestamp - Math.floor(Date.now() / 1000) + 1) * 1000);
       if (waitMs) await new Promise((resolve) => setTimeout(resolve, waitMs));
@@ -232,17 +244,6 @@ describe("KASE corporate actions — local-validator end-to-end", () => {
     await program.methods.finalizeGovernanceProposal().accounts({
       authority: authority.publicKey, bondSecurity, proposal,
     }).rpc();
-    // The same wallet cannot cast a second vote for the same proposal.
-    try {
-      await program.methods.castBondholderVote({ against: {} }).accounts({
-        voter: authority.publicKey, bondSecurity, proposal, corporateAction: governanceAction,
-        holderBondAccount: holderBond.address, holderEntitlement: governanceEntitlement,
-        voterRecord, systemProgram: SystemProgram.programId, rent: SYSVAR_RENT_PUBKEY,
-      }).rpc();
-      expect.fail("A duplicate vote should have been rejected by the voter-record PDA.");
-    } catch (error: any) {
-      expect(String(error?.message || error)).to.match(/already in use|custom program error|already voted|0x0/i);
-    }
     const finalized = await program.account.governanceProposal.fetch(proposal);
     expect(finalized.finalized).to.equal(true);
     expect(finalized.passed).to.equal(true);
