@@ -31,6 +31,8 @@ pub mod kase_corporate_actions {
     ) -> Result<()> {
         require!(isin.len() <= 16 && !isin.is_empty(), KaseError::InvalidIsin);
         require!(face_value > 0, KaseError::InvalidFaceValue);
+        // Bond balances represent whole securities, so fractional bond mints are forbidden.
+        require!(ctx.accounts.bond_mint.decimals == 0, KaseError::InvalidBondMintDecimals);
         require!(annual_coupon_bps <= 10_000, KaseError::InvalidCouponRate);
         require!(
             coupons_per_year == 1 || coupons_per_year == 2 || coupons_per_year == 4 || coupons_per_year == 12,
@@ -131,7 +133,7 @@ pub mod kase_corporate_actions {
         // Never trust an operator-supplied balance without checking the holder's
         // real SPL token account. This prevents creating inflated entitlements.
         require!(
-            bonds_held <= ctx.accounts.holder_bond_account.amount,
+            bonds_held == ctx.accounts.holder_bond_account.amount,
             KaseError::InvalidHolderTokenAccount
         );
 
