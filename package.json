@@ -22,7 +22,7 @@
   "author": "KASE & Superteam Kazakhstan Builder",
   "license": "MIT",
   "dependencies": {
-    "@coral-xyz/anchor": "^0.31.1",
+    "@coral-xyz/anchor": "^0.32.1",
     "@solana/spl-token": "^0.4.8",
     "@solana/web3.js": "^1.95.3",
     "bn.js": "^5.2.1"
