@@ -423,13 +423,13 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             blink_data = {
                 "icon": "https://raw.githubusercontent.com/solana-developers/brand-assets/main/assets/solanaLogoMark.svg",
-                "title": "KASE Corporate Action: Semi-Annual Coupon Payout",
-                "description": "Authorize automated on-chain disbursement of $500,000.00 USDC for KASE Demo USD Bond 2026 (ISIN: KZDEMO000001) across 5 KCSD custodian banks on Solana.",
-                "label": "Disburse Coupon ($500,000 USDC)",
+                "title": "KASE Demo: Coupon Memo Attestation (No Payout)",
+                "description": "Creates a Solana Memo text record only. It does not transfer USDC or settle a coupon. The financial settlement Anchor instruction is not wired to this Blink.",
+                "label": "Create Memo Record Only",
                 "links": {
                     "actions": [
                         {
-                            "label": "Confirm & Disburse ($500k USDC)",
+                            "label": "Create Coupon Memo Record",
                             "href": "/api/actions/coupon"
                         },
                         {
@@ -456,13 +456,13 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             blink_data = {
                 "icon": "https://raw.githubusercontent.com/solana-developers/brand-assets/main/assets/solanaLogoMark.svg",
-                "title": "KASE Corporate Action: Bond Maturity Redemption & SPL Token Burn",
-                "description": "Execute principal redemption of $10,000,000.00 USDC and atomically burn 10,000 tokenized bonds for ISIN: KZDEMO000001 under KCSD depository authority.",
-                "label": "Redeem Principal & Burn Tokens ($10,000,000 USDC)",
+                "title": "KASE Demo: Redemption Memo Attestation (No Burn)",
+                "description": "Creates a Solana Memo text record only. It does not transfer principal USDC or burn bond tokens. The Anchor redemption instruction is not wired to this Blink.",
+                "label": "Create Memo Record Only",
                 "links": {
                     "actions": [
                         {
-                            "label": "Redeem $10M & Burn Tokens",
+                            "label": "Create Redemption Memo Record",
                             "href": "/api/actions/redemption"
                         },
                         {
@@ -490,20 +490,20 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
             blink_data = {
                 "icon": "https://raw.githubusercontent.com/solana-developers/brand-assets/main/assets/solanaLogoMark.svg",
                 "title": "KASE Governance: Restructuring Proposal #101",
-                "description": "Cast institutional votes on restructuring bond terms: Increase coupon rate from 10.00% to 12.50% p.a. for KASE Demo USD Bond 2026 (ISIN: KZDEMO000001).",
-                "label": "Cast Bondholder Ballot",
+                "description": "Creates a Memo text record for a stated choice only. It does not call the Anchor governance instruction or update proposal vote totals.",
+                "label": "Create Memo Record Only",
                 "links": {
                     "actions": [
                         {
-                            "label": "Vote FOR (12.5% Rate)",
+                            "label": "Record FOR Choice in Memo",
                             "href": "/api/actions/vote?choice=for"
                         },
                         {
-                            "label": "Vote AGAINST",
+                            "label": "Record AGAINST Choice in Memo",
                             "href": "/api/actions/vote?choice=against"
                         },
                         {
-                            "label": "Vote ABSTAIN",
+                            "label": "Record ABSTAIN Choice in Memo",
                             "href": "/api/actions/vote?choice=abstain"
                         },
                         {
@@ -536,6 +536,7 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
             if schema_key in ISO20022_TEMPLATES:
                 template = ISO20022_TEMPLATES[schema_key]
                 self.send_response(200)
+                self.send_header("X-KASE-Data-Status", "illustrative-demo-only")
                 if fmt == "json":
                     self.send_header("Content-Type", "application/json; charset=utf-8")
                     self.send_header("Content-Disposition", f'attachment; filename="kase_{schema_key}.json"')
