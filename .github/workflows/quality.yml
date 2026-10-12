@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: kase-quality-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   syntax-and-smoke:
     runs-on: ubuntu-latest
