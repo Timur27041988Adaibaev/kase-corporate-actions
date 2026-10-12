@@ -48,6 +48,21 @@ class KaseServerSmokeTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "Unable to fetch a fresh Solana blockhash"):
                 kase_server.get_recent_blockhash("https://rpc.invalid")
 
+    def test_action_endpoint_returns_503_when_rpc_blockhash_is_unavailable(self):
+        body = json.dumps({"account": "11111111111111111111111111111111"}).encode("utf-8")
+        request = urllib.request.Request(
+            self.base_url + "/api/actions/coupon",
+            data=body,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with patch.object(kase_server, "get_recent_blockhash", side_effect=RuntimeError("RPC offline")):
+            with self.assertRaises(urllib.error.HTTPError) as ctx:
+                urllib.request.urlopen(request, timeout=2)
+        self.assertEqual(ctx.exception.code, 503)
+        payload = json.loads(ctx.exception.read().decode("utf-8"))
+        self.assertEqual(payload.get("status"), "UNAVAILABLE")
+
     def test_base58_zero_address_decodes_to_32_bytes(self):
         self.assertEqual(kase_server.b58decode("11111111111111111111111111111111"), bytes(32))
 
