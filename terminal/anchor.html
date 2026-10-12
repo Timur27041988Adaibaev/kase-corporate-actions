@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KASE — On-chain Devnet Settlement Console</title>
+<style>
+:root{color-scheme:dark;--bg:#0b111a;--panel:#111c29;--line:#29394b;--text:#e8eef6;--muted:#9aaabd;--gold:#e5b85c;--green:#58d6a1;--red:#ff7d7d;--blue:#79b8ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#14263a,#0b111a 55%);color:var(--text);font:15px/1.55 Inter,system-ui,sans-serif}
+main{max-width:1000px;margin:auto;padding:28px 18px 64px}.top{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}
+h1{font-size:clamp(26px,4vw,40px);line-height:1.1;margin:8px 0 12px}.eyebrow{color:var(--gold);font:700 12px monospace;letter-spacing:.12em}.sub{color:var(--muted);max-width:760px}
+.warning{border:1px solid #826a32;background:#332916;color:#ffe5a1;padding:14px 16px;border-radius:12px;margin:20px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:16px 0}.card{background:rgba(17,28,41,.94);border:1px solid var(--line);border-radius:15px;padding:18px;min-width:0}.card h2{font-size:17px;margin:0 0 8px}.muted{color:var(--muted);font-size:13px}.status{border-radius:9px;background:#172435;border:1px solid var(--line);padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.6 ui-monospace,monospace;min-height:56px}
+button{border:1px solid #526980;background:#1c3044;color:var(--text);padding:11px 14px;border-radius:9px;font-weight:700;cursor:pointer}button:hover:not(:disabled){border-color:var(--blue);background:#243c55}button:disabled{opacity:.42;cursor:not-allowed}.primary{background:#624b20;border-color:#a17b35}.primary:hover:not(:disabled){background:#785c26}.green{background:#123d31;border-color:#2e8c6a}.danger{background:#3c2528;border-color:#7c454c}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.address{font:12px ui-monospace,monospace;overflow-wrap:anywhere;color:var(--blue)}#log{min-height:220px;max-height:420px;overflow:auto}.logline{padding:7px 0;border-bottom:1px solid #243244;overflow-wrap:anywhere}.ok{color:var(--green)}.bad{color:var(--red)}a{color:var(--blue)}footer{margin-top:28px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body><main>
+<div class="top"><div><div class="eyebrow">KASE / SOLANA / ANCHOR</div><h1>On-chain settlement console</h1><div class="sub">A real-instruction test harness for coupon transfers, bond redemption and burn, and governance tally. Every state change is submitted to Solana Devnet through your wallet and the deployed KASE Anchor program.</div></div><div class="row"><button id="connect" class="primary">Connect Phantom</button><a href="./index.html">← Main terminal</a></div></div>
+<div class="warning"><b>Devnet test instrument only.</b> This console creates its own test bond mint and test settlement token. These are not USDC, not digital tenge, have no cash value, and are not connected to KASE/KCSD. It will not submit settlement instructions to Mainnet. A funded Phantom Devnet wallet and an executable deployment matching the repository program ID are required.</div>
+<div class="grid">
+<section class="card"><h2>1 · Wallet and program</h2><div class="muted">Network is fixed to Devnet. Sign each transaction in Phantom.</div><p id="wallet" class="address">Wallet not connected</p><p id="programStatus" class="status">Checking program and IDL…</p><div class="row"><button id="refresh" disabled>Check deployment</button><button id="setup" class="primary" disabled>Create test instrument & actions</button></div></section>
+<section class="card"><h2>2 · Coupon payment</h2><p class="muted">After the configured settlement timestamp, the Anchor instruction transfers test settlement tokens from the funded action vault to the holder ATA and marks the entitlement settled.</p><p id="couponState" class="status">Not initialized</p><button id="coupon" class="green" disabled>Execute real coupon transfer</button></section>
+<section class="card"><h2>3 · Bond redemption and burn</h2><p class="muted">After maturity, the Anchor instruction burns the holder’s bond token and transfers principal test tokens in the same atomic transaction.</p><p id="redemptionState" class="status">Not initialized</p><button id="redeem" class="green" disabled>Redeem and burn bond</button></section>
+<section class="card"><h2>4 · Governance vote tally</h2><p class="muted">The holder casts a token-weighted vote. After the voting end time, finalization records the tally and applies the proposed coupon-rate change if quorum and majority pass.</p><p id="voteState" class="status">Not initialized</p><div class="row"><button id="vote" disabled>Cast FOR vote</button><button id="finalize" class="green" disabled>Finalize on-chain vote</button></div></section>
+</div>
+<section class="card"><h2>Transaction and verification log</h2><p class="muted">Each successful action includes a confirmed transaction signature and Devnet Explorer link. Errors are shown as errors; no local-only success state is presented as on-chain settlement.</p><div id="log" class="status" aria-live="polite">Console ready. Connect Phantom to begin.</div></section>
+<footer>Use only test funds. No real-world financial assets, legal rights, official exchange records, independent oracle providers, or fiat rails are connected. <a href="https://explorer.solana.com/?cluster=devnet" target="_blank" rel="noreferrer">Solana Devnet Explorer</a>.</footer>
+</main><script type="module" src="./anchor-console.js"></script></body></html>
