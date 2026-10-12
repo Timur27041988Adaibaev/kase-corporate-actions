@@ -107,13 +107,14 @@ describe("kase_corporate_actions local-validator integration", () => {
 
   it("schedules a corporate action and initializes its vault", async () => {
     const now = Math.floor(Date.now() / 1000);
+    settlementTimestamp = now + 45;
 
     await program.methods
       .scheduleCorporateAction(
         actionId,
         { couponPayment: {} } as never,
         new anchor.BN(now - 60),
-        new anchor.BN(now + 600),
+        new anchor.BN(settlementTimestamp),
       )
       .accounts({
         authority,
