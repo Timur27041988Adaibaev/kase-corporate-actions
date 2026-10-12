@@ -4,6 +4,11 @@
 
 **Pitch video (1:52):** https://youtu.be/h4huY2L8oc4
 
+> **Implementation status — read before using the terminal**
+>
+> The browser terminal currently broadcasts Solana Memo instructions for transaction attestations. Those records do **not** transfer USDC, burn bond tokens, execute the Anchor settlement instructions, or count a governance vote. Independent AML/registry/solvency oracle providers are not connected, so oracle consensus is unavailable. The browser UI must not be treated as a production financial terminal or as proof that the scenarios have settled.
+>
+> The repository contains an Anchor/Rust program and integration-test source, but the web UI is not yet wired to invoke its instructions with configured bond/action/vault/mint accounts. Real settlement requires that integration, successful Anchor build/tests, and a verified deployment/program ID on the intended cluster. Until those checks pass, demo amounts and holder balances are illustrative.
 
 > **KASE (Kazakhstan Stock Exchange) & Superteam Kazakhstan Hackathon**  
 > Automating corporate actions for tokenized financial instruments (RWA) on the Solana blockchain.  
@@ -15,8 +20,7 @@
 
 The project is an institutional platform that automates the lifecycle of securities (bonds) for the Kazakhstan Stock Exchange (KASE) and the Central Securities Depository of the Republic of Kazakhstan (KCSD).
 
-The full end-to-end corporate action cycle is implemented:
-$$\text{Holder identification} \longrightarrow \text{Entitlement calculation} \longrightarrow \text{On-chain execution} \longrightarrow \text{Immutable KASE audit trail}$$
+The repository includes the Anchor program source and a browser terminal prototype. The full end-to-end cycle is **not yet integrated or verified in the web UI**. The current UI can write Memo attestations; it does not execute the actual coupon/redemption settlement or Anchor governance vote.
 
 ---
 
