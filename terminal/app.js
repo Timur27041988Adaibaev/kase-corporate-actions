@@ -3022,7 +3022,7 @@ const ISO_DATA = {
       <PrpslId>101</PrpslId>
       <Titl>Restructuring: Coupon Increase from 10.0% to 12.5% p.a.</Titl>
       <QrmReq>5000</QrmReq>
-      <Rslt>ADOPTED</Rslt>
+      <Rslt>PEND</Rslt>
       <VtsFor>6000</VtsFor>
       <VtsAgnst>1200</VtsAgnst>
       <VtsAbstn>800</VtsAbstn>
@@ -3039,7 +3039,7 @@ const ISO_DATA = {
           votesFor: 6000,
           votesAgainst: 1200,
           votesAbstain: 800,
-          status: "ADOPTED",
+          status: "NOT_EXECUTED",
           newCouponRate: "12.50% p.a.",
         },
       },
