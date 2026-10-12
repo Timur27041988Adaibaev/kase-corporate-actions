@@ -418,24 +418,9 @@ function getOrCreateOperatorKeypair() {
   const web3 = window.solanaWeb3;
   if (!web3 || !web3.Keypair) return null;
 
-  try {
-    const stored = localStorage.getItem("kase_csd_operator_secret");
-    if (stored) {
-      const arr = JSON.parse(stored);
-      if (Array.isArray(arr) && arr.length === 64) {
-        return web3.Keypair.fromSecretKey(new Uint8Array(arr));
-      }
-    }
-  } catch (e) {
-    console.warn("Could not retrieve stored operator keypair:", e);
-  }
-
-  // Generate new persistent CSD Operator Keypair
-  const kp = web3.Keypair.generate();
-  try {
-    localStorage.setItem("kase_csd_operator_secret", JSON.stringify(Array.from(kp.secretKey)));
-  } catch (e) {}
-  return kp;
+  // Development-only ephemeral signer. Never persist private keys in localStorage.
+  // This key is not an institutional KCSD authority and must not hold real assets.
+  return web3.Keypair.generate();
 }
 
 function switchToOperatorMode() {
