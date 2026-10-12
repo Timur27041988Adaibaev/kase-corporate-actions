@@ -605,6 +605,15 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
   });
 
   it("Step 9 [Scenario 3]: Bank B votes 'FOR' with 2,500 bonds weight", async () => {
+    const futureActionId = new BN(202602);
+    const [futureActionPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("action"), bondSecurityPda.toBuffer(), futureActionId.toArrayLike(Buffer, "le", 8)],
+      program.programId
+    );
+    const [bankBEntitlementPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("entitlement"), futureActionPda.toBuffer(), bankB.publicKey.toBuffer()],
+      program.programId
+    );
     const [bankBVoterPda] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from("voter"), proposalPda.toBuffer(), bankB.publicKey.toBuffer()],
       program.programId
@@ -617,6 +626,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         bondSecurity: bondSecurityPda,
         proposal: proposalPda,
         holderBondAccount: bankBBondAccount,
+        holderEntitlement: bankBEntitlementPda,
         voterRecord: bankBVoterPda,
         systemProgram: anchor.web3.SystemProgram.programId,
         rent: anchor.web3.SYSVAR_RENT_PUBKEY,
@@ -629,6 +639,15 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
   });
 
   it("Pass [Adversarial Attack]: Double Voting attempt blocked", async () => {
+    const futureActionId = new BN(202602);
+    const [futureActionPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("action"), bondSecurityPda.toBuffer(), futureActionId.toArrayLike(Buffer, "le", 8)],
+      program.programId
+    );
+    const [bankBEntitlementPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("entitlement"), futureActionPda.toBuffer(), bankB.publicKey.toBuffer()],
+      program.programId
+    );
     const [bankBVoterPda] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from("voter"), proposalPda.toBuffer(), bankB.publicKey.toBuffer()],
       program.programId
@@ -642,6 +661,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
           bondSecurity: bondSecurityPda,
           proposal: proposalPda,
           holderBondAccount: bankBBondAccount,
+          holderEntitlement: bankBEntitlementPda,
           voterRecord: bankBVoterPda,
           systemProgram: anchor.web3.SystemProgram.programId,
           rent: anchor.web3.SYSVAR_RENT_PUBKEY,
