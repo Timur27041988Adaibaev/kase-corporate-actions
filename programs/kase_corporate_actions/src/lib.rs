@@ -575,6 +575,10 @@ pub mod kase_corporate_actions {
     ) -> Result<()> {
         let proposal = &mut ctx.accounts.proposal;
         require!(!proposal.finalized, KaseError::ProposalAlreadyExecuted);
+        require!(
+            Clock::get()?.unix_timestamp >= proposal.voting_end,
+            KaseError::VotingPeriodClosed
+        );
 
         let total_votes = proposal
             .votes_for
