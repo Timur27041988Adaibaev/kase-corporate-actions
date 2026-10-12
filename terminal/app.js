@@ -671,7 +671,7 @@ function updateActionButtons() {
   const btnVoteFor = document.getElementById("btnVoteFor");
   if (btnVoteFor) {
     if (state.votesFor > 0) {
-      btnVoteFor.innerHTML = `<span>✔ 6,000 Votes FOR Cast (${clusterLabel})</span>`;
+      btnVoteFor.innerHTML = `<span>Memo intent recorded only — not counted as a vote</span>`;
       btnVoteFor.disabled = true;
     } else {
       btnVoteFor.disabled = false;
@@ -680,13 +680,13 @@ function updateActionButtons() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          <span>🦊 Vote FOR (6,000) in Phantom</span>
+          <span>Record FOR Intent (Memo Only)</span>
         `
         : `
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          <span>🏛️ Vote FOR (6,000) as CSD</span>
+          <span>Record FOR Intent (Memo Only)</span>
         `;
     }
   }
@@ -694,7 +694,7 @@ function updateActionButtons() {
   const btnVoteAgainst = document.getElementById("btnVoteAgainst");
   if (btnVoteAgainst) {
     if (state.votesAgainst > 0) {
-      btnVoteAgainst.innerHTML = `<span>✔ 1,200 Votes AGAINST Cast (${clusterLabel})</span>`;
+      btnVoteAgainst.innerHTML = `<span>Memo intent recorded only — not counted as a vote</span>`;
       btnVoteAgainst.disabled = true;
     } else {
       btnVoteAgainst.disabled = false;
@@ -704,14 +704,14 @@ function updateActionButtons() {
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
-          <span>🦊 Vote AGAINST (1,200) in Phantom</span>
+          <span>Record AGAINST Intent (Memo Only)</span>
         `
         : `
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
-          <span>🏛️ Vote AGAINST (1,200) as CSD</span>
+          <span>Record AGAINST Intent (Memo Only)</span>
         `;
     }
   }
@@ -719,19 +719,19 @@ function updateActionButtons() {
   const btnVoteAbstain = document.getElementById("btnVoteAbstain");
   if (btnVoteAbstain) {
     if (state.votesAbstain > 0) {
-      btnVoteAbstain.innerHTML = `<span>✔ 800 Votes ABSTAIN Cast (${clusterLabel})</span>`;
+      btnVoteAbstain.innerHTML = `<span>Memo intent recorded only — not counted as a vote</span>`;
       btnVoteAbstain.disabled = true;
     } else {
       btnVoteAbstain.disabled = false;
       btnVoteAbstain.innerHTML = isPhantom
         ? `
           <span class="btn-vote-icon">⚪</span>
-          <span class="btn-vote-title">🦊 Abstain (800) in Phantom</span>
+          <span class="btn-vote-title">Record ABSTAIN Intent (Memo Only)</span>
           <span class="btn-vote-desc">Record neutral vote (8% supply)</span>
         `
         : `
           <span class="btn-vote-icon">⚪</span>
-          <span class="btn-vote-title">VOTE ABSTAIN (Retail Pool: 800)</span>
+          <span class="btn-vote-title">Record ABSTAIN Intent (Memo Only)</span>
           <span class="btn-vote-desc">Record neutral vote (8% supply)</span>
         `;
     }
@@ -740,7 +740,7 @@ function updateActionButtons() {
   const btnFinalize = document.getElementById("btnFinalizeVoting");
   if (btnFinalize) {
     if (state.proposalFinalized) {
-      btnFinalize.innerHTML = `<span>✔ Restructuring approved on ${clusterLabel}</span>`;
+      btnFinalize.innerHTML = `<span>Memo intent recorded only — proposal not finalized</span>`;
       btnFinalize.disabled = true;
     } else {
       btnFinalize.disabled = false;
@@ -750,14 +750,14 @@ function updateActionButtons() {
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
             <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
-          <span>🦊 Finalize proposal in Phantom</span>
+          <span>Record Finalization Intent (Memo Only)</span>
         `
         : `
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
             <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
-          <span>🏛️ Finalize proposal as CSD</span>
+          <span>Record Finalization Intent (Memo Only)</span>
         `;
     }
   }
@@ -2108,16 +2108,11 @@ function setupTabs() {
 // QUORUM METER & VOTING LOGIC
 // ==============================================================================
 function updateQuorum() {
-  const q = BondMath.getQuorumProgress(state.votesFor, state.votesAgainst, 5000, state.votesAbstain);
+  // The UI has no live Anchor proposal account or verified vote tally connected.
   const quorumEl = document.getElementById("quorumText");
   const fillEl = document.getElementById("quorumFill");
-
-  if (quorumEl) {
-    quorumEl.textContent = `${q.totalVotes.toLocaleString()} / 5,000 Bonds (${q.quorumPercentage}%)`;
-  }
-  if (fillEl) {
-    fillEl.style.width = `${q.quorumPercentage}%`;
-  }
+  if (quorumEl) quorumEl.textContent = "On-chain tally unavailable — Anchor vote integration not connected";
+  if (fillEl) fillEl.style.width = "0%";
 }
 
 // ==============================================================================
