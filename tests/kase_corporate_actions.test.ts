@@ -837,11 +837,13 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
       [Buffer.from("bond"), Buffer.from(maturedIsin)],
       program.programId
     );
-    const testMaturityTimestamp = Math.floor(Date.now() / 1000) + 3;
-    const testMaturity = new anchor.BN(testMaturityTimestamp);
+    let testMaturityTimestamp: number;
+    let testMaturity: anchor.BN;
     const testBondMint = await createMint(provider.connection, authority, authority.publicKey, null, 0);
     const holderAcc = await createAccount(provider.connection, bankA, testBondMint, bankA.publicKey);
     await mintTo(provider.connection, authority, testBondMint, holderAcc, authority.publicKey, 1);
+    testMaturityTimestamp = Math.floor(Date.now() / 1000) + 5;
+    testMaturity = new anchor.BN(testMaturityTimestamp);
 
     await program.methods
       .initializeBondInstrument(
