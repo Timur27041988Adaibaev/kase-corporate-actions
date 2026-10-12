@@ -1496,8 +1496,17 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
 
   const cluster = CLUSTERS[currentCluster];
 
-  // Pre-flight gas check
-  await ensureGasBalance(state.walletPubkey, 0.005);
+  // Pre-flight gas check. Handle this before disabling UI controls so a failed
+  // faucet/RPC request cannot leave the action button permanently disabled.
+  try {
+    await ensureGasBalance(state.walletPubkey, 0.005);
+  } catch (error) {
+    const message = error?.message || String(error);
+    appendLog("GAS-GUARD", "tag-err", `Transaction not started: ${message}`);
+    showToast("Transaction not started", message, "error");
+    if (typeof onError === "function") onError(error);
+    return;
+  }
 
   // 1. Open Transaction Modal in Loading State
   showModalLoading(actionTitle, `Building the Solana Memo instruction and fetching the latest blockhash from ${cluster.name}...`);
