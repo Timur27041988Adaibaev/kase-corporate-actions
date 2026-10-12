@@ -1690,13 +1690,19 @@ async function broadcastRealSolanaTransaction({ actionTitle, memoText, onSuccess
       }
     } catch (confirmErr) {
       console.warn("Confirmation check notice:", confirmErr);
-      const status = await connection.getSignatureStatus(signature);
-      if (status && status.value && status.value.err) {
+      const status = await connection.getSignatureStatus(signature, { searchTransactionHistory: true });
+      if (!status || !status.value) {
+        throw new Error(`Unable to verify confirmation for transaction ${signature}. Check Solana Explorer before retrying.`);
+      }
+      if (status.value.err) {
         throw new Error(`On-chain transaction error: ${JSON.stringify(status.value.err)}`);
+      }
+      if (!["confirmed", "finalized"].includes(status.value.confirmationStatus)) {
+        throw new Error(`Transaction ${signature} has not reached confirmed/finalized status.`);
       }
     }
 
-    updateModalStep(4, true, "Transaction confirmed successfully!");
+    updateModalStep(4, true, "Memo transaction confirmed successfully.");
 
     // 6. Confirmed!
     const slot = await connection.getSlot("confirmed");
