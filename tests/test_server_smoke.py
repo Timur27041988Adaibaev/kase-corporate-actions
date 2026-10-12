@@ -51,7 +51,7 @@ class KaseServerSmokeTests(unittest.TestCase):
         self.assertEqual(payload.get("status"), "PROGRAM_DEPLOYED")
         self.assertTrue(payload.get("rpc_verified"))
         self.assertFalse(payload.get("settlement_executed"))
-        self.assertEqual(payload.get("settlement_integration"), "not-connected-to-browser-terminal")
+        self.assertEqual(payload.get("settlement_integration"), "devnet-anchor-console; binary-compatibility-not-proven")
 
     def test_oracle_endpoint_does_not_claim_fake_consensus(self):
         request = urllib.request.Request(self.base_url + "/api/oracle/consensus")
