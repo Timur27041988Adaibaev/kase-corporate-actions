@@ -58,7 +58,7 @@ jobs:
       - name: Install compatible Solana CLI
         run: |
           set -euo pipefail
-          sh -c "$(curl -sSfL https://release.anza.xyz/v2.2.16/install)" </dev/null
+          sh -c "$(curl -sSfL https://release.anza.xyz/v2.3.0/install)" </dev/null
           SOLANA_BIN="$HOME/.local/share/solana/install/active_release/bin"
           test -x "$SOLANA_BIN/solana"
           echo "$SOLANA_BIN" >> "$GITHUB_PATH"
@@ -66,7 +66,7 @@ jobs:
           export PATH="$SOLANA_BIN:$HOME/.cargo/bin:$PATH"
           solana --version
           anchor --version
-          solana --version | grep -F "2.2.16"
+          solana --version | grep -F "2.3.0"
           anchor --version | grep -F "0.32.1"
       - name: Configure local Solana wallet
         run: |
@@ -83,9 +83,9 @@ jobs:
           export PATH="$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH"
           rustc --version
           cargo --version
-          solana --version | grep -F "2.2.16"
+          solana --version | grep -F "2.3.0"
           anchor --version | grep -F "0.32.1"
-          # Solana 2.2's SBF toolchain uses Cargo 1.84, which cannot parse
+          # Solana 2.3's SBF toolchain uses Cargo 1.84, which cannot parse
           # zeroize_derive 1.5.0's edition2024 manifest. Resolve with the
           # host Cargo and pin the compatible transitive version in Cargo.lock.
           cargo update -p zeroize_derive --precise 1.4.3
