@@ -1,6 +1,8 @@
 # KASE Automated Corporate Actions on Solana 🇰🇿⚡
 
-**Demo video (2:45, real Devnet transactions in Solana Explorer):** https://youtu.be/7LY-WmN_ghE
+**Demo video (3:01, real Devnet transactions in Solana Explorer):** https://youtu.be/ilgyZc630uU
+
+**Pitch video (1:52):** https://youtu.be/h4huY2L8oc4
 
 
 > **KASE (Kazakhstan Stock Exchange) & Superteam Kazakhstan Hackathon**  
