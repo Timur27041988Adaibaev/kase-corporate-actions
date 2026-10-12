@@ -90,3 +90,12 @@ jobs:
           # host Cargo and pin the compatible transitive version in Cargo.lock.
           cargo update -p zeroize_derive --precise 1.4.3
           anchor test
+
+      - name: Upload generated Anchor IDL for browser integration
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kase-corporate-actions-idl
+          path: target/idl/kase_corporate_actions.json
+          if-no-files-found: warn
+          retention-days: 14
