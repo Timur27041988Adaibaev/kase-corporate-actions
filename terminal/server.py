@@ -619,22 +619,6 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
             }, indent=2).encode("utf-8"))
             return
 
-        # 7. System Health Endpoint (/api/health)
-        if path == "/api/health":
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            health_data = {
-                "status": "healthy",
-                "version": "4.0.0",
-                "service": "kase-solana-enterprise-terminal",
-                "clusters": ["devnet", "mainnet-beta"],
-                "actionsSpecVersion": "2.1.3",
-                "iso20022Supported": ["seev.031.002.10", "seev.036.002.11", "seev.004.002.08"]
-            }
-            self.wfile.write(json.dumps(health_data, indent=2).encode("utf-8"))
-            return
-
         # 404 for unknown Action endpoints
         if path.startswith("/api/actions/"):
             self.send_response(404)
@@ -715,6 +699,21 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
 
         if path == "/api/actions/coupon":
             amount_str = query.get("amount", [str(payload.get("amount", "500000"))])[0]
+            try:
+                amount = float(amount_str)
+            except (TypeError, ValueError):
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({"message": "'amount' must be a positive number not exceeding 10000000."}).encode("utf-8"))
+                return
+            if not 0 < amount <= 10000000:
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({"message": "'amount' must be a positive number not exceeding 10000000."}).encode("utf-8"))
+                return
+            amount_str = format(amount, "f").rstrip("0").rstrip(".") if "." in format(amount, "f") else format(amount, "f")
             memo_payload = f"KASE_DEMO_MEMO_ONLY | REQUESTED_ACTION=COUPON | AMOUNT_REFERENCE={amount_str}_USDC | ISIN=KZDEMO000001 | RECIPIENT={account} | EXECUTION=NOT_PERFORMED"
             try:
                 tx_base64 = build_solana_memo_transaction(account, memo_payload, tx_version=tx_version)
@@ -749,9 +748,32 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         if path == "/api/actions/redemption":
-            bonds_str = query.get("bonds", [str(payload.get("bonds", "10000"))])[0]
-            memo_payload = f"KASE_DEMO_MEMO_ONLY | REQUESTED_ACTION=REDEMPTION_AND_BURN | AMOUNT_REFERENCE=10000000_USDC | ISIN=KZDEMO000001 | RECIPIENT={account} | EXECUTION=NOT_PERFORMED"
-            tx_base64 = build_solana_memo_transaction(account, memo_payload, tx_version=tx_version)
+            try:
+                bonds = int(query.get("bonds", [str(payload.get("bonds", "10000"))])[0])
+            except (TypeError, ValueError):
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({"message": "'bonds' must be an integer from 1 to 10000."}).encode("utf-8"))
+                return
+            if not 1 <= bonds <= 10000:
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({"message": "'bonds' must be an integer from 1 to 10000."}).encode("utf-8"))
+                return
+            memo_payload = f"KASE_DEMO_MEMO_ONLY | REQUESTED_ACTION=REDEMPTION_AND_BURN | BONDS_REFERENCE={bonds} | AMOUNT_REFERENCE={bonds * 1000}_USDC | ISIN=KZDEMO000001 | RECIPIENT={account} | EXECUTION=NOT_PERFORMED"
+            try:
+                tx_base64 = build_solana_memo_transaction(account, memo_payload, tx_version=tx_version)
+            except (RuntimeError, ValueError) as err:
+                self.send_response(503)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "status": "UNAVAILABLE",
+                    "message": f"Cannot prepare a valid transaction because Solana RPC is unavailable: {err}"
+                }).encode("utf-8"))
+                return
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
@@ -785,7 +807,17 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
             rationale = query.get("rationale", [str(payload.get("rationale", ""))])[0]
             rationale_suffix = f" | Rationale: {rationale[:40]}" if rationale else ""
             memo_payload = f"KASE_DEMO_MEMO_ONLY | REQUESTED_ACTION=GOVERNANCE_VOTE | CHOICE_INTENT={choice.upper()} | PROPOSAL_ID=101 | VOTER={account}{rationale_suffix} | EXECUTION=NOT_PERFORMED"
-            tx_base64 = build_solana_memo_transaction(account, memo_payload, tx_version=tx_version)
+            try:
+                tx_base64 = build_solana_memo_transaction(account, memo_payload, tx_version=tx_version)
+            except (RuntimeError, ValueError) as err:
+                self.send_response(503)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "status": "UNAVAILABLE",
+                    "message": f"Cannot prepare a valid transaction because Solana RPC is unavailable: {err}"
+                }).encode("utf-8"))
+                return
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
