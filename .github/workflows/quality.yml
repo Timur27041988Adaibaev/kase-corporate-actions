@@ -45,6 +45,11 @@ jobs:
           echo "$HOME/.avm/bin" >> "$GITHUB_PATH"
           "$HOME/.cargo/bin/avm" install 0.30.1
           "$HOME/.cargo/bin/avm" use 0.30.1
+      - name: Configure local Solana wallet
+        run: |
+          mkdir -p "$HOME/.config/solana"
+          solana-keygen new --no-bip39-passphrase --force -o "$HOME/.config/solana/id.json"
+          solana config set --url localhost
       - name: Install test dependencies
         run: |
           npm install --no-audit --no-fund
