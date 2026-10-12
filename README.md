@@ -6,9 +6,9 @@
 
 > **Implementation status — read before using the terminal**
 >
-> The browser terminal currently broadcasts Solana Memo instructions for transaction attestations. Those records do **not** transfer USDC, burn bond tokens, execute the Anchor settlement instructions, or count a governance vote. Independent AML/registry/solvency oracle providers are not connected, so oracle consensus is unavailable. The browser UI must not be treated as a production financial terminal or as proof that the scenarios have settled.
+> The main dashboard still supports Memo attestations for audit notes. A separate Devnet-only console at `terminal/anchor.html` is wired to the Anchor instructions for SPL test-token coupon transfers, bond-token burns with principal transfers, and governance voting/finalization. The console checks whether the configured program ID is executable, but that check does not prove the deployed binary matches the current source. Test mints are not USDC or digital tenge; independent AML/registry/solvency oracles and production financial rails are not connected.
 >
-> The repository contains an Anchor/Rust program and integration-test source, but the web UI is not yet wired to invoke its instructions with configured bond/action/vault/mint accounts. Real settlement requires that integration, successful Anchor build/tests, and a verified deployment/program ID on the intended cluster. Until those checks pass, demo amounts and holder balances are illustrative.
+> The browser console now builds the bond/action/vault/mint accounts and invokes the Anchor instructions directly through Phantom on Devnet. The local-validator integration suite tests actual SPL token transfers, bond burns, voting tally, and adversarial cases. Before relying on Devnet, the live executable and deployed binary must still be verified against the current source. Nothing here connects to official KASE/KCSD accounts or real-world settlement rails.
 
 > **KASE (Kazakhstan Stock Exchange) & Superteam Kazakhstan Hackathon**  
 > Automating corporate actions for tokenized financial instruments (RWA) on the Solana blockchain.  
@@ -20,7 +20,7 @@
 
 The project is a prototype intended to explore how corporate actions for tokenized bonds could be implemented on Solana for a KASE/KCSD-style workflow. It is not connected to official KASE/KCSD systems and is not a production financial service.
 
-The repository includes the Anchor program source and a browser terminal prototype. The full end-to-end cycle is **not yet integrated or verified in the web UI**. The current UI can write Memo attestations; it does not execute the actual coupon/redemption settlement or Anchor governance vote.
+The repository includes the Anchor program source and a browser terminal prototype. The full test-token cycle is available in `terminal/anchor.html`, separate from the main dashboard's Memo attestations. It executes coupon settlement, redemption/burn, and governance instructions on Devnet only when the configured program is executable and compatible. This is a test harness, not a production financial terminal.
 
 ---
 
@@ -66,7 +66,7 @@ The repository includes the Anchor program source and a browser terminal prototy
    - Retail Pool = **800 votes "ABSTAIN" (8%)**
    - Broker C (2,000) = **does not vote**
 3. **Double-voting protection:** The `VoterRecord` PDA derived from `[b"voter", proposal.key(), voter.key()]` blocks repeat votes.
-4. **Tally and quorum:** The quorum threshold (5,000 bonds = 50%) is checked. When "FOR" wins (6,000 FOR vs 1,200 AGAINST), the resolution is intended to update the on-chain coupon rate when a real governance instruction passes. The current browser terminal does not execute that instruction or recalculate from on-chain state.
+4. **Tally and quorum:** The quorum threshold (5,000 bonds = 50%) is checked. When "FOR" wins (6,000 FOR vs 1,200 AGAINST), the resolution is intended to update the on-chain coupon rate when a real governance instruction passes. The Devnet Anchor console calls the finalization instruction and reads the resulting proposal state back from chain.
 
 ---
 
@@ -76,15 +76,15 @@ For transparency, the table below strictly separates functionality implemented d
 
 | Component / Operation | Implemented in Anchor program (code) | Simulated / Off-chain services | Implementation notes |
 | :--- | :---: | :---: | :--- |
-| **Devnet deployment of the program** | ⚠️ **Requires live verification** | — | Program ID configured in source: `5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz`. The browser terminal currently submits Memo-only attestations and does not invoke the Anchor scenario instructions. Mainnet: not deployed. |
+| **Devnet deployment of the program** | ⚠️ **Requires live verification** | — | Program ID configured in source: `5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz`. The Devnet Anchor console invokes the Anchor instructions when a compatible executable is deployed. The main dashboard's general audit attestations remain Memo records. Mainnet financial settlement: not deployed. |
 | **Instrument registration (`BondSecurity`)** | ✅ **Implemented on-chain** | — | PDA `[b"bond", isin]`, ISIN validation (1–16 characters), face value, rate, dates |
 | **Corporate action scheduling (`CorporateAction`)** | ✅ **Implemented on-chain** | — | PDA `[b"action", bond_key, id]`, check that maturity has not passed |
 | **Holder balance snapshot (`HolderEntitlement`)** | ✅ **Implemented on-chain** | — | PDA `[b"entitlement", action_key, holder]`, records the entitlement |
 | **Funding the pool into the Escrow Vault** | ✅ **Implemented on-chain** | — | PDA vault, funded via SPL Token Transfer |
 | **Coupon payment (DvP)** | ✅ **Implemented on-chain** | — | Atomic CPI transfer from the Vault to the investor, sets `is_settled = true` |
 | **Double-Claim protection** | ✅ **Implemented on-chain** | — | Strict `require!(!entitlement.is_settled, KaseError::AlreadySettled)` |
-| **Principal redemption and Token Burn** | ⚠️ **Implemented in source; current deployed binary not verified** | — | Anchor source includes maturity check, token burn, and principal transfer; browser UI does not invoke it. |
-| **Governance and voting (`GovernanceProposal`)** | ⚠️ **Implemented in source; current deployed binary not verified** | — | Anchor source includes proposal and vote logic; browser UI records vote intent in Memo only. |
+| **Principal redemption and Token Burn** | ⚠️ **Implemented in source; current deployed binary not verified** | — | Anchor source and Devnet console include maturity checks, token burn, and principal transfer using test SPL tokens; current deployed-binary compatibility must be verified. |
+| **Governance and voting (`GovernanceProposal`)** | ⚠️ **Implemented in source; current deployed binary not verified** | — | Anchor source and Devnet console include proposal creation, token-weighted voting, and on-chain tally/finalization; current deployed-binary compatibility must be verified. |
 | **Double-Vote protection** | ✅ **Implemented on-chain** | — | PDA collision on `[b"voter", proposal_key, voter_key]` in Sealevel |
 | **Dynamic recalculation of instrument terms** | ⚠️ **Implemented in source; current deployed binary not verified** | — | Anchor source updates the rate on finalization; browser UI does not invoke it. |
 | **Broadcasting transactions to Solana Devnet & Mainnet** | — | ✅ **Solana Memo Program** | Uses the official Solana Memo Program (`MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr`). Mainnet: Memo Program records only. Devnet program ID is configured in source; deployment/account status must be verified. |
@@ -206,7 +206,7 @@ This performs a live RPC preflight only. It verifies that the configured program
 ```bash
 python terminal/server.py
 ```
-Open in a browser: **`http://localhost:8088`** *(press `Ctrl + F5`)*. The browser's corporate-action buttons currently create Memo attestations only; they are not connected to the Anchor settlement instructions.
+Open in a browser: **`http://localhost:8088`** *(press `Ctrl + F5`)*. Use the separate **On-chain settlement console** link (`/anchor.html`) for the Devnet test-token flow. The main dashboard's general audit/social-platform attestations may still use Memo records.
 
 ---
 
@@ -217,7 +217,7 @@ Built for the **KASE (Kazakhstan Stock Exchange)** and **Superteam Kazakhstan** 
 
 ## Historical Devnet deployment evidence (re-verify against current source)
 
-The transaction links below are historical Devnet records from an earlier deployment/run. They show that those transactions were recorded on Devnet, but they do **not** prove that the currently committed source matches the deployed binary or that the browser UI invokes these Anchor instructions. The browser UI currently submits Memo-only attestations. Check the live program account and verify the deployed build before relying on the current deployment.
+The transaction links below are historical Devnet records from an earlier deployment/run. They show that those transactions were recorded on Devnet, but they do **not** prove that the currently committed source matches the deployed binary. The separate browser console is now wired to the Anchor instructions; verify the live program account and deployed build before relying on it.
 
 - **Program ID:** [`5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz`](https://explorer.solana.com/address/5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz?cluster=devnet)
 - **Deploy tx:** [4u96WS31…](https://explorer.solana.com/tx/4u96WS31cUb7wozMADQhJMfej7gUN3jP3uoDGxkLFbPAGWZPhoKtKPcjr7kckPaarGhKLL4q5ADoe7RWC9ZWRVY8?cluster=devnet)
