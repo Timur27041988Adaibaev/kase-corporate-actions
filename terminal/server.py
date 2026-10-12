@@ -401,6 +401,18 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
         path = parsed.path
         query = urllib.parse.parse_qs(parsed.query)
 
+        if path == "/api/health":
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "status": "healthy",
+                "service": "kase-corporate-actions-terminal",
+                "mode": "memo-attestation-prototype",
+                "settlement": "not-executed-by-terminal",
+            }).encode("utf-8"))
+            return
+
         # 1. Solana Actions Specification: /actions.json and /.well-known/actions.json
         if path in ["/actions.json", "/.well-known/actions.json"]:
             self.send_response(200)
