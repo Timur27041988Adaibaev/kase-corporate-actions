@@ -595,7 +595,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
   it("Step 8 [Scenario 3]: Create Restructuring Proposal #101", async () => {
     const now = Math.floor(Date.now() / 1000);
     const votingStart = new anchor.BN(now - 100);
-    const votingEnd = new anchor.BN(now + 86400);
+    const votingEnd = new anchor.BN(now + 15);
     const quorumThreshold = new anchor.BN(2000); // 2,000 bonds quorum
 
     const title = "Restructure: Increase Coupon to 12.5% p.a.";
@@ -808,6 +808,11 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
   });
 
   it("Step 10 [Scenario 3]: Finalize Proposal -> Quorum Met & Passed (2500 > 2000)", async () => {
+    const currentProposal = await program.account.governanceProposal.fetch(proposalPda);
+    const waitMs = currentProposal.votingEnd.toNumber() * 1000 - Date.now() + 250;
+    if (waitMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+    }
     await program.methods
       .finalizeGovernanceProposal()
       .accounts({
