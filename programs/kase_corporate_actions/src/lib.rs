@@ -140,9 +140,14 @@ pub mod kase_corporate_actions {
             action.status != ActionStatus::Completed && action.status != ActionStatus::Cancelled,
             KaseError::InvalidActionStatus
         );
+        let now = Clock::get()?.unix_timestamp;
         require!(
-            Clock::get()?.unix_timestamp >= action.record_date_timestamp,
+            now >= action.record_date_timestamp,
             KaseError::RecordDateNotReached
+        );
+        require!(
+            now <= action.settlement_timestamp,
+            KaseError::InvalidSettlementDate
         );
 
         let bond = &ctx.accounts.bond_security;
