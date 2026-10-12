@@ -8,6 +8,9 @@ pub enum KaseError {
     #[msg("Annual coupon rate cannot exceed 100% (10000 bps).")]
     InvalidCouponRate,
 
+    #[msg("Bond security mint must use zero decimals so each token represents one whole bond.")]
+    InvalidBondMintDecimals,
+
     #[msg("Coupon payment frequency must be 1, 2, 4 or 12 times per year.")]
     InvalidCouponFrequency,
 
