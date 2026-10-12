@@ -27,24 +27,27 @@ async function chainTimestamp(connection: any): Promise<number> {
   return Math.floor(Date.now() / 1000);
 }
 
-async function waitUntilTimestamp(connection: any, targetTimestamp: number, payer: any): Promise<void> {
-  let now = await chainTimestamp(connection);
-  let attempts = 0;
-  const memoProgram = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
-  const maxAttempts = Math.max(20, Math.ceil(Math.max(0, targetTimestamp - now) * 8) + 20);
-  while (now < targetTimestamp && attempts < maxAttempts) {
-    const tx = new Transaction().add(new TransactionInstruction({
-      keys: [],
-      programId: memoProgram,
-      data: Buffer.from("KASE_TEST_CLOCK_HEARTBEAT"),
-    }));
-    await sendAndConfirmTransaction(connection, tx, [payer], { commitment: "confirmed" });
-    now = await chainTimestamp(connection);
-    attempts++;
+async function waitUntilTimestamp(connection: any, targetTimestamp: number, _payer?: any): Promise<void> {
+  // The local validator advances its Clock sysvar naturally. Do not call
+  // undocumented warpSlot RPCs or submit heartbeat transactions: both can
+  // stall blockhash acquisition on some validator releases.
+  const targetWallClock = targetTimestamp * 1000 + 1500;
+  const remainingMs = targetWallClock - Date.now();
+  if (remainingMs > 0) {
+    await new Promise((resolve) => setTimeout(resolve, remainingMs));
   }
-  if (now < targetTimestamp) {
-    throw new Error(`Local validator clock did not reach ${targetTimestamp}; current time is ${now} after ${attempts} heartbeat transactions.`);
+  // Wait until a confirmed block reports the target timestamp, with a small
+  // polling interval and a bounded timeout.
+  const deadline = Date.now() + 15000;
+  while (Date.now() < deadline) {
+    const slot = await connection.getSlot("confirmed");
+    for (let offset = 0; offset < 8 && slot > offset; offset++) {
+      const timestamp = await connection.getBlockTime(slot - offset);
+      if (timestamp !== null && timestamp >= targetTimestamp) return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 300));
   }
+  throw new Error(`Validator clock did not reach ${targetTimestamp} within 15 seconds after scheduled time.`);
 }
 
   let authority = anchor.web3.Keypair.generate(); // KASE CSD
