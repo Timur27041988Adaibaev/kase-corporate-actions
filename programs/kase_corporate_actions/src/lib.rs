@@ -128,6 +128,12 @@ pub mod kase_corporate_actions {
         bonds_held: u64,
     ) -> Result<()> {
         require!(bonds_held > 0, KaseError::ZeroHolderBalance);
+        // Never trust an operator-supplied balance without checking the holder's
+        // real SPL token account. This prevents creating inflated entitlements.
+        require!(
+            bonds_held <= ctx.accounts.holder_bond_account.amount,
+            KaseError::InvalidHolderTokenAccount
+        );
 
         let action = &mut ctx.accounts.corporate_action;
         require!(
