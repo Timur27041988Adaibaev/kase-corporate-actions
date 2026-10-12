@@ -387,6 +387,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         corporateAction: couponActionPda,
         actionVault: couponVaultPda,
         funderTokenAccount: issuerSettlementAccount,
+        settlementMint,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .signers([issuer])
@@ -413,6 +414,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         actionVault: couponVaultPda,
         holderEntitlement: bankAEntitlementPda,
         holderSettlementAccount: bankASettlementAccount,
+        settlementMint,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .signers([authority])
@@ -437,6 +439,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
           actionVault: couponVaultPda,
           holderEntitlement: bankAEntitlementPda,
           holderSettlementAccount: bankASettlementAccount,
+          settlementMint,
           tokenProgram: TOKEN_PROGRAM_ID,
         })
         .signers([authority])
@@ -513,6 +516,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         corporateAction: futureActionPda,
         actionVault: futureVaultPda,
         funderTokenAccount: issuerSettlementAccount,
+        settlementMint,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .signers([issuer])
@@ -528,6 +532,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
           actionVault: futureVaultPda,
           holderEntitlement: futureEntitlementPda,
           holderSettlementAccount: bankBSettlementAccount,
+          settlementMint,
           tokenProgram: TOKEN_PROGRAM_ID,
         })
         .signers([authority])
@@ -619,6 +624,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         bondMint: bondMint,
         holderBondAccount: bankABondAccount,
         holderSettlementAccount: bankASettlementAccount,
+        settlementMint,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .signers([bankA])
@@ -641,7 +647,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
   it("Step 8 [Scenario 3]: Create Restructuring Proposal #101", async () => {
     const now = Math.floor(Date.now() / 1000);
     const votingStart = new anchor.BN(now - 100);
-    const votingEnd = new anchor.BN(now + 60);
+    const votingEnd = new anchor.BN(now + 180);
     const quorumThreshold = new anchor.BN(2000); // 2,000 bonds quorum
 
     const title = "Restructure: Increase Coupon to 12.5% p.a.";
@@ -983,6 +989,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
         bondMint: testBondMint,
         holderBondAccount: holderAcc,
         holderSettlementAccount: bankASettlementAccount,
+        settlementMint,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .signers([bankA])
