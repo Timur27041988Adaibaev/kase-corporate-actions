@@ -1939,9 +1939,9 @@ function renderTable() {
 
     let statusBadge = `<span class="csd-status-pill pending font-mono">PENDING RECORD</span>`;
     if (state.couponSettled && !state.redemptionSettled) {
-      statusBadge = `<span class="csd-status-pill settled font-mono">COUPON SETTLED</span>`;
+      statusBadge = `<span class="csd-status-pill settled font-mono">MEMO RECORD ONLY</span>`;
     } else if (state.redemptionSettled) {
-      statusBadge = `<span class="csd-status-pill burned font-mono">BURNED & REDEEMED</span>`;
+      statusBadge = `<span class="csd-status-pill burned font-mono">MEMO RECORD ONLY</span>`;
     }
 
     const tr = document.createElement("tr");
