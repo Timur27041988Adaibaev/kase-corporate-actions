@@ -7,7 +7,7 @@
     "test": "ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts",
     "verify": "ts-node scripts/verify_settlement_flow.ts",
     "verify:py": "python verify.py",
-    "start": "npx serve terminal -p 3000"
+    "start": "python terminal/server.py"
   },
   "keywords": [
     "solana",
