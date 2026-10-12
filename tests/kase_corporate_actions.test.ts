@@ -341,6 +341,38 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
     assert.equal(entState.isSettled, false);
   });
 
+  it("Pass [Adversarial Attack]: Reject aggregate holder snapshots above active bond supply", async () => {
+    // Bank B's real SPL balance is increased, but the aggregate snapshot must
+    // still be capped by the instrument's registered active supply.
+    await mintTo(
+      provider.connection,
+      authority,
+      bondMint,
+      bankBBondAccount,
+      authority.publicKey,
+      7000
+    );
+    try {
+      await program.methods
+        .recordHolderSnapshot(new BN(6501))
+        .accounts({
+          authority: authority.publicKey,
+          bondSecurity: bondSecurityPda,
+          corporateAction: couponActionPda,
+          holder: bankB.publicKey,
+          holderBondAccount: bankBBondAccount,
+          holderEntitlement: bankBEntitlementPda,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+        })
+        .signers([authority])
+        .rpc();
+      assert.fail("Aggregate snapshot must not exceed registered active supply.");
+    } catch (err: any) {
+      expect(err.toString()).to.include("SnapshotExceedsActiveSupply");
+    }
+  });
+
   it("Step 4 [Scenario 1]: Issuer deposits $200,000 USDC to Action Vault PDA", async () => {
     const depositAmount = new BN(200_000_000_000); // 200,000 USDC
 
