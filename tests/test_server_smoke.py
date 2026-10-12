@@ -84,6 +84,44 @@ class KaseServerSmokeTests(unittest.TestCase):
         payload = json.loads(ctx.exception.read().decode("utf-8"))
         self.assertEqual(payload.get("status"), "UNAVAILABLE")
 
+    def test_all_action_endpoints_fail_closed_when_transaction_cannot_be_prepared(self):
+        for route, payload in [
+            ("/api/actions/coupon", {"account": "11111111111111111111111111111111"}),
+            ("/api/actions/redemption", {"account": "11111111111111111111111111111111"}),
+            ("/api/actions/vote", {"account": "11111111111111111111111111111111"}),
+        ]:
+            with self.subTest(route=route):
+                request = urllib.request.Request(
+                    self.base_url + route,
+                    data=json.dumps(payload).encode("utf-8"),
+                    headers={"Content-Type": "application/json"},
+                    method="POST",
+                )
+                with patch.object(kase_server, "build_solana_memo_transaction", side_effect=RuntimeError("RPC offline")):
+                    with self.assertRaises(urllib.error.HTTPError) as ctx:
+                        urllib.request.urlopen(request, timeout=2)
+                self.assertEqual(ctx.exception.code, 503)
+                response = json.loads(ctx.exception.read().decode("utf-8"))
+                self.assertEqual(response.get("status"), "UNAVAILABLE")
+
+    def test_invalid_amount_and_redemption_count_are_rejected(self):
+        for route, query, payload in [
+            ("/api/actions/coupon?amount=-1", {}, {"account": "11111111111111111111111111111111"}),
+            ("/api/actions/redemption?bonds=10001", {}, {"account": "11111111111111111111111111111111"}),
+        ]:
+            with self.subTest(route=route):
+                request = urllib.request.Request(
+                    self.base_url + route,
+                    data=json.dumps(payload).encode("utf-8"),
+                    headers={"Content-Type": "application/json"},
+                    method="POST",
+                )
+                with patch.object(kase_server, "build_solana_memo_transaction") as build:
+                    with self.assertRaises(urllib.error.HTTPError) as ctx:
+                        urllib.request.urlopen(request, timeout=2)
+                self.assertEqual(ctx.exception.code, 400)
+                build.assert_not_called()
+
     def test_base58_zero_address_decodes_to_32_bytes(self):
         self.assertEqual(kase_server.b58decode("11111111111111111111111111111111"), bytes(32))
 
