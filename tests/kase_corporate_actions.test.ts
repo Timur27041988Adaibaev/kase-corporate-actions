@@ -360,6 +360,11 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
   });
 
   it("Step 5 [Scenario 1]: Execute Coupon Settlement to Bank A ($175,000 USDC transferred)", async () => {
+    const couponActionState = await program.account.corporateAction.fetch(couponActionPda);
+    const couponWaitMs = couponActionState.settlementTimestamp.toNumber() * 1000 - Date.now() + 250;
+    if (couponWaitMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, couponWaitMs));
+    }
     const balBefore = (await getAccount(provider.connection, bankASettlementAccount)).amount;
 
     await program.methods
@@ -502,7 +507,7 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
 
   it("Step 6 [Scenario 2]: Schedule Redemption Corporate Action #202699 & Deposit Principal", async () => {
     const recordDate = new anchor.BN(Math.floor(Date.now() / 1000) - 100);
-    const settlementDate = new anchor.BN(Math.floor(Date.now() / 1000) - 50);
+    const settlementDate = new anchor.BN(Math.floor(Date.now() / 1000) + 10);
 
     await program.methods
       .scheduleCorporateAction(
@@ -553,10 +558,14 @@ describe("KASE Corporate Actions on Solana: Formal & Adversarial Verification", 
 
   it("Step 7 [Scenario 2]: Execute Redemption -> Burn 3,500 Bond Tokens & Pay $3,500,000 Principal", async () => {
     const bondCheck = await program.account.bondSecurity.fetch(bondSecurityPda);
-    const now = Math.floor(Date.now() / 1000);
-    if (bondCheck.maturityTimestamp.toNumber() > now) {
-      const waitMs = (bondCheck.maturityTimestamp.toNumber() - now + 1) * 1000;
-      await new Promise((r) => setTimeout(r, waitMs));
+    const redemptionActionState = await program.account.corporateAction.fetch(redemptionActionPda);
+    const earliestExecution = Math.max(
+      bondCheck.maturityTimestamp.toNumber(),
+      redemptionActionState.settlementTimestamp.toNumber()
+    );
+    const waitMs = earliestExecution * 1000 - Date.now() + 250;
+    if (waitMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
     }
 
     const bondsBefore = (await getAccount(provider.connection, bankABondAccount)).amount;
