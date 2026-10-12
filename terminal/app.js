@@ -2400,10 +2400,10 @@ function initListeners() {
 
     const cluster = CLUSTERS[currentCluster];
     const totalCouponFormatted = formatUSD(BondMath.calculateCoupon(BondMath.terms.totalSupply));
-    const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=COUPON_DISTRIBUTION | AMOUNT=${totalCouponFormatted}_USDC | CSD=CONFIRMED`;
+    const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=DEMO_MEMO_ATTESTATION | REQUESTED_ACTION=COUPON_DISTRIBUTION | AMOUNT_REFERENCE=${totalCouponFormatted}_USDC | EXECUTION=NOT_PERFORMED`;
 
     await broadcastRealSolanaTransaction({
-      actionTitle: `Scenario 1: Settle Semi-Annual Coupon (${totalCouponFormatted} USDC) [${cluster.shortName}]`,
+      actionTitle: `Memo Attestation Only: Coupon Request (${totalCouponFormatted} USDC reference) [${cluster.shortName}]`,
       memoText,
       onSuccess: (signature, slot) => {
         const cs = clusterStates[currentCluster];
@@ -2459,10 +2459,10 @@ function initListeners() {
 
     const cluster = CLUSTERS[currentCluster];
     const totalPrincipalFormatted = formatUSD(BondMath.calculateRedemption(BondMath.terms.totalSupply));
-    const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=MATURITY_REDEMPTION_AND_BURN | UNITS=10,000 | TOTAL=${totalPrincipalFormatted}_USDC | CSD=CONFIRMED`;
+    const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=DEMO_MEMO_ATTESTATION | REQUESTED_ACTION=REDEMPTION_AND_BURN | UNITS_REFERENCE=10,000 | AMOUNT_REFERENCE=${totalPrincipalFormatted}_USDC | EXECUTION=NOT_PERFORMED`;
 
     await broadcastRealSolanaTransaction({
-      actionTitle: `Scenario 2: Burn 10,000 Bond Tokens & Settle Principal (${totalPrincipalFormatted}) [${cluster.shortName}]`,
+      actionTitle: `Memo Attestation Only: Redemption Request (${totalPrincipalFormatted} reference) [${cluster.shortName}]`,
       memoText,
       onSuccess: (signature, slot) => {
         const cs = clusterStates[currentCluster];
@@ -2529,9 +2529,9 @@ function initListeners() {
     if (c === "for") {
       const btn = document.getElementById("btnVoteFor");
       if (btn) btn.disabled = true;
-      const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=GOVERNANCE_VOTE | PROPOSAL_ID=101 | VOTE=FOR | WEIGHT=6,000 | CSD=VERIFIED`;
+      const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=DEMO_MEMO_ATTESTATION | REQUESTED_ACTION=GOVERNANCE_VOTE | PROPOSAL_ID=101 | VOTE_INTENT=FOR | WEIGHT_REFERENCE=6,000 | EXECUTION=NOT_PERFORMED`;
       await broadcastRealSolanaTransaction({
-        actionTitle: `Cast 6,000 Votes FOR Proposal #101 (Bank A + Bank B) [${cluster.shortName}]`,
+        actionTitle: `Memo Attestation Only: Vote Intent FOR Proposal #101 [${cluster.shortName}]`,
         memoText,
         onSuccess: (signature, slot) => {
           const cs = clusterStates[currentCluster];
@@ -2552,9 +2552,9 @@ function initListeners() {
     } else if (c === "against") {
       const btn = document.getElementById("btnVoteAgainst");
       if (btn) btn.disabled = true;
-      const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=GOVERNANCE_VOTE | PROPOSAL_ID=101 | VOTE=AGAINST | WEIGHT=1,200 | CSD=VERIFIED`;
+      const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=DEMO_MEMO_ATTESTATION | REQUESTED_ACTION=GOVERNANCE_VOTE | PROPOSAL_ID=101 | VOTE_INTENT=AGAINST | WEIGHT_REFERENCE=1,200 | EXECUTION=NOT_PERFORMED`;
       await broadcastRealSolanaTransaction({
-        actionTitle: `Cast 1,200 Votes AGAINST Proposal #101 (Bank D) [${cluster.shortName}]`,
+        actionTitle: `Memo Attestation Only: Vote Intent AGAINST Proposal #101 [${cluster.shortName}]`,
         memoText,
         onSuccess: (signature, slot) => {
           const cs = clusterStates[currentCluster];
@@ -2575,9 +2575,9 @@ function initListeners() {
     } else if (c === "abstain") {
       const btn = document.getElementById("btnVoteAbstain");
       if (btn) btn.disabled = true;
-      const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=GOVERNANCE_VOTE | PROPOSAL_ID=101 | VOTE=ABSTAIN | WEIGHT=800 | CSD=VERIFIED`;
+      const memoText = `KASE_CORP_ACT: ISIN=${BondMath.terms.isin} | TYPE=DEMO_MEMO_ATTESTATION | REQUESTED_ACTION=GOVERNANCE_VOTE | PROPOSAL_ID=101 | VOTE_INTENT=ABSTAIN | WEIGHT_REFERENCE=800 | EXECUTION=NOT_PERFORMED`;
       await broadcastRealSolanaTransaction({
-        actionTitle: `Cast 800 Votes ABSTAIN on Proposal #101 (Retail Pool) [${cluster.shortName}]`,
+        actionTitle: `Memo Attestation Only: Vote Intent ABSTAIN Proposal #101 [${cluster.shortName}]`,
         memoText,
         onSuccess: (signature, slot) => {
           const cs = clusterStates[currentCluster];
