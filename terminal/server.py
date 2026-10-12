@@ -665,7 +665,17 @@ class KASEEnterpriseHandler(http.server.SimpleHTTPRequestHandler):
         if path == "/api/actions/coupon":
             amount_str = query.get("amount", [str(payload.get("amount", "500000"))])[0]
             memo_payload = f"KASE CSD: Semi-Annual Coupon ${amount_str} USDC | ISIN KZDEMO000001 | Recipient: {account}"
-            tx_base64 = build_solana_memo_transaction(account, memo_payload, tx_version=tx_version)
+            try:
+                tx_base64 = build_solana_memo_transaction(account, memo_payload, tx_version=tx_version)
+            except (RuntimeError, ValueError) as err:
+                self.send_response(503)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "status": "UNAVAILABLE",
+                    "message": f"Cannot prepare a valid transaction because Solana RPC is unavailable: {err}"
+                }).encode("utf-8"))
+                return
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
