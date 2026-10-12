@@ -103,6 +103,10 @@ jobs:
         run: |
           set -euo pipefail
           test -s target/idl/kase_corporate_actions.json
+          # Rebase the generated IDL commit on the latest main; other frontend fixes
+          # may have landed while the long SBF build/test job was running.
+          git fetch origin main
+          git checkout -B publish-generated-idl origin/main
           mkdir -p terminal/idl
           cp target/idl/kase_corporate_actions.json terminal/idl/kase_corporate_actions.json
           git config user.name "github-actions[bot]"
