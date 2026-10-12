@@ -226,6 +226,10 @@ pub mod kase_corporate_actions {
         }
 
         let action = &mut ctx.accounts.corporate_action;
+        require!(
+            action.status != ActionStatus::Completed && action.status != ActionStatus::Cancelled,
+            KaseError::InvalidActionStatus
+        );
         action.status = ActionStatus::Funded;
 
         emit!(VaultFundedEvent {
@@ -253,6 +257,10 @@ pub mod kase_corporate_actions {
         );
         require!(
             action.action_type == ActionType::CouponPayment,
+            KaseError::InvalidActionStatus
+        );
+        require!(
+            action.status == ActionStatus::Funded || action.status == ActionStatus::SnapshotActive,
             KaseError::InvalidActionStatus
         );
         require!(
@@ -333,6 +341,14 @@ pub mod kase_corporate_actions {
         require!(
             action.action_type == ActionType::BondRedemption,
             KaseError::InvalidActionStatus
+        );
+        require!(
+            action.status == ActionStatus::Funded || action.status == ActionStatus::SnapshotActive,
+            KaseError::InvalidActionStatus
+        );
+        require!(
+            Clock::get()?.unix_timestamp >= action.settlement_timestamp,
+            KaseError::InvalidSettlementDate
         );
         require!(
             Clock::get()?.unix_timestamp >= bond.maturity_timestamp,
@@ -494,14 +510,13 @@ pub mod kase_corporate_actions {
         let current_balance = ctx.accounts.holder_bond_account.amount;
         require!(current_balance > 0, KaseError::ZeroHolderBalance);
 
-        let vote_weight = if let Some(entitlement) = &ctx.accounts.holder_entitlement {
-            require!(entitlement.holder == ctx.accounts.voter.key(), KaseError::InvalidHolderTokenAccount);
-            require!(entitlement.bonds_held > 0, KaseError::ZeroHolderBalance);
-            require!(current_balance >= entitlement.bonds_held, KaseError::VoteRecyclingForbidden);
-            entitlement.bonds_held
-        } else {
-            current_balance
-        };
+        let entitlement = ctx.accounts.holder_entitlement
+            .as_ref()
+            .ok_or(error!(KaseError::VoteRecyclingForbidden))?;
+        require!(entitlement.holder == ctx.accounts.voter.key(), KaseError::InvalidHolderTokenAccount);
+        require!(entitlement.bonds_held > 0, KaseError::ZeroHolderBalance);
+        require!(current_balance >= entitlement.bonds_held, KaseError::VoteRecyclingForbidden);
+        let vote_weight = entitlement.bonds_held;
 
         match choice {
             VoteChoice::For => {
