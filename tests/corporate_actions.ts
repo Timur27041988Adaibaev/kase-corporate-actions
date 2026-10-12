@@ -102,7 +102,7 @@ describe("KASE corporate actions — real local-validator settlement", () => {
       .rpc();
 
     const recordDate = new BN(now - 5);
-    const settlementDate = new BN(now + 3);
+    const settlementDate = new BN(now + 30);
     await program.methods
       .scheduleCorporateAction(
         actionId,
