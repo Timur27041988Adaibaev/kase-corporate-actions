@@ -47,15 +47,20 @@ jobs:
           echo "$HOME/.avm/bin" >> "$GITHUB_PATH"
           "$HOME/.cargo/bin/avm" install 0.31.1
           "$HOME/.cargo/bin/avm" use 0.31.1
-      - name: Install compatible Solana CLI after Anchor setup
+      - name: Install compatible Solana CLI
         run: |
-          installer="$(curl -sSfL https://release.anza.xyz/v2.2.16/install)"
-          set +o pipefail
-          yes | sh -c "$installer"
-          echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
-          export PATH="$HOME/.local/share/solana/install/active_release/bin:$HOME/.avm/bin:$HOME/.cargo/bin:$PATH"
+          set -euo pipefail
+          sh -c "$(curl -sSfL https://release.anza.xyz/v2.2.16/install)" </dev/null
+          SOLANA_BIN="$HOME/.local/share/solana/install/active_release/bin"
+          test -x "$SOLANA_BIN/solana"
+          echo "$SOLANA_BIN" >> "$GITHUB_PATH"
+          echo "$HOME/.avm/bin" >> "$GITHUB_PATH"
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          export PATH="$SOLANA_BIN:$HOME/.avm/bin:$HOME/.cargo/bin:$PATH"
           solana --version
           anchor --version
+          solana --version | grep -F "2.2.16"
+          anchor --version | grep -F "0.31.1"
       - name: Configure local Solana wallet
         run: |
           mkdir -p "$HOME/.config/solana"
@@ -69,9 +74,10 @@ jobs:
         env:
           RUSTUP_TOOLCHAIN: stable
         run: |
-          export PATH="$HOME/.cargo/bin:$PATH"
+          set -euo pipefail
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$HOME/.avm/bin:$HOME/.cargo/bin:$PATH"
           rustc --version
           cargo --version
-          solana --version
-          anchor --version
+          solana --version | grep -F "2.2.16"
+          anchor --version | grep -F "0.31.1"
           anchor test
