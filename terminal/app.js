@@ -623,7 +623,7 @@ function updateActionButtons() {
   const btnCoupon = document.getElementById("btnExecuteCoupon");
   if (btnCoupon) {
     if (state.couponSettled) {
-      btnCoupon.innerHTML = `<span>✔ Scenario 1 Fully Settled on ${clusterLabel}</span>`;
+      btnCoupon.innerHTML = `<span>Memo intent recorded only — no coupon payment executed</span>`;
       btnCoupon.disabled = true;
     } else {
       btnCoupon.disabled = false;
@@ -632,13 +632,13 @@ function updateActionButtons() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
           </svg>
-          <span>🦊 Approve in Phantom: Coupon payment ${couponAmount} (${clusterLabel})</span>
+          <span>🦊 Record Coupon Intent (Memo Only)</span>
         `
         : `
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
           </svg>
-          <span>🏛️ Execute via CSD Operator (${couponAmount} USDC • ${clusterLabel})</span>
+          <span>Record Coupon Intent (Memo Only)</span>
         `;
     }
   }
@@ -647,7 +647,7 @@ function updateActionButtons() {
   const btnRedeem = document.getElementById("btnExecuteRedemption");
   if (btnRedeem) {
     if (state.redemptionSettled) {
-      btnRedeem.innerHTML = `<span>✔ Scenario 2 Fully Redeemed & Burned on ${clusterLabel}</span>`;
+      btnRedeem.innerHTML = `<span>Memo intent recorded only — no redemption or burn executed</span>`;
       btnRedeem.disabled = true;
     } else {
       btnRedeem.disabled = false;
