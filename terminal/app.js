@@ -2923,7 +2923,7 @@ function copyBlinkUrl() {
 async function testBlinkExecution() {
   playAudioCue("click");
   closeBlinksModal();
-  appendLog("BLINK", "tag-broadcast", "⚡ Executing Corporate Action via Solana Blinks (Dialect Actions)...");
+  appendLog("BLINK", "tag-broadcast", "Preparing a Solana Memo attestation via the Actions endpoint; no settlement instruction is called.");
   
   // Trigger scenario 1 directly
   const btn = document.getElementById("btnExecuteCoupon");
