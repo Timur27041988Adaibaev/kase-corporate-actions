@@ -3,7 +3,6 @@ import { Program, BN } from "@coral-xyz/anchor";
 import {
   createAccount,
   createMint,
-  getOrCreateAssociatedTokenAccount,
   mintTo,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
@@ -76,17 +75,17 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       connection, authority, authority.publicKey, null, 6,
       undefined, undefined, TOKEN_PROGRAM_ID,
     );
-    const holderBond = await getOrCreateAssociatedTokenAccount(
+    const holderBond = await createAccount(
       connection, authority, bondMint, authority.publicKey,
     );
-    const holderSettlement = await getOrCreateAssociatedTokenAccount(
+    const holderSettlement = await createAccount(
       connection, authority, settlementMint, authority.publicKey,
     );
     // Separate funding account so the test proves a real transfer to the holder ATA.
     const funderSettlement = await createAccount(
       connection, authority, settlementMint, authority.publicKey,
     );
-    await mintTo(connection, authority, bondMint, holderBond.address, authority, 1);
+    await mintTo(connection, authority, bondMint, holderBond, authority, 1);
     await mintTo(
       connection, authority, settlementMint, funderSettlement, authority,
       BigInt(couponAmount.add(principalAmount).toString()),
@@ -164,7 +163,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       .rpc();
     await program.methods.recordHolderSnapshot(new BN(1)).accounts({
       authority: authority.publicKey, bondSecurity, corporateAction: couponAction,
-      holder: authority.publicKey, holderBondAccount: holderBond.address,
+      holder: authority.publicKey, holderBondAccount: holderBond,
       holderEntitlement: couponEntitlement, systemProgram: SystemProgram.programId,
       rent: SYSVAR_RENT_PUBKEY,
     }).rpc();
@@ -185,7 +184,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       .rpc();
     await program.methods.recordHolderSnapshot(new BN(1)).accounts({
       authority: authority.publicKey, bondSecurity, corporateAction: redemptionAction,
-      holder: authority.publicKey, holderBondAccount: holderBond.address,
+      holder: authority.publicKey, holderBondAccount: holderBond,
       holderEntitlement: redemptionEntitlement, systemProgram: SystemProgram.programId,
       rent: SYSVAR_RENT_PUBKEY,
     }).rpc();
@@ -209,7 +208,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       .rpc();
     await program.methods.recordHolderSnapshot(new BN(1)).accounts({
       authority: authority.publicKey, bondSecurity, corporateAction: governanceAction,
-      holder: authority.publicKey, holderBondAccount: holderBond.address,
+      holder: authority.publicKey, holderBondAccount: holderBond,
       holderEntitlement: governanceEntitlement, systemProgram: SystemProgram.programId,
       rent: SYSVAR_RENT_PUBKEY,
     }).rpc();
@@ -228,7 +227,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
 
     await program.methods.castBondholderVote({ for: {} }).accounts({
       voter: authority.publicKey, bondSecurity, proposal, corporateAction: governanceAction,
-      holderBondAccount: holderBond.address, holderEntitlement: governanceEntitlement,
+      holderBondAccount: holderBond, holderEntitlement: governanceEntitlement,
       voterRecord, systemProgram: SystemProgram.programId, rent: SYSVAR_RENT_PUBKEY,
     }).rpc();
 
@@ -236,7 +235,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
     try {
       await program.methods.castBondholderVote({ against: {} }).accounts({
         voter: authority.publicKey, bondSecurity, proposal, corporateAction: governanceAction,
-        holderBondAccount: holderBond.address, holderEntitlement: governanceEntitlement,
+        holderBondAccount: holderBond, holderEntitlement: governanceEntitlement,
         voterRecord, systemProgram: SystemProgram.programId, rent: SYSVAR_RENT_PUBKEY,
       }).rpc();
       expect.fail("A duplicate vote should have been rejected by the voter-record PDA.");
@@ -247,14 +246,14 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
     const waitUntil = async (timestamp: number) => waitUntilTimestamp(connection, timestamp, authority);
 
     await waitUntil(couponSettlementAt);
-    const beforeCoupon = await connection.getTokenAccountBalance(holderSettlement.address);
+    const beforeCoupon = await connection.getTokenAccountBalance(holderSettlement);
     await program.methods.executeCouponPayment().accounts({
       authority: authority.publicKey, bondSecurity, corporateAction: couponAction,
       actionVault: couponVault, holderEntitlement: couponEntitlement,
-      holderSettlementAccount: holderSettlement.address, settlementMint,
+      holderSettlementAccount: holderSettlement, settlementMint,
       tokenProgram: TOKEN_PROGRAM_ID,
     }).rpc();
-    const afterCoupon = await connection.getTokenAccountBalance(holderSettlement.address);
+    const afterCoupon = await connection.getTokenAccountBalance(holderSettlement);
     expect(Number(afterCoupon.value.amount) - Number(beforeCoupon.value.amount))
       .to.equal(Number(couponAmount.toString()));
     expect((await program.account.holderEntitlement.fetch(couponEntitlement)).isSettled).to.equal(true);
@@ -262,7 +261,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       await program.methods.executeCouponPayment().accounts({
         authority: authority.publicKey, bondSecurity, corporateAction: couponAction,
         actionVault: couponVault, holderEntitlement: couponEntitlement,
-        holderSettlementAccount: holderSettlement.address, settlementMint,
+        holderSettlementAccount: holderSettlement, settlementMint,
         tokenProgram: TOKEN_PROGRAM_ID,
       }).rpc();
       expect.fail("A duplicate coupon claim must be rejected.");
@@ -280,18 +279,18 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
     expect((await program.account.bondSecurity.fetch(bondSecurity)).annualCouponBps).to.equal(1_250);
 
     await waitUntil(maturityAt);
-    const beforeRedemption = await connection.getTokenAccountBalance(holderSettlement.address);
+    const beforeRedemption = await connection.getTokenAccountBalance(holderSettlement);
     await program.methods.executeBondRedemption().accounts({
       holder: authority.publicKey, bondSecurity, corporateAction: redemptionAction,
       actionVault: redemptionVault, holderEntitlement: redemptionEntitlement,
-      bondMint, holderBondAccount: holderBond.address,
-      holderSettlementAccount: holderSettlement.address, settlementMint,
+      bondMint, holderBondAccount: holderBond,
+      holderSettlementAccount: holderSettlement, settlementMint,
       tokenProgram: TOKEN_PROGRAM_ID,
     }).rpc();
-    const afterRedemption = await connection.getTokenAccountBalance(holderSettlement.address);
+    const afterRedemption = await connection.getTokenAccountBalance(holderSettlement);
     expect(Number(afterRedemption.value.amount) - Number(beforeRedemption.value.amount))
       .to.equal(Number(principalAmount.toString()));
-    expect((await connection.getTokenAccountBalance(holderBond.address)).value.amount).to.equal("0");
+    expect((await connection.getTokenAccountBalance(holderBond)).value.amount).to.equal("0");
     expect((await program.account.holderEntitlement.fetch(redemptionEntitlement)).isSettled).to.equal(true);
   }).retries(2);
 });
