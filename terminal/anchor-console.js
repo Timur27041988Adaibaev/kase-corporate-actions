@@ -27,7 +27,7 @@ function bn(n){return new anchor.BN(String(n))}
 function le8(n){return bn(n).toArrayLike(Buffer,"le",8)}
 function pda(seeds){return PublicKey.findProgramAddressSync(seeds,PROGRAM_ID)[0]}
 function actionPda(id){return pda([Buffer.from("action"),state.bondSecurity.toBuffer(),le8(id)])}
-function vaultPda(action){return getAssociatedTokenAddressSync(state.settlementMint,action,true,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID)}
+function vaultPda(action,mint){return getAssociatedTokenAddressSync(mint,action,true,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID)}
 function entitlementPda(action){return pda([Buffer.from("entitlement"),action.toBuffer(),wallet.publicKey.toBuffer()])}
 function proposalPda(id){return pda([Buffer.from("proposal"),state.bondSecurity.toBuffer(),le8(id)])}
 function voterPda(proposal){return pda([Buffer.from("voter"),proposal.toBuffer(),wallet.publicKey.toBuffer()])}
@@ -110,7 +110,7 @@ async function setup() {
     const isin="KZTEST"+String(couponId).slice(-8);
     const bondSecurity=pda([Buffer.from("bond"),Buffer.from(isin)]);
     const couponAction=actionPda(couponId),redemptionAction=actionPda(redemptionId),governanceAction=actionPda(governanceId);
-    const couponVault=vaultPda(couponAction),redemptionVault=vaultPda(redemptionAction),governanceVault=vaultPda(governanceAction);
+    const couponVault=vaultPda(couponAction,m.settlementMint),redemptionVault=vaultPda(redemptionAction,m.settlementMint),governanceVault=vaultPda(governanceAction,m.settlementMint);
     const couponEntitlement=entitlementPda(couponAction),redemptionEntitlement=entitlementPda(redemptionAction),governanceEntitlement=entitlementPda(governanceAction);
     state={...m,isin,bondSecurity,couponId,redemptionId,governanceId,proposalId,couponAction,redemptionAction,governanceAction,couponVault,redemptionVault,governanceVault,couponEntitlement,redemptionEntitlement,governanceEntitlement,record,couponAt,voteEnd,maturity,proposal:proposalPda(proposalId),createdAt:now};
     const init=program.methods.initializeBondInstrument(isin,bn(1_000_000_000),1000,2,bn(1),bn(maturity)).accounts({
