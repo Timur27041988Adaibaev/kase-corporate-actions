@@ -132,7 +132,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       program.programId,
     );
 
-    console.log("[e2e] initialize bond");
+    process.stderr.write("[e2e] initialize bond\n");
     await program.methods
       .initializeBondInstrument(
         isin, faceValue, 1_000, 2, new BN(1), new BN(maturityAt),
@@ -150,7 +150,8 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       .rpc();
 
     const recordDate = new BN(now - 5);
-    console.log("[e2e] schedule coupon");
+    process.stderr.write("[e2e] schedule coupon\n");
+    process.stderr.write(`[e2e] coupon action=${couponAction.toBase58()} vault=${couponVault.toBase58()} ownerOnCurve=${PublicKey.isOnCurve(couponAction.toBytes())}\n`);
     await program.methods
       .scheduleCorporateAction(
         couponActionId, { couponPayment: {} }, recordDate, new BN(couponSettlementAt),
@@ -162,20 +163,21 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
         tokenProgram: TOKEN_PROGRAM_ID, rent: SYSVAR_RENT_PUBKEY,
       })
       .rpc();
-    console.log("[e2e] snapshot coupon");
+    process.stderr.write("[e2e] snapshot coupon\n");
     await program.methods.recordHolderSnapshot(new BN(1)).accounts({
       authority: authority.publicKey, bondSecurity, corporateAction: couponAction,
       holder: authority.publicKey, holderBondAccount: holderBond,
       holderEntitlement: couponEntitlement, systemProgram: SystemProgram.programId,
       rent: SYSVAR_RENT_PUBKEY,
     }).rpc();
-    console.log("[e2e] fund coupon");
+    process.stderr.write("[e2e] fund coupon\n");
     await program.methods.depositActionVault(couponAmount).accounts({
       funder: authority.publicKey, corporateAction: couponAction, actionVault: couponVault,
       funderTokenAccount: funderSettlement, settlementMint, tokenProgram: TOKEN_PROGRAM_ID,
     }).rpc();
 
-    console.log("[e2e] schedule redemption");
+    process.stderr.write("[e2e] schedule redemption\n");
+    process.stderr.write(`[e2e] redemption action=${redemptionAction.toBase58()} vault=${redemptionVault.toBase58()} ownerOnCurve=${PublicKey.isOnCurve(redemptionAction.toBytes())}\n`);
     await program.methods
       .scheduleCorporateAction(
         redemptionActionId, { bondRedemption: {} }, recordDate, new BN(maturityAt),
@@ -187,33 +189,35 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
         tokenProgram: TOKEN_PROGRAM_ID, rent: SYSVAR_RENT_PUBKEY,
       })
       .rpc();
-    console.log("[e2e] snapshot redemption");
+    process.stderr.write("[e2e] snapshot redemption\n");
     await program.methods.recordHolderSnapshot(new BN(1)).accounts({
       authority: authority.publicKey, bondSecurity, corporateAction: redemptionAction,
       holder: authority.publicKey, holderBondAccount: holderBond,
       holderEntitlement: redemptionEntitlement, systemProgram: SystemProgram.programId,
       rent: SYSVAR_RENT_PUBKEY,
     }).rpc();
-    console.log("[e2e] fund redemption");
+    process.stderr.write("[e2e] fund redemption\n");
     await program.methods.depositActionVault(principalAmount).accounts({
       funder: authority.publicKey, corporateAction: redemptionAction, actionVault: redemptionVault,
       funderTokenAccount: funderSettlement, settlementMint, tokenProgram: TOKEN_PROGRAM_ID,
     }).rpc();
 
-    console.log("[e2e] schedule governance");
+    process.stderr.write("[e2e] schedule governance\n");
+    const governanceVault = getAssociatedTokenAddressSync(settlementMint, governanceAction, true, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
+    process.stderr.write(`[e2e] governance action=${governanceAction.toBase58()} vault=${governanceVault.toBase58()} ownerOnCurve=${PublicKey.isOnCurve(governanceAction.toBytes())}\n`);
     await program.methods
       .scheduleCorporateAction(
         governanceActionId, { governanceVoting: {} }, recordDate, new BN(voteEndsAt),
       )
       .accounts({
         authority: authority.publicKey, bondSecurity, corporateAction: governanceAction,
-        actionVault: getAssociatedTokenAddressSync(settlementMint, governanceAction, true, TOKEN_PROGRAM_ID),
+        actionVault: governanceVault,
         settlementMint, systemProgram: SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID, associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         rent: SYSVAR_RENT_PUBKEY,
       })
       .rpc();
-    console.log("[e2e] snapshot governance");
+    process.stderr.write("[e2e] snapshot governance\n");
     await program.methods.recordHolderSnapshot(new BN(1)).accounts({
       authority: authority.publicKey, bondSecurity, corporateAction: governanceAction,
       holder: authority.publicKey, holderBondAccount: holderBond,
