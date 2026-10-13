@@ -65,8 +65,7 @@ async function requestDevnetSol() {
   if(!wallet || !connection) throw new Error("Connect Phantom first.");
   log("Requesting 1 test SOL from the Solana Devnet faucet…");
   const signature=await connection.requestAirdrop(wallet.publicKey,1_000_000_000);
-  const latest=await connection.getLatestBlockhash("confirmed");
-  const confirmation=await connection.confirmTransaction({signature,...latest},"confirmed");
+  const confirmation=await connection.confirmTransaction(signature,"confirmed");
   if(confirmation.value.err) throw new Error("Devnet airdrop failed: "+JSON.stringify(confirmation.value.err));
   txLink(signature);
   log("Devnet faucet confirmed 1 test SOL. It has no cash value.");
