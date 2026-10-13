@@ -100,7 +100,7 @@ async function setup() {
     const m=await createTestMints();
     const now=Math.floor(Date.now()/1000);
     const couponId=Date.now(), redemptionId=couponId+1, governanceId=couponId+2, proposalId=couponId+3;
-    const record=now-1,couponAt=now+45,voteEnd=now+45,maturity=now+75;
+    const record=now-1,couponAt=now+180,voteEnd=now+240,maturity=now+360;
     const isin="KZTEST"+String(couponId).slice(-8);
     const bondSecurity=pda([Buffer.from("bond"),Buffer.from(isin)]);
     const couponAction=actionPda(couponId),redemptionAction=actionPda(redemptionId),governanceAction=actionPda(governanceId);
