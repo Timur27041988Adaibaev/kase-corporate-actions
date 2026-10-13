@@ -764,32 +764,7 @@
         },
         {
           "name": "action_vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  97,
-                  99,
-                  116,
-                  105,
-                  111,
-                  110,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "corporate_action"
-              }
-            ]
-          }
+          "writable": true
         },
         {
           "name": "settlement_mint"
@@ -800,6 +775,10 @@
         },
         {
           "name": "token_program"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
           "name": "rent",
