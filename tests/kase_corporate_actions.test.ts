@@ -1,11 +1,13 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
   createMint,
   createAccount,
   mintTo,
   getAccount,
+  getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
 import { assert, expect } from "chai";
 import BN from "bn.js";
@@ -203,10 +205,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       program.programId
     );
 
-    [couponVaultPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("action_vault"), couponActionPda.toBuffer()],
-      program.programId
-    );
+    couponVaultPda = getAssociatedTokenAddressSync(settlementMint, couponActionPda, true, TOKEN_PROGRAM_ID);
 
     [bankAEntitlementPda] = anchor.web3.PublicKey.findProgramAddressSync(
       [
@@ -226,10 +225,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       program.programId
     );
 
-    [redemptionVaultPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("action_vault"), redemptionActionPda.toBuffer()],
-      program.programId
-    );
+    redemptionVaultPda = getAssociatedTokenAddressSync(settlementMint, redemptionActionPda, true, TOKEN_PROGRAM_ID);
 
     [bankARedemptionPda] = anchor.web3.PublicKey.findProgramAddressSync(
       [
@@ -312,6 +308,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
         bondSecurity: bondSecurityPda,
         corporateAction: couponActionPda,
         actionVault: couponVaultPda,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         settlementMint: settlementMint,
         systemProgram: anchor.web3.SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
@@ -491,10 +488,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       ],
       program.programId
     );
-    const [futureVaultPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("action_vault"), futureActionPda.toBuffer()],
-      program.programId
-    );
+    const futureVaultPda = getAssociatedTokenAddressSync(settlementMint, futureActionPda, true, TOKEN_PROGRAM_ID);
     const [futureEntitlementPda] = anchor.web3.PublicKey.findProgramAddressSync(
       [
         Buffer.from("entitlement"),
@@ -517,6 +511,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
         bondSecurity: bondSecurityPda,
         corporateAction: futureActionPda,
         actionVault: futureVaultPda,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         settlementMint: settlementMint,
         systemProgram: anchor.web3.SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
@@ -595,6 +590,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
         bondSecurity: bondSecurityPda,
         corporateAction: redemptionActionPda,
         actionVault: redemptionVaultPda,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         settlementMint: settlementMint,
         systemProgram: anchor.web3.SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
@@ -713,10 +709,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       [Buffer.from("action"), bondSecurityPda.toBuffer(), governanceActionId.toArrayLike(Buffer, "le", 8)],
       program.programId
     );
-    const [governanceVaultPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("action_vault"), governanceActionPda.toBuffer()],
-      program.programId
-    );
+    const governanceVaultPda = getAssociatedTokenAddressSync(settlementMint, governanceActionPda, true, TOKEN_PROGRAM_ID);
     const [bankBGovernanceEntitlementPda] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from("entitlement"), governanceActionPda.toBuffer(), bankB.publicKey.toBuffer()],
       program.programId
@@ -733,6 +726,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
         bondSecurity: bondSecurityPda,
         corporateAction: governanceActionPda,
         actionVault: governanceVaultPda,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         settlementMint,
         systemProgram: anchor.web3.SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
@@ -840,10 +834,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       ],
       program.programId
     );
-    const [fakeVaultPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("action_vault"), fakeActionPda.toBuffer()],
-      program.programId
-    );
+    const fakeVaultPda = getAssociatedTokenAddressSync(settlementMint, fakeActionPda, true, TOKEN_PROGRAM_ID);
 
     try {
       await program.methods
@@ -858,6 +849,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
           bondSecurity: bondSecurityPda,
           corporateAction: fakeActionPda,
           actionVault: fakeVaultPda,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           settlementMint: settlementMint,
           systemProgram: anchor.web3.SystemProgram.programId,
           tokenProgram: TOKEN_PROGRAM_ID,
@@ -950,10 +942,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       [Buffer.from("action"), maturedBondPda.toBuffer(), testActionId.toArrayLike(Buffer, "le", 8)],
       program.programId
     );
-    const [testVaultPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("action_vault"), testActionPda.toBuffer()],
-      program.programId
-    );
+    const testVaultPda = getAssociatedTokenAddressSync(settlementMint, testActionPda, true, TOKEN_PROGRAM_ID);
     const [testEntitlementPda] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from("entitlement"), testActionPda.toBuffer(), bankA.publicKey.toBuffer()],
       program.programId
@@ -972,6 +961,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
         bondSecurity: maturedBondPda,
         corporateAction: testActionPda,
         actionVault: testVaultPda,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         settlementMint: settlementMint,
         systemProgram: anchor.web3.SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
@@ -1027,10 +1017,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       [Buffer.from("action"), maturedBondPda.toBuffer(), nextActionId.toArrayLike(Buffer, "le", 8)],
       program.programId
     );
-    const [nextVaultPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("action_vault"), nextActionPda.toBuffer()],
-      program.programId
-    );
+    const nextVaultPda = getAssociatedTokenAddressSync(settlementMint, nextActionPda, true, TOKEN_PROGRAM_ID);
 
     try {
       await program.methods
@@ -1045,6 +1032,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
           bondSecurity: maturedBondPda,
           corporateAction: nextActionPda,
           actionVault: nextVaultPda,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           settlementMint: settlementMint,
           systemProgram: anchor.web3.SystemProgram.programId,
           tokenProgram: TOKEN_PROGRAM_ID,
