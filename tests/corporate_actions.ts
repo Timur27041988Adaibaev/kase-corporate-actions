@@ -57,7 +57,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
   it("executes a real coupon transfer, governance vote/finalization, and redemption/burn", async () => {
     const connection = provider.connection;
     const now = await chainTimestamp(connection);
-    const isin = `KZTEST${now.toString().slice(-8)}`.slice(0, 16);
+    const isin = `KZ${Date.now().toString().slice(-14)}`;
     const couponActionId = new BN(now + 1);
     const redemptionActionId = new BN(now + 2);
     const governanceActionId = new BN(now + 3);
@@ -132,6 +132,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       program.programId,
     );
 
+    console.log("[e2e] initialize bond");
     await program.methods
       .initializeBondInstrument(
         isin, faceValue, 1_000, 2, new BN(1), new BN(maturityAt),
@@ -149,6 +150,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       .rpc();
 
     const recordDate = new BN(now - 5);
+    console.log("[e2e] schedule coupon");
     await program.methods
       .scheduleCorporateAction(
         couponActionId, { couponPayment: {} }, recordDate, new BN(couponSettlementAt),
@@ -160,17 +162,20 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
         tokenProgram: TOKEN_PROGRAM_ID, rent: SYSVAR_RENT_PUBKEY,
       })
       .rpc();
+    console.log("[e2e] snapshot coupon");
     await program.methods.recordHolderSnapshot(new BN(1)).accounts({
       authority: authority.publicKey, bondSecurity, corporateAction: couponAction,
       holder: authority.publicKey, holderBondAccount: holderBond,
       holderEntitlement: couponEntitlement, systemProgram: SystemProgram.programId,
       rent: SYSVAR_RENT_PUBKEY,
     }).rpc();
+    console.log("[e2e] fund coupon");
     await program.methods.depositActionVault(couponAmount).accounts({
       funder: authority.publicKey, corporateAction: couponAction, actionVault: couponVault,
       funderTokenAccount: funderSettlement, settlementMint, tokenProgram: TOKEN_PROGRAM_ID,
     }).rpc();
 
+    console.log("[e2e] schedule redemption");
     await program.methods
       .scheduleCorporateAction(
         redemptionActionId, { bondRedemption: {} }, recordDate, new BN(maturityAt),
@@ -182,17 +187,20 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
         tokenProgram: TOKEN_PROGRAM_ID, rent: SYSVAR_RENT_PUBKEY,
       })
       .rpc();
+    console.log("[e2e] snapshot redemption");
     await program.methods.recordHolderSnapshot(new BN(1)).accounts({
       authority: authority.publicKey, bondSecurity, corporateAction: redemptionAction,
       holder: authority.publicKey, holderBondAccount: holderBond,
       holderEntitlement: redemptionEntitlement, systemProgram: SystemProgram.programId,
       rent: SYSVAR_RENT_PUBKEY,
     }).rpc();
+    console.log("[e2e] fund redemption");
     await program.methods.depositActionVault(principalAmount).accounts({
       funder: authority.publicKey, corporateAction: redemptionAction, actionVault: redemptionVault,
       funderTokenAccount: funderSettlement, settlementMint, tokenProgram: TOKEN_PROGRAM_ID,
     }).rpc();
 
+    console.log("[e2e] schedule governance");
     await program.methods
       .scheduleCorporateAction(
         governanceActionId, { governanceVoting: {} }, recordDate, new BN(voteEndsAt),
@@ -205,6 +213,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
         rent: SYSVAR_RENT_PUBKEY,
       })
       .rpc();
+    console.log("[e2e] snapshot governance");
     await program.methods.recordHolderSnapshot(new BN(1)).accounts({
       authority: authority.publicKey, bondSecurity, corporateAction: governanceAction,
       holder: authority.publicKey, holderBondAccount: holderBond,
