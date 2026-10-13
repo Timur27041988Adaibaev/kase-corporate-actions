@@ -11,6 +11,7 @@ const { PublicKey, Keypair, SystemProgram, Transaction, TransactionInstruction, 
 
 const PROGRAM_ID = new PublicKey('5sbnpE6Q3kXTKTbvBoxHL94H82qSxKaZ3F9WhpwsHCiz');
 const TOKEN = spl.TOKEN_PROGRAM_ID;
+const ATA_PROGRAM = spl.ASSOCIATED_TOKEN_PROGRAM_ID;
 const c = new w.Connection('https://api.devnet.solana.com', { commitment: 'confirmed', disableRetryOnRateLimit: false });
 const payer = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync(__dirname + '/../keys/deployer.json'))));
 const LOG = __dirname + '/../scenario_log.json';
@@ -95,7 +96,7 @@ async function send(label, ixs, signers, expectFail = false) {
     [m(payer.publicKey, true, true), m(payer.publicKey), m(bondMint), m(usdc), m(bond, true), m(SystemProgram.programId), m(TOKEN), m(SYSVAR_RENT_PUBKEY)])], [payer]);
 
   const actionPda = id => pda([Buffer.from('action'), bond.toBuffer(), u64(id)]);
-  const vaultPda = a => pda([Buffer.from('action_vault'), a.toBuffer()]);
+  const vaultPda = a => spl.getAssociatedTokenAddressSync(usdc, a, true, TOKEN, ATA_PROGRAM);
   const entPda = (a, h) => pda([Buffer.from('entitlement'), a.toBuffer(), h.toBuffer()]);
   const now = () => Math.floor(Date.now() / 1000);
   async function schedule(id, type, label) {
@@ -103,7 +104,7 @@ async function send(label, ixs, signers, expectFail = false) {
     const recordDate = now() - 60;
     const settlementDate = now() + 45;
     await send(label, [ix('schedule_corporate_action', [u64(id), u8(type), i64(recordDate), i64(settlementDate)],
-      [m(payer.publicKey, true, true), m(bond), m(a, true), m(v, true), m(usdc), m(SystemProgram.programId), m(TOKEN), m(SYSVAR_RENT_PUBKEY)])], [payer]);
+      [m(payer.publicKey, true, true), m(bond), m(a, true), m(v, true), m(usdc), m(SystemProgram.programId), m(TOKEN), m(ATA_PROGRAM), m(SYSVAR_RENT_PUBKEY)])], [payer]);
     return [a, v, settlementDate];
   }
   async function waitUntil(timestamp, label) {
@@ -134,7 +135,7 @@ async function send(label, ixs, signers, expectFail = false) {
   await send('ATTACK: double coupon claim holder 1 (must be rejected: AlreadySettled)', [couponIx(0)], [payer], true);
   const attacker = holders[2];
   await send('ATTACK: holder 3 tries to schedule an action (must be rejected: UnauthorizedAuthority)', [ix('schedule_corporate_action', [u64(99), u8(0), i64(now() - 60), i64(now() - 60)],
-    [m(attacker.publicKey, true, true), m(bond), m(actionPda(99), true), m(vaultPda(actionPda(99)), true), m(usdc), m(SystemProgram.programId), m(TOKEN), m(SYSVAR_RENT_PUBKEY)])], [attacker], true);
+    [m(attacker.publicKey, true, true), m(bond), m(actionPda(99), true), m(vaultPda(actionPda(99)), true), m(usdc), m(SystemProgram.programId), m(TOKEN), m(ATA_PROGRAM), m(SYSVAR_RENT_PUBKEY)])], [attacker], true);
 
   // --- Scenario 3: governance ---
   const [ga] = await schedule(3, 2, '3.1 schedule_corporate_action #3 GovernanceVoting (record date)');
