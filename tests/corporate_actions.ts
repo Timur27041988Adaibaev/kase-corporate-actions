@@ -1,8 +1,10 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program, BN } from "@coral-xyz/anchor";
 import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
   createAccount,
   createMint,
+  getAssociatedTokenAddressSync,
   mintTo,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
@@ -107,12 +109,8 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       [Buffer.from("action"), bondSecurity.toBuffer(), governanceActionId.toArrayLike(Buffer, "le", 8)],
       program.programId,
     );
-    const [couponVault] = PublicKey.findProgramAddressSync(
-      [Buffer.from("action_vault"), couponAction.toBuffer()], program.programId,
-    );
-    const [redemptionVault] = PublicKey.findProgramAddressSync(
-      [Buffer.from("action_vault"), redemptionAction.toBuffer()], program.programId,
-    );
+    const couponVault = getAssociatedTokenAddressSync(settlementMint, couponAction, true, TOKEN_PROGRAM_ID);
+    const redemptionVault = getAssociatedTokenAddressSync(settlementMint, redemptionAction, true, TOKEN_PROGRAM_ID);
     const [couponEntitlement] = PublicKey.findProgramAddressSync(
       [Buffer.from("entitlement"), couponAction.toBuffer(), authority.publicKey.toBuffer()],
       program.programId,
@@ -158,6 +156,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       .accounts({
         authority: authority.publicKey, bondSecurity, corporateAction: couponAction,
         actionVault: couponVault, settlementMint, systemProgram: SystemProgram.programId,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         tokenProgram: TOKEN_PROGRAM_ID, rent: SYSVAR_RENT_PUBKEY,
       })
       .rpc();
@@ -179,6 +178,7 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       .accounts({
         authority: authority.publicKey, bondSecurity, corporateAction: redemptionAction,
         actionVault: redemptionVault, settlementMint, systemProgram: SystemProgram.programId,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         tokenProgram: TOKEN_PROGRAM_ID, rent: SYSVAR_RENT_PUBKEY,
       })
       .rpc();
@@ -199,11 +199,10 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       )
       .accounts({
         authority: authority.publicKey, bondSecurity, corporateAction: governanceAction,
-        actionVault: PublicKey.findProgramAddressSync(
-          [Buffer.from("action_vault"), governanceAction.toBuffer()], program.programId,
-        )[0],
+        actionVault: getAssociatedTokenAddressSync(settlementMint, governanceAction, true, TOKEN_PROGRAM_ID),
         settlementMint, systemProgram: SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID, rent: SYSVAR_RENT_PUBKEY,
+        tokenProgram: TOKEN_PROGRAM_ID, associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        rent: SYSVAR_RENT_PUBKEY,
       })
       .rpc();
     await program.methods.recordHolderSnapshot(new BN(1)).accounts({
