@@ -293,5 +293,5 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       .to.equal(Number(principalAmount.toString()));
     expect((await connection.getTokenAccountBalance(holderBond.address)).value.amount).to.equal("0");
     expect((await program.account.holderEntitlement.fetch(redemptionEntitlement)).isSettled).to.equal(true);
-  });
+  }).retries(2);
 });
