@@ -131,12 +131,10 @@ async function setup() {
       systemProgram:SystemProgram.programId,tokenProgram:TOKEN_PROGRAM_ID,associatedTokenProgram:ASSOCIATED_TOKEN_PROGRAM_ID,rent:SYSVAR_RENT_PUBKEY
     });
     log("Initializing instrument and three corporate actions…");
-    await sendWalletTx([
-      await ix(init),
-      await ix(schedule(couponId,{couponPayment:{}},couponAt,couponAction,couponVault)),
-      await ix(schedule(redemptionId,{bondRedemption:{}},maturity,redemptionAction,redemptionVault)),
-      await ix(schedule(governanceId,{governanceVoting:{}},voteEnd,governanceAction,governanceVault))
-    ]);
+    await sendWalletTx([await ix(init)]);
+    await sendWalletTx([await ix(schedule(couponId,{couponPayment:{}},couponAt,couponAction,couponVault))]);
+    await sendWalletTx([await ix(schedule(redemptionId,{bondRedemption:{}},maturity,redemptionAction,redemptionVault))]);
+    await sendWalletTx([await ix(schedule(governanceId,{governanceVoting:{}},voteEnd,governanceAction,governanceVault))]);
     const snapshot=(action,entitlement)=>program.methods.recordHolderSnapshot(bn(1)).accounts({
       authority:wallet.publicKey,bondSecurity,corporateAction:action,holder:wallet.publicKey,holderBondAccount:m.bondAta,
       holderEntitlement:entitlement,systemProgram:SystemProgram.programId,rent:SYSVAR_RENT_PUBKEY
