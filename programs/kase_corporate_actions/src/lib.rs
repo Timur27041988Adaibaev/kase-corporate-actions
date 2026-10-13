@@ -709,7 +709,7 @@ pub struct ScheduleCorporateAction<'info> {
 }
 
 #[derive(Accounts)]
-pub struct RecordHolderSnapshot,<'info> {
+pub struct RecordHolderSnapshot<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
 
