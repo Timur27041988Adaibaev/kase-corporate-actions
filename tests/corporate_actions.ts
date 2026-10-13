@@ -3,7 +3,6 @@ import { Program, BN } from "@coral-xyz/anchor";
 import {
   createAccount,
   createMint,
-  getOrCreateAssociatedTokenAccount,
   mintTo,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
@@ -76,12 +75,21 @@ async function waitUntilTimestamp(connection: any, targetTimestamp: number, _pay
       connection, authority, authority.publicKey, null, 6,
       undefined, undefined, TOKEN_PROGRAM_ID,
     );
-    const holderBond = await getOrCreateAssociatedTokenAccount(
-      connection, authority, bondMint, authority.publicKey,
-    );
-    const holderSettlement = await getOrCreateAssociatedTokenAccount(
-      connection, authority, settlementMint, authority.publicKey,
-    );
+    // Use explicit SPL token accounts rather than the Associated Token
+    // Account program: this test exercises corporate-action settlement, not ATA
+    // derivation, and the validator's ATA program rejects this setup in CI.
+    const holderBond = {
+      address: await createAccount(
+        connection, authority, bondMint, authority.publicKey,
+        undefined, undefined, TOKEN_PROGRAM_ID,
+      ),
+    };
+    const holderSettlement = {
+      address: await createAccount(
+        connection, authority, settlementMint, authority.publicKey,
+        undefined, undefined, TOKEN_PROGRAM_ID,
+      ),
+    };
     // Separate funding account so the test proves a real transfer to the holder ATA.
     const funderSettlement = await createAccount(
       connection, authority, settlementMint, authority.publicKey,
