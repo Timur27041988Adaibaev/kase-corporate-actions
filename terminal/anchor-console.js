@@ -122,7 +122,7 @@ async function setup() {
     const couponAction=actionPda(couponId),redemptionAction=actionPda(redemptionId),governanceAction=actionPda(governanceId);
     const couponVault=vaultPda(couponAction,m.settlementMint),redemptionVault=vaultPda(redemptionAction,m.settlementMint),governanceVault=vaultPda(governanceAction,m.settlementMint);
     const couponEntitlement=entitlementPda(couponAction),redemptionEntitlement=entitlementPda(redemptionAction),governanceEntitlement=entitlementPda(governanceAction);
-    state={...m,isin,bondSecurity,couponId,redemptionId,governanceId,proposalId,couponAction,redemptionAction,governanceAction,couponVault,redemptionVault,governanceVault,couponEntitlement,redemptionEntitlement,governanceEntitlement,record,couponAt,voteEnd,maturity,proposal:proposalPda(proposalId),createdAt:now};
+    state={...m,isin,bondSecurity,couponId,redemptionId,governanceId,proposalId,couponAction,redemptionAction,governanceAction,couponVault,redemptionVault,governanceVault,couponEntitlement,redemptionEntitlement,governanceEntitlement,record,couponAt,voteEnd,maturity,proposal:proposalPda(proposalId),createdAt:now,setupComplete:false};
     const init=program.methods.initializeBondInstrument(isin,bn(1_000_000_000),1000,2,bn(1),bn(maturity)).accounts({
       authority:wallet.publicKey,issuer:wallet.publicKey,bondMint:m.bondMint,settlementMint:m.settlementMint,bondSecurity,
       systemProgram:SystemProgram.programId,tokenProgram:TOKEN_PROGRAM_ID,associatedTokenProgram:ASSOCIATED_TOKEN_PROGRAM_ID,rent:SYSVAR_RENT_PUBKEY
@@ -158,10 +158,12 @@ async function setup() {
       proposer:wallet.publicKey,bondSecurity,proposal:state.proposal,systemProgram:SystemProgram.programId,rent:SYSVAR_RENT_PUBKEY
     });
     await sendWalletTx([await ix(createProposal)]);
+    state.setupComplete=true;
     saveState();renderState();
     log("Setup completed: on-chain test accounts and instructions confirmed. Cast the FOR vote before the deadline. Test tokens have no cash value.");
   } catch(e) {
-    log("SETUP ERROR: "+(e.message||e),"bad");
+    if(state){state.setupComplete=false;try{saveState();renderState()}catch(_){} }
+    log("SETUP ERROR: "+(e.message||e)+" — partial setup references were saved; execution buttons remain disabled. Start a fresh setup after resolving the error.","bad");
     setStatus("programStatus",String(e.message||e));
   } finally {el("setup").disabled=false;}
 }
@@ -182,14 +184,16 @@ function renderState() {
   setStatus("couponState","Action: "+state.couponAction.toBase58()+"\nVault: "+state.couponVault.toBase58()+"\nSettlement unlock: "+new Date(state.couponAt*1000).toLocaleTimeString());
   setStatus("redemptionState","Action: "+state.redemptionAction.toBase58()+"\nVault: "+state.redemptionVault.toBase58()+"\nMaturity: "+new Date(state.maturity*1000).toLocaleTimeString());
   setStatus("voteState","Proposal: "+state.proposal.toBase58()+"\nGovernance action: "+state.governanceAction.toBase58()+"\nVoting ends: "+new Date(state.voteEnd*1000).toLocaleTimeString());
-  for(const id of ["coupon","redeem","vote","finalize"])el(id).disabled=false;
+  for(const id of ["coupon","redeem","vote","finalize"])el(id).disabled=!state.setupComplete;
   updateAvailability();
 }
 function updateAvailability() {
   if(!state)return;
   const now=Math.floor(Date.now()/1000);
+  if(!state.setupComplete){for(const id of ["coupon","redeem","vote","finalize"])el(id).disabled=true;return;}
   el("coupon").disabled=now<state.couponAt;
   el("redeem").disabled=now<state.maturity;
+  el("vote").disabled=now>=state.voteEnd;
   el("finalize").disabled=now<state.voteEnd;
 }
 async function executeCoupon() {
