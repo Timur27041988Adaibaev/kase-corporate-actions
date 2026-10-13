@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{self, Transfer};
 use anchor_spl::token_interface::{
     self as token_interface, Mint, TokenAccount, TokenInterface, TransferChecked,
@@ -104,7 +105,9 @@ pub mod kase_corporate_actions {
         action.settled_holders_count = 0;
         action.vault = ctx.accounts.action_vault.key();
         action.bump = ctx.bumps.corporate_action;
-        action.vault_bump = ctx.bumps.action_vault;
+        // ATA addresses are derived by the Associated Token Program, not this program.
+        // Preserve the serialized field for account-layout compatibility.
+        action.vault_bump = 0;
 
         let type_code = match action_type {
             ActionType::CouponPayment => 1u8,
@@ -688,10 +691,9 @@ pub struct ScheduleCorporateAction<'info> {
     #[account(
         init,
         payer = authority,
-        seeds = [b"action_vault", corporate_action.key().as_ref()],
-        bump,
-        token::mint = settlement_mint,
-        token::authority = corporate_action
+        associated_token::mint = settlement_mint,
+        associated_token::authority = corporate_action,
+        associated_token::token_program = token_program
     )]
     pub action_vault: InterfaceAccount<'info, TokenAccount>,
 
@@ -702,11 +704,12 @@ pub struct ScheduleCorporateAction<'info> {
 
     pub system_program: Program<'info, System>,
     pub token_program: Interface<'info, TokenInterface>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
     pub rent: Sysvar<'info, Rent>,
 }
 
 #[derive(Accounts)]
-pub struct RecordHolderSnapshot<'info> {
+pub struct RecordHolderSnapshot,<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
 
@@ -753,8 +756,8 @@ pub struct DepositActionVault<'info> {
 
     #[account(
         mut,
-        seeds = [b"action_vault", corporate_action.key().as_ref()],
-        bump = corporate_action.vault_bump
+        constraint = action_vault.key() == corporate_action.vault @ KaseError::InvalidTokenMint,
+        constraint = action_vault.owner == corporate_action.key() @ KaseError::InvalidTokenMint
     )]
     pub action_vault: InterfaceAccount<'info, TokenAccount>,
 
@@ -791,8 +794,9 @@ pub struct ExecuteCouponPayment<'info> {
 
     #[account(
         mut,
-        seeds = [b"action_vault", corporate_action.key().as_ref()],
-        bump = corporate_action.vault_bump
+        constraint = action_vault.key() == corporate_action.vault @ KaseError::InvalidTokenMint,
+        constraint = action_vault.owner == corporate_action.key() @ KaseError::InvalidTokenMint,
+        constraint = action_vault.mint == bond_security.settlement_mint @ KaseError::InvalidTokenMint
     )]
     pub action_vault: InterfaceAccount<'info, TokenAccount>,
 
@@ -833,8 +837,9 @@ pub struct ExecuteBondRedemption<'info> {
 
     #[account(
         mut,
-        seeds = [b"action_vault", corporate_action.key().as_ref()],
-        bump = corporate_action.vault_bump
+        constraint = action_vault.key() == corporate_action.vault @ KaseError::InvalidTokenMint,
+        constraint = action_vault.owner == corporate_action.key() @ KaseError::InvalidTokenMint,
+        constraint = action_vault.mint == bond_security.settlement_mint @ KaseError::InvalidTokenMint
     )]
     pub action_vault: Box<InterfaceAccount<'info, TokenAccount>>,
 
