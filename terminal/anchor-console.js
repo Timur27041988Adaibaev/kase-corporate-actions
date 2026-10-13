@@ -128,7 +128,7 @@ async function setup() {
     });
     const schedule=(id,type,settle,action,vault)=>program.methods.scheduleCorporateAction(bn(id),type,bn(record),bn(settle)).accounts({
       authority:wallet.publicKey,bondSecurity,corporateAction:action,actionVault:vault,settlementMint:m.settlementMint,
-      systemProgram:SystemProgram.programId,tokenProgram:TOKEN_PROGRAM_ID,rent:SYSVAR_RENT_PUBKEY
+      systemProgram:SystemProgram.programId,tokenProgram:TOKEN_PROGRAM_ID,associatedTokenProgram:ASSOCIATED_TOKEN_PROGRAM_ID,rent:SYSVAR_RENT_PUBKEY
     });
     log("Initializing instrument and three corporate actions…");
     await sendWalletTx([
