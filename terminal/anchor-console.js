@@ -27,7 +27,7 @@ function bn(n){return new anchor.BN(String(n))}
 function le8(n){return bn(n).toArrayLike(Buffer,"le",8)}
 function pda(seeds){return PublicKey.findProgramAddressSync(seeds,PROGRAM_ID)[0]}
 function actionPda(id){return pda([Buffer.from("action"),state.bondSecurity.toBuffer(),le8(id)])}
-function vaultPda(action){return pda([Buffer.from("action_vault"),action.toBuffer()])}
+function vaultPda(action){return getAssociatedTokenAddressSync(state.settlementMint,action,true,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID)}
 function entitlementPda(action){return pda([Buffer.from("entitlement"),action.toBuffer(),wallet.publicKey.toBuffer()])}
 function proposalPda(id){return pda([Buffer.from("proposal"),state.bondSecurity.toBuffer(),le8(id)])}
 function voterPda(proposal){return pda([Buffer.from("voter"),proposal.toBuffer(),wallet.publicKey.toBuffer()])}
@@ -115,7 +115,7 @@ async function setup() {
     state={...m,isin,bondSecurity,couponId,redemptionId,governanceId,proposalId,couponAction,redemptionAction,governanceAction,couponVault,redemptionVault,governanceVault,couponEntitlement,redemptionEntitlement,governanceEntitlement,record,couponAt,voteEnd,maturity,proposal:proposalPda(proposalId),createdAt:now};
     const init=program.methods.initializeBondInstrument(isin,bn(1_000_000_000),1000,2,bn(1),bn(maturity)).accounts({
       authority:wallet.publicKey,issuer:wallet.publicKey,bondMint:m.bondMint,settlementMint:m.settlementMint,bondSecurity,
-      systemProgram:SystemProgram.programId,tokenProgram:TOKEN_PROGRAM_ID,rent:SYSVAR_RENT_PUBKEY
+      systemProgram:SystemProgram.programId,tokenProgram:TOKEN_PROGRAM_ID,associatedTokenProgram:ASSOCIATED_TOKEN_PROGRAM_ID,rent:SYSVAR_RENT_PUBKEY
     });
     const schedule=(id,type,settle,action,vault)=>program.methods.scheduleCorporateAction(bn(id),type,bn(record),bn(settle)).accounts({
       authority:wallet.publicKey,bondSecurity,corporateAction:action,actionVault:vault,settlementMint:m.settlementMint,
