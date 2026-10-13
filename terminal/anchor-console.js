@@ -47,7 +47,7 @@ async function connect() {
   provider=new anchor.AnchorProvider(connection,wallet,{commitment:"confirmed",preflightCommitment:"confirmed"});
   el("wallet").textContent=wallet.publicKey.toBase58();
   await getProgram();
-  for(const id of ["refresh","setup"]) el(id).disabled=false;
+  for(const id of ["refresh","setup","airdrop"]) el(id).disabled=false;
   await checkProgram();
   restoreState();
   log("Connected wallet "+wallet.publicKey.toBase58());
@@ -60,6 +60,16 @@ async function checkProgram() {
     if(!executable) throw new Error("The configured program account is not executable on Devnet. A program-keypair/deployer-funded deployment is still required; no financial transaction can run until then.");
     return true;
   } catch(e) { setStatus("programStatus",String(e.message||e)); throw e; }
+}
+async function requestDevnetSol() {
+  if(!wallet || !connection) throw new Error("Connect Phantom first.");
+  log("Requesting 1 test SOL from the Solana Devnet faucet…");
+  const signature=await connection.requestAirdrop(wallet.publicKey,1_000_000_000);
+  const latest=await connection.getLatestBlockhash("confirmed");
+  const confirmation=await connection.confirmTransaction({signature,...latest},"confirmed");
+  if(confirmation.value.err) throw new Error("Devnet airdrop failed: "+JSON.stringify(confirmation.value.err));
+  txLink(signature);
+  log("Devnet faucet confirmed 1 test SOL. It has no cash value.");
 }
 async function sendWalletTx(instructions, signers=[]) {
   const tx=new Transaction().add(...instructions);
@@ -229,6 +239,7 @@ async function guarded(fn) {
 }
 el("connect").addEventListener("click",()=>guarded(connect));
 el("refresh").addEventListener("click",()=>guarded(checkProgram));
+el("airdrop").addEventListener("click",()=>guarded(requestDevnetSol));
 el("setup").addEventListener("click",()=>guarded(setup));
 el("coupon").addEventListener("click",()=>guarded(executeCoupon));
 el("redeem").addEventListener("click",()=>guarded(executeRedemption));
