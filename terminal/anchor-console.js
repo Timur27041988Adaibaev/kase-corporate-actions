@@ -3,7 +3,7 @@ import * as web3 from "https://esm.sh/@solana/web3.js@1.98.4?bundle";
 import { Buffer } from "https://esm.sh/buffer@6.0.3";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID, MINT_SIZE, TOKEN_PROGRAM_ID,
-  createAssociatedTokenAccountInstruction, createInitializeMintInstruction,
+  createAssociatedTokenAccountIdempotentInstruction, createInitializeMintInstruction,
   createMintToInstruction, getAssociatedTokenAddressSync
 } from "https://esm.sh/@solana/spl-token@0.4.14?bundle";
 if (!window.Buffer) window.Buffer = Buffer;
@@ -77,17 +77,23 @@ async function createTestMints() {
   const lamports=await connection.getMinimumBalanceForRentExemption(MINT_SIZE);
   const bondAta=getAssociatedTokenAddressSync(bondMint.publicKey,wallet.publicKey);
   const settlementAta=getAssociatedTokenAddressSync(settlementMint.publicKey,wallet.publicKey);
-  const instructions=[
+  // Create and initialize the mints first. Creating ATAs in a separate transaction
+  // avoids ATA-program owner/mint validation failures in the same transaction that
+  // creates new mint accounts.
+  await sendWalletTx([
     SystemProgram.createAccount({fromPubkey:wallet.publicKey,newAccountPubkey:bondMint.publicKey,lamports,space:MINT_SIZE,programId:TOKEN_PROGRAM_ID}),
     createInitializeMintInstruction(bondMint.publicKey,0,wallet.publicKey,wallet.publicKey,TOKEN_PROGRAM_ID),
     SystemProgram.createAccount({fromPubkey:wallet.publicKey,newAccountPubkey:settlementMint.publicKey,lamports,space:MINT_SIZE,programId:TOKEN_PROGRAM_ID}),
-    createInitializeMintInstruction(settlementMint.publicKey,6,wallet.publicKey,wallet.publicKey,TOKEN_PROGRAM_ID),
-    createAssociatedTokenAccountInstruction(wallet.publicKey,bondAta,wallet.publicKey,bondMint.publicKey,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID),
-    createAssociatedTokenAccountInstruction(wallet.publicKey,settlementAta,wallet.publicKey,settlementMint.publicKey,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID),
+    createInitializeMintInstruction(settlementMint.publicKey,6,wallet.publicKey,wallet.publicKey,TOKEN_PROGRAM_ID)
+  ],[bondMint,settlementMint]);
+  await sendWalletTx([
+    createAssociatedTokenAccountIdempotentInstruction(wallet.publicKey,bondAta,wallet.publicKey,bondMint.publicKey,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID),
+    createAssociatedTokenAccountIdempotentInstruction(wallet.publicKey,settlementAta,wallet.publicKey,settlementMint.publicKey,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID)
+  ]);
+  await sendWalletTx([
     createMintToInstruction(bondMint.publicKey,bondAta,wallet.publicKey,1,[],TOKEN_PROGRAM_ID),
     createMintToInstruction(settlementMint.publicKey,settlementAta,wallet.publicKey,1_050_000_000n,[],TOKEN_PROGRAM_ID)
-  ];
-  await sendWalletTx(instructions,[bondMint,settlementMint]);
+  ]);
   return {bondMint:bondMint.publicKey,bondAta,settlementMint:settlementMint.publicKey,settlementAta};
 }
 async function ix(method){return method.instruction()}
