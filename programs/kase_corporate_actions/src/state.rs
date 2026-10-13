@@ -100,13 +100,13 @@ pub struct CorporateAction {
     /// Number of investors processed
     pub settled_holders_count: u32,
 
-    /// Corporate action funds vault (PDA token account)
+    /// Canonical associated token account owned by the corporate-action PDA
     pub vault: Pubkey,
 
     /// Bump seed of the action account
     pub bump: u8,
 
-    /// Bump seed of the token vault
+    /// Reserved for account-layout compatibility; canonical ATAs have no program PDA bump
     pub vault_bump: u8,
 }
 
