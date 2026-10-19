@@ -42,5 +42,36 @@ v3 = json.loads(zlib.decompress(base64.b64decode(v3_packed)))
 for name, entry in v3.items():
     patch(name, entry['ops'], entry['base_sha256'])
 
+
+# 3.1 validated business safeguards, applied after the v3 bundle.
+app_file = ROOT / "app.py"
+content = app_file.read_text("utf-8")
+modifications = [
+    ("import json\n", "import json\nimport math\n"),
+    (
+        "                    if status not in STATES:return self.error('Неизвестный статус',400,user)\n",
+        """                    if status not in STATES:return self.error('Неизвестный статус',400,user)
+                    if status in ('Готов','Выдан'):
+                        blocked=db.execute('SELECT 1 FROM blockers WHERE repair_id=? AND resolved_at IS NULL LIMIT 1',(rid,)).fetchone()
+                        if blocked:
+                            return self.error('Нельзя завершить ремонт: есть незакрытые причины простоя. Сначала зафиксируйте их решение.',409,user)
+                        rejected=db.execute(\"\"\"SELECT 1 FROM inspections i JOIN attachments a ON a.id=i.attachment_id
+                            WHERE a.repair_id=? AND i.decision='Доработать' LIMIT 1\"\"\",(rid,)).fetchone()
+                        if rejected:
+                            return self.error('Нельзя завершить ремонт: есть фото- или видеоотчёты, возвращённые на доработку.',409,user)
+"""
+    ),
+    (
+        "                    if amount<=0 or amount>1000000:return self.error('Некорректное количество',400,user)",
+        "                    if not math.isfinite(amount) or amount<=0 or amount>1000000:return self.error('Некорректное количество',400,user)"
+    )
+]
+for previous, updated in modifications:
+    count = content.count(previous)
+    if count != 1:
+        raise RuntimeError(f"v3.1 patch mismatch, expected one match, found {count}")
+    content = content.replace(previous, updated, 1)
+app_file.write_text(content, encoding="utf-8")
+
 os.chdir(ROOT)
 os.execv(sys.executable, [sys.executable, '-u', 'app.py'])
